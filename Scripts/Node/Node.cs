@@ -68,7 +68,7 @@ public partial class Node : IPositionable, IRotatable, ITarget
     bool _debug;
     Node _debugFrame;
 
-    public Node(string id, Node parent, Texture2D texture, Vector2 position, Vector2 size)
+    public Node(string id, Node parent, Texture2D texture, Vector2 position, Vector2 size, bool tmp = true)
     {
         ID = id;
         Position = position;
@@ -82,7 +82,12 @@ public partial class Node : IPositionable, IRotatable, ITarget
             Root = this;
         else
             parent.LinkChild(this);
+
+        if (tmp)
+            _marker = new Node($"{id}_marker", this, AssetManager.GetTexture("debug.marker"), Vector2.One * 8, Vector2.Zero, false);
     }
+
+    Node _marker;
 
     public void LinkChild(Node obj)
     {
@@ -104,6 +109,9 @@ public partial class Node : IPositionable, IRotatable, ITarget
         Point mousePosition = mouseState.Position;
 
         _hovered = WorldRectangle.Contains(mousePosition);
+
+        if (_marker != null)
+            _marker.Enabled = _hovered;
     }
 
     public Rectangle LocalRectangle => new Rectangle(
@@ -126,17 +134,17 @@ public partial class Node : IPositionable, IRotatable, ITarget
 
     public void Measure()
     {
-        if (WidthType == SizeType.FILL)
-        {
-            Size = new Vector2(Parent.Size.X - (Margin.Right + Margin.Left), Size.Y);
-            Position = new Vector2(Margin.Left, Position.Y);
-        }
+        // if (WidthType == SizeType.FILL)
+        // {
+        //     Size = new Vector2(Parent.Size.X - (Margin.Right + Margin.Left), Size.Y);
+        //     Position = new Vector2(Margin.Left, Position.Y);
+        // }
 
-        if (HeightType == SizeType.FILL)
-        {
-            Size = new Vector2(Size.X, Parent.Size.Y - (Margin.Bottom + Margin.Top));
-            Position = new Vector2(Position.X, Margin.Top);
-        }
+        // if (HeightType == SizeType.FILL)
+        // {
+        //     Size = new Vector2(Size.X, Parent.Size.Y - (Margin.Bottom + Margin.Top));
+        //     Position = new Vector2(Position.X, Margin.Top);
+        // }
     }
 
     public virtual Rectangle SourceRectangle => new Rectangle(0, 0, Texture.Width, Texture.Height);
@@ -145,11 +153,10 @@ public partial class Node : IPositionable, IRotatable, ITarget
 
     public virtual void Render(SpriteBatch spriteBatch)
     {
-        // do nothing
         Measure();
     }
 
-    public bool Is9Sliced { get; set; }
+    public Margin Margin9Slice { get; set; } = new Margin(0);
 
     public virtual void Draw(SpriteBatch spriteBatch)
     {
@@ -158,7 +165,7 @@ public partial class Node : IPositionable, IRotatable, ITarget
         
         Rectangle[] destinationRectangles;
         Rectangle[] sourceRectangles;
-        if (Is9Sliced)
+        if (!Margin9Slice.IsZero)
         {
             destinationRectangles = CreatePatches(WorldRectangle);
             sourceRectangles = CreatePatches(Texture.Bounds);
@@ -221,16 +228,16 @@ public partial class Node : IPositionable, IRotatable, ITarget
     public void DrawDebug(SpriteBatch spriteBatch)
     {
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState, null, null);
-        spriteBatch.Draw(
-            AssetManager.GetTexture("debug.background"),
-            WorldRectangle,
-            null,
-            Color.White,
-            Rotation,
-            Origin,
-            SpriteEffects.None,
-            0.0f
-        );
+        // spriteBatch.Draw(
+        //     AssetManager.GetTexture("debug.background"),
+        //     WorldRectangle,
+        //     null,
+        //     Color.White,
+        //     Rotation,
+        //     Origin,
+        //     SpriteEffects.None,
+        //     0.0f
+        // );
 
         Rectangle[] destinationRectangles;
         Rectangle[] sourceRectangles;

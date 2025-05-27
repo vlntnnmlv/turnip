@@ -1,4 +1,4 @@
-﻿#define DEBUG_LAYOUT
+﻿// #define DEBUG_LAYOUT
 
 using System;
 using System.Collections;
@@ -45,7 +45,10 @@ public class Kafana : Game
         base.Initialize();
 
         // root
-        new Area("root", null, AssetManager.GetTexture("background"), Vector2.Zero, new Vector2(Width, Height));
+        var bg = new Area("root_bg", null, AssetManager.GetTexture("dialog_fill"), Vector2.Zero, new Vector2(Width, Height));
+        var frame = new Area("root_frame", bg, AssetManager.GetTexture("dialog_frame"), Vector2.One * 3, new Vector2(Width - 6 , Height - 6));
+        frame.Margin9Slice = new Margin(3);
+
         // Object grass = new Area("grass", Object.Root, AssetManager.GetTexture("grass"), new Vector2(Width / 2, Height / 2), new Vector2(Width / 2, Height / 2));
         // Area tile = new Area("tile", grass, AssetManager.GetTexture("tile"), Vector2.Zero, new Vector2(Width / 4, Height / 4));
         // Object player = new Object("player", grass, AssetManager.GetTexture("player"), Vector2.Zero, Vector2.One * 64);
@@ -56,17 +59,18 @@ public class Kafana : Game
         // float tileHeight = MathF.Floor(0.5f * Height / tileTexture.Height) * tileTexture.Height;
         // new Area("tile", Object.Root, tileTexture, new Vector2(0, 0), new Vector2(Width, tileHeight));
         // new Area("grass", Object.Root, AssetManager.GetTexture("grass"), new Vector2(0, tileHeight), new Vector2(Width, Height - tileHeight));
-        new Text("title", Node.Root, "BASIC KAFANA", AssetManager.GetFont("kafana"),new Vector2(Width, Height) / 2);
+
+        new Text("title", Node.Root, "BASIC KAFANA", AssetManager.GetFont("kafana"), new Vector2(Width, Height) / 2);
 
         // tmp
         // Object flll = new Object("dialog_fill", Object.Root, AssetManager.GetTexture("dialog_fill"), new Vector2(50, 100), new Vector2(500, 300));
-        _frame = new Node("dialog_frame", Node.Root, AssetManager.GetTexture("dialog_frame"), new Vector2(50, 100), new Vector2(500, 300));
-        _frame.Is9Sliced = true;
+        // _frame = new Node("dialog_frame", Node.Root, AssetManager.GetTexture("dialog_frame"), new Vector2(50, 100), new Vector2(500, 300));
+        // _frame.Is9Sliced = true;
         
-        Node tmp = new Node("tmp", _frame, AssetManager.GetTexture("dialog_fill"), Vector2.Zero, Vector2.Zero);
-        tmp.WidthType = SizeType.FILL;
-        tmp.HeightType = SizeType.FILL;
-        tmp.Margin = new Margin(2, 2, 2, 2);
+        // Node tmp = new Node("tmp", _frame, AssetManager.GetTexture("dialog_fill"), Vector2.Zero, Vector2.Zero);
+        // tmp.WidthType = SizeType.FILL;
+        // tmp.HeightType = SizeType.FILL;
+        // tmp.Margin = new Margin(2, 2, 2, 2);
 
         // initialize managers
         // _characterManager = new CharacterManager(this);

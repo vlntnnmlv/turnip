@@ -20,11 +20,21 @@ public struct Margin
     public int Top;
     public int Bottom;
 
+    public bool IsZero => Left == 0 && Right == 0 && Top == 0 && Bottom == 0;
+
     public Margin(int left, int right, int top, int bottom)
     {
         Left = left;
         Right = right;
         Top = top;
         Bottom = bottom;
+    }
+
+    public Margin(int margin)
+    {
+        Left = margin;
+        Right = margin;
+        Top = margin;
+        Bottom = margin;
     }
 }
