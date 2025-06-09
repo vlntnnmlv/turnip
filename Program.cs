@@ -3,54 +3,6 @@ using Raylib_cs;
 
 namespace BasicKafana;
 
-public static class Vector2Extensions
-{
-    public static Vector2 Normalized(this Vector2 _Vector)
-    {
-        return _Vector == Vector2.Zero ? Vector2.Zero : Vector2.Normalize(_Vector);
-    }
-
-    public static float Magnitude(this Vector2 _Vector)
-    {
-        return Vector2.Distance(Vector2.Zero, _Vector);
-    }
-
-    public static Vector2 Reversed(this Vector2 _Vector, bool _X)
-    {
-        Vector2 reverseVector = new Vector2(_X ? -1 : 1, _X ? 1 : -1);
-        return _Vector * reverseVector;
-    }
-}
-
-public static class RectangleExtensions
-{
-    public static Vector2 Center(this Rectangle _Rectangle)
-    {
-       return new Vector2(_Rectangle.X + _Rectangle.Width / 2, _Rectangle.Y + _Rectangle.Height / 2); 
-    }
-}
-
-struct Box
-{
-    public string ID;
-    public Vector2 Size;
-    public Vector2 Position;
-    public Vector2 Velocity;
-    public Vector2 Acceleration;
-    public Vector2 NetForce;
-    public bool IsStatic;
-    public bool HadCollisionsThisFrame;
-    public float Mass;
-
-    public Vector2 Direction => Velocity.Normalized();
-    public Rectangle Rectangle => new Rectangle(Position, Size);
-};
-
-struct State
-{
-    public Box[] Boxes;
-};
-
 class Program
 {
     const int WINDOW_WIDTH = 1080;
@@ -66,7 +18,6 @@ class Program
     const float PHYSICS_FRICTION_COEFFICIENT = 0.4f;
     const bool PHYSICS_ENABLE_DYNAMIC_PUSHING = false;
 
-    static Font m_DefaultFont = Raylib.GetFontDefault();
     static State m_State;
 
     // SPV = shortest separation vector
@@ -118,19 +69,25 @@ class Program
         return state;
     }
 
-
+    // TODO:
+    // 1. Handle user input → compute desired velocities / forces
+    // 2. Apply forces → update velocity from acceleration (F = ma)
+    // 3. Integrate velocity → predict new positions (without committing)
+    // 4. Detect collisions (between predicted positions)
+    // 5. Resolve collisions → adjust velocities & positions
+    // 6. Finalize position → apply resolved positions
     static State GetNextState(State _State, float _DeltaTime)
     {
         State newState = _State;
 
-        // reset net force
+        // reset physics
         for (uint i = 0; i < newState.Boxes.Length; i++)
         {
             newState.Boxes[i].NetForce = Vector2.Zero;
             newState.Boxes[i].HadCollisionsThisFrame = false;
         }
 
-        // update boxes collisions
+        // resolve froces and collisions
         {
             for (uint i = 0; i < newState.Boxes.Length; i++)
             {
@@ -250,58 +207,6 @@ class Program
         return newState;
     }
 
-    static void DrawLabel(string _Text, Vector2 _Position, Color _Color, int _FontSize = 16)
-    {
-        int textWidth = Raylib.MeasureText(_Text, _FontSize);
-        Raylib.DrawTextEx(m_DefaultFont, _Text, _Position - new Vector2(textWidth / 2, 0), _FontSize, 5, _Color);
-    }
-
-    static void DrawArrow(Vector2 _Start, Vector2 _End, Color _Color, int _Thickness = 2)
-    {
-        Raylib.DrawLineEx(_Start, _End, _Thickness, _Color);
-    }
-
-    static void DrawBox(Box _Box, Color? _Color = null)
-    {
-        Color color = _Color.HasValue
-            ? _Color.Value
-            : _Box.IsStatic
-                ? Color.Red
-                : Color.Blue;
-
-        if (_Box.IsStatic)
-            Raylib.DrawRectangle((int)_Box.Rectangle.X, (int)_Box.Rectangle.Y, (int)_Box.Rectangle.Width, (int)_Box.Rectangle.Height, color);
-        else
-            Raylib.DrawRectangleLinesEx(_Box.Rectangle, 6, color);
-
-        Vector2 center = _Box.Rectangle.Center();
-        if (_Box.Velocity != Vector2.Zero)
-        {
-            DrawArrow(center, center + _Box.Velocity, Color.DarkPurple, 5);
-            DrawLabel("Velocity", center + _Box.Velocity, Color.DarkPurple);
-        }
-
-        if (_Box.Acceleration != Vector2.Zero)
-        {
-            DrawArrow(center, center + _Box.Acceleration, Color.Green, 3);
-            DrawLabel("Acceleration", center + _Box.Acceleration, Color.Green);
-        }
-
-        if (_Box.NetForce != Vector2.Zero)
-        {
-            DrawArrow(center, center + _Box.NetForce, Color.Black, 1);
-            DrawLabel("NetForce", center + _Box.NetForce, Color.Black);
-        }
-    }
-
-    static void DrawState(State _State)
-    {
-        for (uint i = 0; i < _State.Boxes.Length; i++)
-        {
-            DrawBox(_State.Boxes[i], i == 0 ? Color.Green : null);
-        }
-    }
-
     // TODO: Figure our wth is this?
     // STAThread is required if you deploy using NativeAOT on Windows - See https://github.com/raylib-cs/raylib-cs/issues/301
     [STAThread]
@@ -311,20 +216,20 @@ class Program
 
         Random random = new Random();
         random.Next();
+
         Raylib.SetRandomSeed((uint)random.Next());
 
         m_State = CreateState(NUM_BOXES);
 
         while (!Raylib.WindowShouldClose())
         {
-
             if (Raylib.IsKeyPressed(KeyboardKey.R))
                 m_State = CreateState(NUM_BOXES);
 
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Color.RayWhite);
 
-            DrawState(m_State);
+            Renderer.DrawState(m_State);
 
             Raylib.EndDrawing();
 
