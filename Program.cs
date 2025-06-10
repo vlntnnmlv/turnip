@@ -69,13 +69,6 @@ class Program
         return state;
     }
 
-    // TODO:
-    // 1. Handle user input → compute desired velocities / forces
-    // 2. Apply forces → update velocity from acceleration (F = ma)
-    // 3. Integrate velocity → predict new positions (without committing)
-    // 4. Detect collisions (between predicted positions)
-    // 5. Resolve collisions → adjust velocities & positions
-    // 6. Finalize position → apply resolved positions
     static State GetNextState(State _State, float _DeltaTime)
     {
         State newState = _State;
@@ -168,12 +161,8 @@ class Program
                 if (Raylib.IsKeyDown(KeyboardKey.D))
                     direction += new Vector2(1, 0);
 
-                // newState.Boxes[0].NetForce += direction * 100000;
-
                 Vector2 newPosition = newState.Boxes[0].Position + direction.Normalized() * PLAYER_SPEED * _DeltaTime;
-                Vector2 newVelocity = (newPosition - newState.Boxes[0].Position) / _DeltaTime;
 
-                newState.Boxes[0].Velocity = newVelocity;
                 newState.Boxes[0].Position = newPosition;
             }
         }
