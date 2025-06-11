@@ -16,7 +16,7 @@ class Program
     const float PHYSICS_GRAVITY = 9.81f;
     const float PHYSICS_ELASTICITY = 0.75f;
     const float PHYSICS_FRICTION_COEFFICIENT = 0.4f;
-    const bool PHYSICS_ENABLE_DYNAMIC_PUSHING = false;
+    const bool PHYSICS_ENABLE_PLAYER_DYNAMIC_PUSHING = false;
 
     static State m_State;
 
@@ -63,7 +63,7 @@ class Program
                     Raylib.GetRandomValue(0, WINDOW_HEIGHT - (int)state.Boxes[i].Size.Y)
                 );
             state.Boxes[i].IsStatic = Raylib.GetRandomValue(0, 100) < 20;
-            state.Boxes[i].Mass = state.Boxes[i].Size.X * state.Boxes[i].Size.Y;
+            state.Boxes[i].Mass = (float)Math.Sqrt(state.Boxes[i].Size.X * state.Boxes[i].Size.Y);
         }
 
         return state;
@@ -78,6 +78,43 @@ class Program
         {
             newState.Boxes[i].NetForce = Vector2.Zero;
             newState.Boxes[i].HadCollisionsThisFrame = false;
+        }
+
+        // update from user input
+        {
+            // movement
+            {
+                Vector2 direction = Vector2.Zero;
+
+                if (Raylib.IsKeyDown(KeyboardKey.W))
+                    direction += new Vector2(0, -1);
+                if (Raylib.IsKeyDown(KeyboardKey.A))
+                    direction += new Vector2(-1, 0);
+                if (Raylib.IsKeyDown(KeyboardKey.S))
+                    direction += new Vector2(0, 1);
+                if (Raylib.IsKeyDown(KeyboardKey.D))
+                    direction += new Vector2(1, 0);
+
+                Vector2 newPosition = newState.Boxes[0].Position + direction.Normalized() * PLAYER_SPEED * _DeltaTime;
+
+                newState.Boxes[0].Position = newPosition;
+            }
+
+            // kick force
+            {
+                Vector2 mousePosition = Raylib.GetMousePosition();
+
+                newState.ManualControl = mousePosition - newState.Boxes[0].Rectangle.Center();
+
+                for (uint i = 1; i < _State.Boxes.Length; i++)
+                {
+                    if (_State.Boxes[i].Rectangle.Contains(mousePosition) && Raylib.IsKeyPressed(KeyboardKey.Space))
+                    {
+                        Console.WriteLine($"Kicked Box {i}");
+                        _State.Boxes[i].NetForce += newState.ManualControl.Normalized() * 100000000;
+                    }
+                }
+            }
         }
 
         // resolve froces and collisions
@@ -121,7 +158,7 @@ class Program
                     }
 
                     // apply forces on impact
-                    if (i != 0 && j != 0 || PHYSICS_ENABLE_DYNAMIC_PUSHING)
+                    if (PHYSICS_ENABLE_PLAYER_DYNAMIC_PUSHING || i != 0 && j != 0)
                     {
                         Vector2 collisionNormal = -spv.Normalized();
                         float relativeVelocity = Vector2.Dot(newState.Boxes[i].Velocity - newState.Boxes[j].Velocity, collisionNormal);
@@ -147,24 +184,6 @@ class Program
                     // TODO: Something
                 }
             }
-
-            // update from user input
-            {
-                Vector2 direction = Vector2.Zero;
-
-                if (Raylib.IsKeyDown(KeyboardKey.W))
-                    direction += new Vector2(0, -1);
-                if (Raylib.IsKeyDown(KeyboardKey.A))
-                    direction += new Vector2(-1, 0);
-                if (Raylib.IsKeyDown(KeyboardKey.S))
-                    direction += new Vector2(0, 1);
-                if (Raylib.IsKeyDown(KeyboardKey.D))
-                    direction += new Vector2(1, 0);
-
-                Vector2 newPosition = newState.Boxes[0].Position + direction.Normalized() * PLAYER_SPEED * _DeltaTime;
-
-                newState.Boxes[0].Position = newPosition;
-            }
         }
 
         // update kinematics
@@ -180,15 +199,24 @@ class Program
                 newState.Boxes[i].NetForce += frictionMagnitude * -newState.Boxes[i].Direction;
             }
 
+            if (newState.Boxes[i].NetForce != Vector2.Zero)
+                Console.WriteLine($"Force to Box {i}: {newState.Boxes[i].NetForce}");
+
             newState.Boxes[i].Acceleration = newState.Boxes[i].NetForce / newState.Boxes[i].Mass;
 
             if (newState.Boxes[i].Acceleration.Magnitude() < PHYSICS_EPSILON)
                 newState.Boxes[i].Acceleration = Vector2.Zero;
 
+            if (newState.Boxes[i].Acceleration != Vector2.Zero)
+                Console.WriteLine($"Acceleration to Box {i}: {newState.Boxes[i].Acceleration}");
+
             newState.Boxes[i].Velocity += newState.Boxes[i].Acceleration * _DeltaTime;
 
             if (newState.Boxes[i].Velocity.Magnitude() < PHYSICS_EPSILON)
                 newState.Boxes[i].Velocity = Vector2.Zero;
+
+            if (newState.Boxes[i].Velocity != Vector2.Zero)
+                Console.WriteLine($"Velocity to Box {i}: {newState.Boxes[i].Velocity}");
 
             newState.Boxes[i].Position += newState.Boxes[i].Velocity * _DeltaTime;
         }

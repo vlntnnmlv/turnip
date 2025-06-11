@@ -5,6 +5,7 @@ namespace BasicKafana;
 
 public static class Renderer
 {
+    static Texture2D m_CrateTexture = Raylib.LoadTexture("crate.png");
     static Font m_DefaultFont = Raylib.GetFontDefault();
 
     public static void DrawLabel(string _Text, Vector2 _Position, Color _Color, int _FontSize = 16)
@@ -26,10 +27,7 @@ public static class Renderer
                 ? Color.Red
                 : Color.Blue;
 
-        if (_Box.IsStatic)
-            Raylib.DrawRectangle((int)_Box.Rectangle.X, (int)_Box.Rectangle.Y, (int)_Box.Rectangle.Width, (int)_Box.Rectangle.Height, color);
-        else
-            Raylib.DrawRectangleLinesEx(_Box.Rectangle, 6, color);
+        Raylib.DrawTexturePro(m_CrateTexture, new Rectangle(Vector2.Zero, m_CrateTexture.Width, m_CrateTexture.Height), _Box.Rectangle, Vector2.Zero, 0, color);
 
         Vector2 center = _Box.Rectangle.Center();
         if (_Box.Velocity != Vector2.Zero)
@@ -55,7 +53,9 @@ public static class Renderer
     {
         for (uint i = 0; i < _State.Boxes.Length; i++)
         {
-            Renderer.DrawBox(_State.Boxes[i], i == 0 ? Color.Green : null);
+            DrawBox(_State.Boxes[i], i == 0 ? Color.Green : null);
         }
+
+        DrawArrow(_State.Boxes[0].Rectangle.Center(), _State.Boxes[0].Rectangle.Center() + _State.ManualControl, new Color(155, 12, 96));
     }
 }

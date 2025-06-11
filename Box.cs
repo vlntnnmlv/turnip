@@ -12,6 +12,8 @@ public struct Box
     public Vector2 Velocity;
     public Vector2 Acceleration;
     public Vector2 NetForce;
+    public float Rotation;
+    public float AngularVelocity;
     public bool IsStatic;
     public bool HadCollisionsThisFrame;
     public float Mass;
