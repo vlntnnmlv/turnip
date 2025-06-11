@@ -3,6 +3,12 @@ using Raylib_cs;
 
 namespace BasicKafana;
 
+public static class Globals
+{
+    public const int WINDOW_WIDTH = 1080;
+    public const int WINDOW_HEIGHT = 720;
+}
+
 class Program
 {
     const int WINDOW_WIDTH = 1080;
@@ -19,25 +25,7 @@ class Program
     const bool PHYSICS_ENABLE_PLAYER_DYNAMIC_PUSHING = false;
 
     static State m_State;
-
-    // SPV = shortest separation vector
-    // the resulted vector must be applied to the rect "a"
-    static Vector2 GetSPV(Rectangle a, Rectangle b)
-    {
-        float dx1 = b.X + b.Width - a.X; // from left
-        float dx2 = a.X + a.Width - b.X; // from right
-        float dy1 = b.Y + b.Height - a.Y; // from top
-        float dy2 = a.Y + a.Height - b.Y; // from bottom
-
-        float spvX = dx1 < dx2 ? dx1 : -dx2;
-        float spvY = dy1 < dy2 ? dy1 : -dy2;
-
-        // Choose the axis with the smallest penetration
-        if (Math.Abs(spvX) < Math.Abs(spvY))
-            return new Vector2(spvX, 0);
-        else
-            return new Vector2(0, spvY);
-    }
+    static List<Collision> m_Collisions = new();
 
     static State CreateState(int _NumBoxes)
     {
@@ -46,18 +34,19 @@ class Program
         state.Boxes = new Box[_NumBoxes + 5];
 
         // player controled box
-        state.Boxes[0] = new Box() { ID = "Player", Position = new Vector2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), Size = Vector2.One * 25, Mass = 1000 };
+        state.Boxes[0] = new Box() { Index = 0, ID = "Player", Position = new Vector2(WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2), Size = Vector2.One * 50, Mass = 75 };
 
         // walls
-        state.Boxes[1] = new Box() { ID = "WestWall", Position = new Vector2(-10, 0), Size = new Vector2(12, WINDOW_HEIGHT), IsStatic = true };
-        state.Boxes[2] = new Box() { ID = "NorthWall", Position = new Vector2(0, -10), Size = new Vector2(WINDOW_WIDTH, 12), IsStatic = true };
-        state.Boxes[3] = new Box() { ID = "EastWall", Position = new Vector2(WINDOW_WIDTH - 2, 0), Size = new Vector2(8, WINDOW_HEIGHT), IsStatic = true };
-        state.Boxes[4] = new Box() { ID = "SouthWall", Position = new Vector2(0, WINDOW_HEIGHT - 2), Size = new Vector2(WINDOW_WIDTH, 12), IsStatic = true };
+        state.Boxes[1] = new Box() { Index = 1, ID = "WestWall", Position = new Vector2(-10, 0), Size = new Vector2(12, WINDOW_HEIGHT), IsStatic = true };
+        state.Boxes[2] = new Box() { Index = 2, ID = "NorthWall", Position = new Vector2(0, -10), Size = new Vector2(WINDOW_WIDTH, 12), IsStatic = true };
+        state.Boxes[3] = new Box() { Index = 3, ID = "EastWall", Position = new Vector2(WINDOW_WIDTH - 2, 0), Size = new Vector2(8, WINDOW_HEIGHT), IsStatic = true };
+        state.Boxes[4] = new Box() { Index = 4, ID = "SouthWall", Position = new Vector2(0, WINDOW_HEIGHT - 2), Size = new Vector2(WINDOW_WIDTH, 12), IsStatic = true };
 
         for (uint i = 5; i < state.Boxes.Length; i++)
         {
+            state.Boxes[i].Index = i;
             state.Boxes[i].ID = $"Box{i}";
-            state.Boxes[i].Size = new Vector2(Raylib.GetRandomValue(30, 60), Raylib.GetRandomValue(30, 60));
+            state.Boxes[i].Size = new Vector2(Raylib.GetRandomValue(15, 25), Raylib.GetRandomValue(15, 25));
             state.Boxes[i].Position = new Vector2(
                     Raylib.GetRandomValue(0, WINDOW_WIDTH - (int)state.Boxes[i].Size.X),
                     Raylib.GetRandomValue(0, WINDOW_HEIGHT - (int)state.Boxes[i].Size.Y)
@@ -72,13 +61,6 @@ class Program
     static State GetNextState(State _State, float _DeltaTime)
     {
         State newState = _State;
-
-        // reset physics
-        for (uint i = 0; i < newState.Boxes.Length; i++)
-        {
-            newState.Boxes[i].NetForce = Vector2.Zero;
-            newState.Boxes[i].HadCollisionsThisFrame = false;
-        }
 
         // update from user input
         {
@@ -98,6 +80,9 @@ class Program
                 Vector2 newPosition = newState.Boxes[0].Position + direction.Normalized() * PLAYER_SPEED * _DeltaTime;
 
                 newState.Boxes[0].Position = newPosition;
+
+                if (direction != Vector2.Zero)
+                    newState.Boxes[0].Velocity = Vector2.Zero;
             }
 
             // kick force
@@ -110,14 +95,13 @@ class Program
                 {
                     if (_State.Boxes[i].Rectangle.Contains(mousePosition) && Raylib.IsKeyPressed(KeyboardKey.Space))
                     {
-                        Console.WriteLine($"Kicked Box {i}");
-                        _State.Boxes[i].NetForce += newState.ManualControl.Normalized() * 100000000;
+                        _State.Boxes[i].NetForce += newState.ManualControl.Normalized() * 5000 / _DeltaTime;
                     }
                 }
             }
         }
 
-        // resolve froces and collisions
+        // save collisions and apply forces on impact
         {
             for (uint i = 0; i < newState.Boxes.Length; i++)
             {
@@ -130,43 +114,20 @@ class Program
                     if (oneBox.IsStatic && otherBox.IsStatic)
                         continue;
 
-                    if (!Raylib.CheckCollisionRecs(oneBox.Rectangle, otherBox.Rectangle))
+                    Collision collision = new Collision(oneBox, otherBox);
+                    if (!collision.IsValid)
                         continue;
 
+                    m_Collisions.Add(collision);
                     newState.Boxes[i].HadCollisionsThisFrame = true;
 
-                    Vector2 spv = GetSPV(oneBox.Rectangle, otherBox.Rectangle);
-
-                    // resolve collision
                     {
-                        float velocityMagnitudeI = newState.Boxes[i].Velocity.Magnitude();
-                        float velocityMagnitudeJ = newState.Boxes[j].Velocity.Magnitude();
-                        float velocityMagnitudeSumm = velocityMagnitudeI + velocityMagnitudeJ;
-
-                        float ratio;
-                        if (newState.Boxes[i].IsStatic)
-                            ratio = 1;
-                        else if (newState.Boxes[j].IsStatic)
-                            ratio = 0;
-                        else
-                            ratio = velocityMagnitudeSumm != 0
-                                ? velocityMagnitudeI / velocityMagnitudeSumm
-                                : 0.5f;
-
-                        newState.Boxes[i].Position += spv * (1 - ratio);
-                        newState.Boxes[j].Position -= spv * ratio;
-                    }
-
-                    // apply forces on impact
-                    if (PHYSICS_ENABLE_PLAYER_DYNAMIC_PUSHING || i != 0 && j != 0)
-                    {
-                        Vector2 collisionNormal = -spv.Normalized();
-                        float relativeVelocity = Vector2.Dot(newState.Boxes[i].Velocity - newState.Boxes[j].Velocity, collisionNormal);
+                        float relativeVelocity = Vector2.Dot(newState.Boxes[i].Velocity - newState.Boxes[j].Velocity, collision.Normal);
                         float oneOverMassI = newState.Boxes[i].IsStatic ? 0 : (1 / newState.Boxes[i].Mass);
                         float oneOverMassJ = newState.Boxes[j].IsStatic ? 0 : (1 / newState.Boxes[j].Mass);
 
                         float impluseMagnitude = -(1 + PHYSICS_ELASTICITY) * relativeVelocity / (oneOverMassI + oneOverMassJ);
-                        Vector2 impulse = impluseMagnitude * collisionNormal;
+                        Vector2 impulse = impluseMagnitude * collision.Normal;
 
                         Vector2 forceI = impulse / _DeltaTime;
                         Vector2 forceJ = -impulse / _DeltaTime;
@@ -177,11 +138,6 @@ class Program
                         if (!newState.Boxes[j].IsStatic)
                             newState.Boxes[j].NetForce += forceJ;
                     }
-                }
-
-                if (!newState.Boxes[i].HadCollisionsThisFrame)
-                {
-                    // TODO: Something
                 }
             }
         }
@@ -199,27 +155,47 @@ class Program
                 newState.Boxes[i].NetForce += frictionMagnitude * -newState.Boxes[i].Direction;
             }
 
-            if (newState.Boxes[i].NetForce != Vector2.Zero)
-                Console.WriteLine($"Force to Box {i}: {newState.Boxes[i].NetForce}");
-
             newState.Boxes[i].Acceleration = newState.Boxes[i].NetForce / newState.Boxes[i].Mass;
 
             if (newState.Boxes[i].Acceleration.Magnitude() < PHYSICS_EPSILON)
                 newState.Boxes[i].Acceleration = Vector2.Zero;
-
-            if (newState.Boxes[i].Acceleration != Vector2.Zero)
-                Console.WriteLine($"Acceleration to Box {i}: {newState.Boxes[i].Acceleration}");
 
             newState.Boxes[i].Velocity += newState.Boxes[i].Acceleration * _DeltaTime;
 
             if (newState.Boxes[i].Velocity.Magnitude() < PHYSICS_EPSILON)
                 newState.Boxes[i].Velocity = Vector2.Zero;
 
-            if (newState.Boxes[i].Velocity != Vector2.Zero)
-                Console.WriteLine($"Velocity to Box {i}: {newState.Boxes[i].Velocity}");
-
             newState.Boxes[i].Position += newState.Boxes[i].Velocity * _DeltaTime;
         }
+
+        // resolve collisions
+        foreach (Collision collision in m_Collisions)
+        {
+            float velocityMagnitudeI = collision.One.Velocity.Magnitude();
+            float velocityMagnitudeJ = collision.Other.Velocity.Magnitude();
+            float velocityMagnitudeSumm = velocityMagnitudeI + velocityMagnitudeJ;
+
+            float ratio;
+            if (collision.One.IsStatic)
+                ratio = 1;
+            else if (collision.Other.IsStatic)
+                ratio = 0;
+            else
+                ratio = velocityMagnitudeSumm != 0
+                    ? velocityMagnitudeI / velocityMagnitudeSumm
+                    : 0.5f;
+
+            newState.Boxes[collision.One.Index].Position += collision.SPV * (1 - ratio);
+            newState.Boxes[collision.Other.Index].Position -= collision.SPV * ratio;
+
+            newState.Boxes[collision.One.Index].HP -= 20 * (1 - ratio);
+            newState.Boxes[collision.Other.Index].HP -= 20 * ratio;
+        }
+
+        // reset physics
+        m_Collisions.Clear();
+        for (uint i = 0; i < newState.Boxes.Length; i++)
+            newState.Boxes[i].NetForce = Vector2.Zero;
 
         return newState;
     }

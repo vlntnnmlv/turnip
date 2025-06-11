@@ -6,7 +6,10 @@ namespace BasicKafana;
 
 public struct Box
 {
+    public bool Destroyed;
+    public float HP;
     public string ID;
+    public uint Index;
     public Vector2 Size;
     public Vector2 Position;
     public Vector2 Velocity;

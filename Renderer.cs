@@ -6,6 +6,8 @@ namespace BasicKafana;
 public static class Renderer
 {
     static Texture2D m_CrateTexture = Raylib.LoadTexture("crate.png");
+    static Texture2D m_FloorTexture = Raylib.LoadTexture("floor.png");
+
     static Font m_DefaultFont = Raylib.GetFontDefault();
 
     public static void DrawLabel(string _Text, Vector2 _Position, Color _Color, int _FontSize = 16)
@@ -49,8 +51,32 @@ public static class Renderer
         }
     }
 
+    public static void DrawFloor()
+    {
+        int gridWidth = (int)MathF.Ceiling(0.5f + Globals.WINDOW_WIDTH / m_FloorTexture.Width);
+        int gridHeight = (int)MathF.Ceiling(0.5f + Globals.WINDOW_HEIGHT / m_FloorTexture.Height);
+
+        Console.WriteLine($"{gridWidth}x{gridHeight} by {m_FloorTexture.Width}x{m_FloorTexture.Height}");
+        for (int i = 0; i < gridWidth; i++)
+        {
+            for (int j = 0; j < gridHeight; j++)
+            {
+                Raylib.DrawTexturePro(
+                    m_FloorTexture,
+                    new Rectangle(Vector2.Zero, m_FloorTexture.Width, m_FloorTexture.Height),
+                    new Rectangle(Vector2.Zero + new Vector2(i * m_FloorTexture.Width, j * m_FloorTexture.Height), m_FloorTexture.Width, m_FloorTexture.Height),
+                    Vector2.Zero,
+                    0,
+                    Color.White
+                );
+            }
+        }
+    }
+
     public static void DrawState(State _State)
     {
+        DrawFloor();
+
         for (uint i = 0; i < _State.Boxes.Length; i++)
         {
             DrawBox(_State.Boxes[i], i == 0 ? Color.Green : null);
