@@ -56,7 +56,6 @@ public static class Renderer
         int gridWidth = (int)MathF.Ceiling(0.5f + Globals.WINDOW_WIDTH / m_FloorTexture.Width);
         int gridHeight = (int)MathF.Ceiling(0.5f + Globals.WINDOW_HEIGHT / m_FloorTexture.Height);
 
-        Console.WriteLine($"{gridWidth}x{gridHeight} by {m_FloorTexture.Width}x{m_FloorTexture.Height}");
         for (int i = 0; i < gridWidth; i++)
         {
             for (int j = 0; j < gridHeight; j++)

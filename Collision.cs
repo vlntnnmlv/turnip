@@ -10,12 +10,15 @@ public struct Collision
     public Box Other;
     public Vector2 SPV;
     public Vector2 Normal;
+    public Vector2 ContactPoint;
 
     public Collision(Box _One, Box _Other)
     {
         One = _One;
         Other = _Other;
-        if (Raylib.CheckCollisionRecs(One.Rectangle, Other.Rectangle))
+
+        Rectangle collisionRect = Raylib.GetCollisionRec(One.Rectangle, Other.Rectangle);
+        if (collisionRect.Size != Vector2.Zero)
         {
             IsValid = true;
 

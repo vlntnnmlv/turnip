@@ -20,6 +20,7 @@ public struct Box
     public bool IsStatic;
     public bool HadCollisionsThisFrame;
     public float Mass;
+    public Material Material;
 
     public Vector2 Direction => Velocity.Normalized();
     public Rectangle Rectangle => new Rectangle(Position, Size);
