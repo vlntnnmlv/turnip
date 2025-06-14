@@ -177,21 +177,14 @@ class Program
             float velocityMagnitudeJ = collision.Other.Velocity.Magnitude();
             float velocityMagnitudeSumm = velocityMagnitudeI + velocityMagnitudeJ;
 
-            // stop if touched player
-            // if (collision.One.Index == 0 || collision.Other.Index == 0)
-            // {
-            //     newState.Boxes[collision.One.Index].Velocity = Vector2.Zero;
-            //     newState.Boxes[collision.Other.Index].Velocity = Vector2.Zero;
-            // }
-
             float ratio;
-            if (collision.One.IsStatic)// || collision.One.Index == 0 && !collision.Other.IsStatic)
+            if (collision.One.IsStatic)
                 ratio = 1;
-            else if (collision.Other.IsStatic)// || collision.Other.Index == 0 && !collision.One.IsStatic)
+            else if (collision.Other.IsStatic)
                 ratio = 0;
             else
-                ratio = velocityMagnitudeSumm != 0
-                    ? (collision.One.Index == 0 ? velocityMagnitudeJ : velocityMagnitudeI) / velocityMagnitudeSumm
+                ratio = velocityMagnitudeSumm != 0 && collision.One.Index != 0
+                    ? velocityMagnitudeI / velocityMagnitudeSumm
                     : 0.5f;
 
             newState.Boxes[collision.One.Index].Position += collision.SPV * (1 - ratio);
