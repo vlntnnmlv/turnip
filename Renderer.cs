@@ -23,14 +23,11 @@ public static class Renderer
 
     public static void DrawBox(Box _Box, Color? _Color = null)
     {
-        Color color = _Color.HasValue
-            ? _Color.Value
-            : _Box.IsStatic
-                ? Color.Red
-                : Color.Blue;
+        Color color = Color.White;
 
         Raylib.DrawTexturePro(m_CrateTexture, new Rectangle(Vector2.Zero, m_CrateTexture.Width, m_CrateTexture.Height), _Box.Rectangle, Vector2.Zero, 0, color);
 
+        #if DEBUG_PHYSICS
         Vector2 center = _Box.Rectangle.Center();
         if (_Box.Velocity != Vector2.Zero)
         {
@@ -49,6 +46,7 @@ public static class Renderer
             DrawArrow(center, center + _Box.NetForce, Color.Black, 1);
             DrawLabel("NetForce", center + _Box.NetForce, Color.Black);
         }
+        #endif
     }
 
     public static void DrawFloor()
