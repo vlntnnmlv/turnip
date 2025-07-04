@@ -8,6 +8,8 @@ public class Node(string _ID, Meristem _Meristem)
     public List<Node> Children { get; } = [];
     public Node? Parent { get; set; }
 
+    public int Order => Parent?.Children.IndexOf(this) ?? 0;
+
     public override string ToString()
     {
         return $"[{ID}] {Meristem}";

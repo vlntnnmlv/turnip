@@ -105,6 +105,9 @@ class Program
         return newState;
     }
 
+    static Node vstack;
+    static Node hstack;
+
     // TODO: Figure our wth is this?
     // STAThread is required if you deploy using NativeAOT on Windows - See https://github.com/raylib-cs/raylib-cs/issues/301
     [STAThread]
@@ -119,33 +122,57 @@ class Program
 
         Node uiTreeRoot = new("root", new Meristem(new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)));
 
-        Node first = new("first", new Meristem(new Rectangle(0, 0, 300, 300)));
-        Node second = new("second", new Meristem(new Rectangle(400, 0, 300, 300)));
-        Node third = new("third", new Meristem(new Rectangle(0, 400, 100, 100)));
-
-        uiTreeRoot.LinkChild(first);
-        uiTreeRoot.LinkChild(second);
-        uiTreeRoot.LinkChild(third);
+        vstack = new("vstack", new Meristem(new Rectangle(0, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT)));
+        uiTreeRoot.LinkChild(vstack);
 
         PetalInfo petalInfo = new PetalInfo
         {
             Texture = Raylib.LoadTexture("frame.png"),
-            Patch = new Rectangle(0, 0, 0, 0)
+            Patch = new Rectangle(5, 5, 5, 5)
         };
 
-        Node a = new("a", new Petal(new Rectangle(0, 0, 10, 10), petalInfo));
-        Node b = new("b", new Petal(new Rectangle(10, 10, 20, 20), petalInfo));
-        Node c = new("c", new Petal(new Rectangle(0, 0, 50, 50), petalInfo));
+        Node top = new("first", new Petal(new Rectangle(0, 0, 300, 300), petalInfo));
+        Node middle = new("second", new Petal(new Rectangle(400, 0, 300, 300), petalInfo));
+        Node bottom = new("third", new Petal(new Rectangle(0, 400, 100, 100), petalInfo));
 
-        first.LinkChild(a);
-        first.LinkChild(b);
-        third.LinkChild(c);
+        vstack.LinkChild(top);
+        vstack.LinkChild(middle);
+        vstack.LinkChild(bottom);
+
+        hstack = new("hstack", new Meristem(new Rectangle(WINDOW_WIDTH / 2, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT)));
+        uiTreeRoot.LinkChild(hstack);
+
+        Node first = new("first", new Petal(new Rectangle(0, 0, 300, 300), petalInfo));
+        Node second = new("second", new Petal(new Rectangle(400, 0, 300, 300), petalInfo));
+        Node third = new("third", new Petal(new Rectangle(0, 400, 100, 100), petalInfo));
+
+        hstack.LinkChild(first);
+        hstack.LinkChild(second);
+        hstack.LinkChild(third);
+
+        // Node a = new("a", new Petal(new Rectangle(0, 0, 10, 10), petalInfo));
+        // Node b = new("b", new Petal(new Rectangle(10, 10, 20, 20), petalInfo));
+        // Node c = new("c", new Petal(new Rectangle(0, 0, 50, 50), petalInfo));
+
+        // first.LinkChild(a);
+        // first.LinkChild(b);
+        // third.LinkChild(c);
 
         // m_State = CreateState(NUM_BOXES);
 
         while (!Raylib.WindowShouldClose())
         {
-            // if (Raylib.IsKeyPressed(KeyboardKey.R))
+            if (Raylib.IsKeyDown(KeyboardKey.J))
+            {
+                vstack.Meristem.Rect.Height -= 1;
+                hstack.Meristem.Rect.Width -= 1;
+            }
+            if (Raylib.IsKeyDown(KeyboardKey.K))
+            {
+                vstack.Meristem.Rect.Height += 1;
+                hstack.Meristem.Rect.Width += 1;
+            }
+            
             // m_State = CreateState(NUM_BOXES);
 
             Raylib.BeginDrawing();
@@ -159,6 +186,9 @@ class Program
                         return;
 
                     _N.Meristem.Draw(_N);
+
+                    if (Garden.DebugUI)
+                        _N.Meristem.DrawDebug(_N);
                 }
             );
 

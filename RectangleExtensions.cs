@@ -18,6 +18,15 @@ public static class RectangleExtensions
         return _Rectangle;
     }
 
+    public static Rectangle Shrink(this Rectangle _Rectangle, Vector2 _Offset)
+    {
+        _Rectangle.Width -= _Offset.X;
+        _Rectangle.Height -= _Offset.Y;
+
+        return _Rectangle;
+    }
+
+
     public static bool Contains(this Rectangle _Rectangle, Vector2 _Vector)
     {
         return _Vector.X > _Rectangle.X && _Vector.X < _Rectangle.X + _Rectangle.Width

@@ -19,27 +19,38 @@ public class Meristem
         else
             WorldRect = Rect.Move(_Node.Parent.Meristem.Rect.Position);
 
-        // Texture2D m_FloorTexture = Raylib.LoadTexture("frame.png");
-        // NPatchInfo patchInfo = new NPatchInfo()
-        // {
-        //     Source = new Rectangle(Vector2.Zero, m_FloorTexture.Width, m_FloorTexture.Height),
-        //     Left = 5,
-        //     Right = 5,
-        //     Top = 5,
-        //     Bottom = 5,
-        //     Layout = NPatchLayout.NinePatch
-        // };
-        // Raylib.DrawTextureNPatch(m_FloorTexture, patchInfo, worldRect, Vector2.Zero, 0, Color.White);
+        float spacing = 20;
+        Rectangle padding = new Rectangle(20, 20, 20, 20);
 
-        if (Garden.DebugUI)
+        if (_Node.Parent?.ID == "vstack")
         {
-            Raylib.DrawRectangleLinesEx(WorldRect, 1, Color.Red);
+            int childrenNumber = _Node.Parent.Children.Count;
 
-            Font font = Raylib.GetFontDefault();
-            int fontSize = 8;
-            Vector2 textSize = Raylib.MeasureTextEx(font, _Node.ID, fontSize, 0.0f);
-            Raylib.DrawTextEx(font, _Node.ID, WorldRect.Center() - textSize / 2, fontSize, 5, Color.Red);
+            Rectangle parentRect = _Node.Parent.Meristem.Rect.Shrink(new Vector2(padding.X + padding.Width, padding.Y + padding.Height));
+            float height = (parentRect.Height - spacing * (childrenNumber - 1)) / childrenNumber;
+
+            WorldRect = new Rectangle(parentRect.X + padding.X, parentRect.Y + padding.Y + _Node.Order * height + spacing * _Node.Order, parentRect.Width, height);
         }
+
+        if (_Node.Parent?.ID == "hstack")
+        {
+            int childrenNumber = _Node.Parent.Children.Count;
+
+            Rectangle parentRect = _Node.Parent.Meristem.Rect.Shrink(new Vector2(padding.X + padding.Width, padding.Y + padding.Height));
+            float width = (parentRect.Width - spacing * (childrenNumber - 1)) / childrenNumber;
+
+            WorldRect = new Rectangle(parentRect.X + padding.X + _Node.Order * width + spacing * _Node.Order, parentRect.Y + padding.Y, width, parentRect.Height);
+        }
+    }
+
+    public void DrawDebug(Node _Node)
+    {
+        Raylib.DrawRectangleLinesEx(WorldRect, 1, Color.Red);
+
+        int fontSize = 8;
+
+        Vector2 textSize = Raylib.MeasureTextEx(Garden.Font, _Node.ID, fontSize, 0.0f);
+        Raylib.DrawTextEx(Garden.Font, _Node.ID, WorldRect.Center() - textSize / 2, fontSize, 5, Color.Red);
     }
 
     public Rectangle Rect;
