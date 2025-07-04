@@ -1,11 +1,7 @@
-﻿#define DEBUG_PHYSICS
-
-using System.Numerics;
+﻿using System.Numerics;
 using Raylib_cs;
 
 namespace BasicKafana;
-
-using Node = Node<Meristem>;
 
 public static class Globals
 {
@@ -121,24 +117,29 @@ class Program
 
         Raylib.SetRandomSeed((uint)random.Next());
 
-        Node uiTreeRoot = new("root", new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
+        Node uiTreeRoot = new("root", new Meristem(new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)));
 
-        Node first = new("first", new Rectangle(0, 0, 300, 300));
-        Node second = new("second", new Rectangle(400, 0, 300, 300));
-        Node third = new("third", new Rectangle(0, 400, 100, 100));
+        Node first = new("first", new Meristem(new Rectangle(0, 0, 300, 300)));
+        Node second = new("second", new Meristem(new Rectangle(400, 0, 300, 300)));
+        Node third = new("third", new Meristem(new Rectangle(0, 400, 100, 100)));
 
         uiTreeRoot.LinkChild(first);
         uiTreeRoot.LinkChild(second);
         uiTreeRoot.LinkChild(third);
 
-        Node a = new("a", new Rectangle(0, 0, 10, 10));
-        Node b = new("b", new Rectangle(10, 10, 20, 20));
-        Node c = new("c", new Rectangle(0, 0, 50, 50));
+        PetalInfo petalInfo = new PetalInfo
+        {
+            Texture = Raylib.LoadTexture("frame.png"),
+            Patch = new Rectangle(0, 0, 0, 0)
+        };
+
+        Node a = new("a", new Petal(new Rectangle(0, 0, 10, 10), petalInfo));
+        Node b = new("b", new Petal(new Rectangle(10, 10, 20, 20), petalInfo));
+        Node c = new("c", new Petal(new Rectangle(0, 0, 50, 50), petalInfo));
 
         first.LinkChild(a);
         first.LinkChild(b);
         third.LinkChild(c);
-
 
         // m_State = CreateState(NUM_BOXES);
 
@@ -154,10 +155,10 @@ class Program
             uiTreeRoot.Traverse(
                 _N =>
                 {
-                    if (_N == null || _N.Data == null)
+                    if (_N == null || _N.Meristem == null)
                         return;
 
-                    _N.Data.Draw(_N.Parent?.Data, _N.ID);
+                    _N.Meristem.Draw(_N);
                 }
             );
 

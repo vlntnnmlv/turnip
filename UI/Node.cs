@@ -1,51 +1,44 @@
 namespace BasicKafana;
 
-public class Node<T>(string _ID)
+public class Node(string _ID, Meristem _Meristem)
 {
     public string ID { get; } = _ID;
-    public T? Data { get; }
+    public Meristem Meristem { get; } = _Meristem;
 
-    public List<Node<T>> Children { get; } = [];
-    public Node<T>? Parent { get; set; }
+    public List<Node> Children { get; } = [];
+    public Node? Parent { get; set; }
 
     public override string ToString()
     {
-        return $"[{ID}] {Data}";
+        return $"[{ID}] {Meristem}";
     }
 
-    public Node(string _ID, params object[] _Arguments) : this(_ID)
-    {
-        Type dataType = typeof(T);
-
-        Data = dataType.IsPrimitive ? (T)_Arguments[0] : (T?)Activator.CreateInstance(dataType, _Arguments);
-    }
-
-    public void LinkChild(Node<T> _Node)
+    public void LinkChild(Node _Node)
     {
         Children.Add(_Node);
         _Node.SetParent(this);
     }
 
-    public void SetParent(Node<T> _Node)
+    public void SetParent(Node _Node)
     {
         Parent = _Node;
     }
 
-    public void Traverse(Action<Node<T>>? _Action)
+    public void Traverse(Action<Node>? _Action) // breadth firsrt search
     {
         if (_Action == null)
             return;
 
-        Queue<Node<T>> q = new();
+        Queue<Node> q = new();
 
         q.Enqueue(this);
 
         while (q.Count > 0)
         {
-            Node<T> current = q.Dequeue();
+            Node current = q.Dequeue();
             _Action?.Invoke(current);
 
-            foreach (Node<T> child in Children)
+            foreach (Node child in Children)
                 child.Traverse(_Action);
         }
     }
