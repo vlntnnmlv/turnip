@@ -21,13 +21,31 @@ public static class Renderer
         Raylib.DrawLineEx(_Start, _End, _Thickness, _Color);
     }
 
+    public static void DrawShape(Shape _Shape)
+    {
+        for (int i = 0; i < _Shape.Points.Length; i++)
+        {
+            int j = (i + 1) % _Shape.Points.Length;
+            Raylib.DrawLineEx(_Shape.Points[i], _Shape.Points[j], 4, Color.Red);
+        }
+
+        Vector2[] edgesNormals = _Shape.Edges.Select(_E => _E.Normal()).ToArray();
+        for (int i = 0; i < edgesNormals.Length; i++)
+        {
+            int j = (i + 1) % _Shape.Points.Length;
+            Vector2 edgeCenter = _Shape.Points[i] + (_Shape.Points[j] - _Shape.Points[i]) * 0.5f;
+            Raylib.DrawLineEx(edgeCenter, edgeCenter + edgesNormals[i] * 50, 2, Color.Red);
+        }
+    }
+
     public static void DrawBox(Box _Box, Color? _Color = null)
     {
         Color color = Color.White;
 
-        Raylib.DrawTexturePro(m_CrateTexture, new Rectangle(Vector2.Zero, m_CrateTexture.Width, m_CrateTexture.Height), _Box.Rectangle, Vector2.Zero, 0, color);
+        Rectangle destinationTextureRectangle = new Rectangle(_Box.Rectangle.Position + _Box.Rectangle.Size / 2, _Box.Rectangle.Size);
+        Raylib.DrawTexturePro(m_CrateTexture, new Rectangle(Vector2.Zero, m_CrateTexture.Width, m_CrateTexture.Height), destinationTextureRectangle, _Box.Rectangle.Size / 2, _Box.Rotation, color);
 
-        #if DEBUG_PHYSICS
+#if DEBUG_PHYSICS
         Vector2 center = _Box.Rectangle.Center();
         if (_Box.Velocity != Vector2.Zero)
         {
@@ -46,7 +64,7 @@ public static class Renderer
             DrawArrow(center, center + _Box.NetForce, Color.Black, 1);
             DrawLabel("NetForce", center + _Box.NetForce, Color.Black);
         }
-        #endif
+#endif
     }
 
     public static void DrawFloor()
@@ -77,6 +95,7 @@ public static class Renderer
         for (uint i = 0; i < _State.Boxes.Length; i++)
         {
             DrawBox(_State.Boxes[i], i == 0 ? Color.Green : null);
+            DrawShape(_State.Boxes[i].Collider);
         }
 
         DrawArrow(_State.Boxes[0].Rectangle.Center(), _State.Boxes[0].Rectangle.Center() + _State.ManualControl, new Color(155, 12, 96));

@@ -10,6 +10,14 @@ public static class RectangleExtensions
         return new Vector2(_Rectangle.X + _Rectangle.Width / 2, _Rectangle.Y + _Rectangle.Height / 2);
     }
 
+    public static Rectangle Move(this Rectangle _Rectangle, Vector2 _Offset)
+    {
+        _Rectangle.X += _Offset.X;
+        _Rectangle.Y += _Offset.Y;
+
+        return _Rectangle;
+    }
+
     public static bool Contains(this Rectangle _Rectangle, Vector2 _Vector)
     {
         return _Vector.X > _Rectangle.X && _Vector.X < _Rectangle.X + _Rectangle.Width

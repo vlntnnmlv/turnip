@@ -20,4 +20,9 @@ public static class Vector2Extensions
         Vector2 reverseVector = new Vector2(_X ? -1 : 1, _X ? 1 : -1);
         return _Vector * reverseVector;
     }
+
+    public static Vector2 Normal(this Vector2 _Vector, bool _Left = true)
+    {
+        return new Vector2(-_Vector.Y, _Vector.X).Normalized();
+    }
 }
