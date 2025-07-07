@@ -6,11 +6,25 @@ public class ANode<T>
     public ANode(string _ID)
     {
         ID = _ID;
+        UID = UIDCount;
+        UIDCount++;
     }
 
+    public static long UIDCount = 0;
+
     public string ID { get; }
+    public long UID { get; }
     public List<T> Children { get; } = new();
     public T? Parent { get; set; }
+
+    public int Order => Parent?.Children.IndexOf((T)this) ?? 0;
+
+    public void Remove()
+    {
+        Children.Clear();
+        Parent?.Children.Remove((T)this);
+        Parent = null;
+    }
 
     public void LinkChild(T _INode)
     {

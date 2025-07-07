@@ -21,7 +21,7 @@ public static class Vector2Extensions
         return _Vector * reverseVector;
     }
 
-    public static Vector2 Normal(this Vector2 _Vector, bool _Left = true)
+    public static Vector2 Normal(this Vector2 _Vector)
     {
         return new Vector2(-_Vector.Y, _Vector.X).Normalized();
     }

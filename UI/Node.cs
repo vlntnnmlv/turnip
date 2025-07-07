@@ -7,6 +7,8 @@ public struct Size
 {
     public SizeType AxisX;
     public SizeType AxisY;
+    public float? X;
+    public float? Y;
     public float? Width;
     public float? Height;
 }
@@ -17,6 +19,8 @@ public enum SizeType
     START,
     END,
     CENTER,
+
+    ABSOLUTE,
 }
 
 public class Node : ANode<Node>
@@ -33,6 +37,31 @@ public class Node : ANode<Node>
     public Rectangle Rect;
     public Rectangle WorldRect;
 
+    public bool IsHovered;
+    public bool IsFocused => Focused == this;
+
+    public static Node? Focused { get; private set; }
+
+    public Action<Node>? OnClick;
+
+    public Action? CheckEvent(Vector2 _MousePositon, bool _IsMousePressed)
+    {
+        IsHovered = WorldRect.Contains(_MousePositon);
+
+        bool wasFocused = IsFocused;
+        if (_IsMousePressed && IsHovered)
+            Focused = this;
+
+        if (!wasFocused && IsFocused)
+        {
+            return OnClicked;
+        }
+
+        return null;
+    }
+
+    public virtual void OnClicked() { }
+
     public virtual void Measure()
     {
         foreach (Node child in Children)
@@ -48,6 +77,9 @@ public class Node : ANode<Node>
                 case SizeType.CENTER:
                     child.Rect.Width = size.Width ?? 0.0f;
                     break;
+                case SizeType.ABSOLUTE:
+                    child.Rect.Width = size.Width ?? 0;
+                    break;
             }
 
             switch (size.AxisY)
@@ -59,6 +91,9 @@ public class Node : ANode<Node>
                 case SizeType.END:
                 case SizeType.CENTER:
                     child.Rect.Height = size.Height ?? 0.0f;
+                    break;
+                case SizeType.ABSOLUTE:
+                    child.Rect.Height = size.Height ?? 0;
                     break;
             }
         }
@@ -81,6 +116,9 @@ public class Node : ANode<Node>
                 case SizeType.CENTER:
                     child.Rect.X = Rect.Center().X - child.Rect.Width / 2.0f;
                     break;
+                case SizeType.ABSOLUTE:
+                    child.Rect.X = size.X ?? 0;
+                    break;
             }
 
             switch (size.AxisY)
@@ -95,61 +133,19 @@ public class Node : ANode<Node>
                 case SizeType.CENTER:
                     child.Rect.Y = Rect.Center().Y - child.Rect.Height / 2.0f;
                     break;
+                case SizeType.ABSOLUTE:
+                    child.Rect.Y = size.Y ?? 0;
+                    break;
             }
         }
     }
 
     public void PlaceInWorld()
     {
-        WorldRect = Parent == null ? Rect : Rect.Move(Parent.Rect.Position);
+        WorldRect = Parent == null ? Rect : Rect.Move(Parent.WorldRect.Position);
     }
 
-    public virtual void Draw()
-    {
-        // if (_Node.Parent == null)
-        //     WorldRect = Rect;
-        // else
-        //     WorldRect = Rect.Move(_Node.Parent.Meristem.Rect.Position);
-
-        // float spacing = 20;
-        // Rectangle padding = new Rectangle(20, 20, 20, 20);
-
-        // if (_Node.Parent?.ID == "vstack")
-        // {
-        //     int childrenNumber = _Node.Parent.Children.Count;
-
-        //     Rectangle paddedParentRect = _Node.Parent.Meristem.Rect.Shrink(
-        //         new Vector2(padding.X + padding.Width, padding.Y + padding.Height)
-        //     );
-        //     float height =
-        //         (paddedParentRect.Height - spacing * (childrenNumber - 1)) / childrenNumber;
-
-        //     Rect = new Rectangle(
-        //         padding.X,
-        //         padding.Y + _Node.Order * (spacing + height),
-        //         paddedParentRect.Width,
-        //         height
-        //     );
-        //     WorldRect = Rect.Move(paddedParentRect.Position); // new Rectangle(paddedParentRect.X + padding.X, paddedParentRect.Y + padding.Y + _Node.Order * height + spacing * _Node.Order, paddedParentRect.Width, height);
-        // }
-
-        // if (_Node.Parent?.ID == "hstack")
-        // {
-        //     int childrenNumber = _Node.Parent.Children.Count;
-
-        //     Rectangle parentRect = _Node.Parent.Meristem.Rect.Shrink(
-        //         new Vector2(padding.X + padding.Width, padding.Y + padding.Height)
-        //     );
-        //     float width = (parentRect.Width - spacing * (childrenNumber - 1)) / childrenNumber;
-
-        //     WorldRect = new Rectangle(
-        //         parentRect.X + padding.X + _Node.Order * width + spacing * _Node.Order,
-        //         parentRect.Y + padding.Y,
-        //         width,
-        //         parentRect.Height
-        //     );
-        // }
-    }
+    public virtual void Draw() { }
 
     public void DrawDebug()
     {
@@ -158,6 +154,13 @@ public class Node : ANode<Node>
         int fontSize = 8;
 
         Vector2 textSize = Raylib.MeasureTextEx(Garden.Font, ID, fontSize, 0.0f);
+
+        if (IsHovered)
+            Raylib.DrawCircle((int)WorldRect.X + 6, (int)WorldRect.Y + 6, 4, Color.Red);
+
+        if (IsFocused)
+            Raylib.DrawCircle((int)WorldRect.X + 12, (int)WorldRect.Y + 6, 4, Color.Blue);
+
         Raylib.DrawTextEx(
             Garden.Font,
             ID,

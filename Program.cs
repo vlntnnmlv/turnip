@@ -160,54 +160,124 @@ class Program
 
         Raylib.SetRandomSeed((uint)random.Next());
 
-        Node uiTreeRoot = new("root", new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
+        Node uiTreeRoot = new Node("root", new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
         uiTreeRoot.Padding = new LRTB(10, 10, 10, 10);
 
-        // vstack = new("vstack", new Node(new Rectangle(0, 0, WINDOW_WIDTH / 2, WINDOW_HEIGHT)));
-        // uiTreeRoot.LinkChild(vstack);
+        Stack stack = new Stack("stack", new Rectangle(0, 0, 0, 0), Stack.StackType.HORIZONTAL);
+        stack.Spacing = 20;
+        uiTreeRoot.LinkChild(stack);
+
+        Stack stackLeft = new Stack(
+            "stackLeft",
+            new Rectangle(0, 0, 0, 0),
+            Stack.StackType.HORIZONTAL
+        );
+        stackLeft.Spacing = 10;
+        stack.LinkChild(stackLeft);
+
+        Stack stackRight = new Stack(
+            "stackRight",
+            new Rectangle(0, 0, 0, 0),
+            Stack.StackType.VERTICAL
+        );
+        stackRight.Spacing = 10;
+        stack.LinkChild(stackRight);
 
         ImageInfo petalInfo = new ImageInfo
         {
-            Texture = Raylib.LoadTexture("frame.png"),
-            Patch = new LRTB(5, 5, 5, 5),
+            Texture = Raylib.LoadTexture("frame@2x.png"),
+            Patch = new LRTB(22, 22, 22, 22),
         };
 
-        Node img1 = new Image(
-            "image",
-            new Rectangle(0, 0, 0, 0),
-            petalInfo,
-            new Size
-            {
-                AxisX = SizeType.START,
-                AxisY = SizeType.FILL,
-                Width = 100,
-            }
-        );
-        uiTreeRoot.LinkChild(img1);
-
+        Node img = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
         Node img2 = new Image(
             "image",
             new Rectangle(0, 0, 0, 0),
             petalInfo,
+            new Size { AxisY = SizeType.CENTER, Height = 250 }
+        );
+        Node img3 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
+        Node img4 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
+        stackLeft.LinkChild(img);
+        stackLeft.LinkChild(img2);
+        stackLeft.LinkChild(img3);
+        stackLeft.LinkChild(img4);
+
+        Node img5 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
+        Node img6 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
+        Node img7 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
+        Node img8 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
+        stackRight.LinkChild(img5);
+        stackRight.LinkChild(img6);
+        stackRight.LinkChild(img7);
+        stackRight.LinkChild(img8);
+
+        void OnClick()
+        {
+            Node tip = new Image(
+                "tip",
+                new Rectangle(0, 0, 0, 0),
+                petalInfo,
+                new Size
+                {
+                    AxisX = SizeType.ABSOLUTE,
+                    AxisY = SizeType.ABSOLUTE,
+                    X = WINDOW_WIDTH / 2 - 50,
+                    Y = WINDOW_HEIGHT / 2 - 30,
+                    Width = 100,
+                    Height = 60,
+                }
+            );
+            void OnTipClick()
+            {
+                tip.Remove();
+            }
+            uiTreeRoot.LinkChild(tip);
+            Button tipbutton = new Button("tupbutton", new Rectangle(0, 0, 0, 0), OnTipClick);
+            tip.LinkChild(tipbutton);
+        }
+
+        Button button = new Button(
+            "button",
+            new Rectangle(0, 0, 0, 0),
+            OnClick,
             new Size
             {
-                AxisX = SizeType.END,
-                AxisY = SizeType.FILL,
-                Width = 100,
+                AxisX = SizeType.START,
+                Width = 50,
+                AxisY = SizeType.END,
+                Height = 40,
             }
         );
-        uiTreeRoot.LinkChild(img2);
+        img8.LinkChild(button);
 
         // m_State = CreateState(NUM_BOXES);
 
+        List<Action> lateActions = new();
+
         while (!Raylib.WindowShouldClose())
         {
+            lateActions.Clear();
             // m_State = CreateState(NUM_BOXES);
 
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Color.RayWhite);
 
             // Renderer.DrawState(m_State);
+
+            uiTreeRoot.Traverse(_N =>
+            {
+                if (_N == null)
+                    return;
+
+                Action? action = _N.CheckEvent(
+                    Raylib.GetMousePosition(),
+                    Raylib.IsMouseButtonPressed(MouseButton.Left)
+                );
+
+                if (action != null)
+                    lateActions.Add(action);
+            });
 
             uiTreeRoot.Traverse(_N =>
             {
@@ -241,6 +311,9 @@ class Program
             Raylib.EndDrawing();
 
             // m_State = GetNextState(m_State, Raylib.GetFrameTime());
+
+            foreach (Action action in lateActions)
+                action?.Invoke();
         }
 
         Raylib.CloseWindow();
