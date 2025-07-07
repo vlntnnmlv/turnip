@@ -251,6 +251,16 @@ class Program
         );
         img8.LinkChild(button);
 
+        Animation animation = new Animation(
+            20,
+            (_P) =>
+            {
+                img2.Size.Height = 50 + MathF.Abs(MathF.Sin(_P * 10 * MathF.PI)) * 100;
+            },
+            null
+        );
+        animation.Start();
+
         // m_State = CreateState(NUM_BOXES);
 
         List<Action> lateActions = new();
@@ -314,6 +324,8 @@ class Program
 
             foreach (Action action in lateActions)
                 action?.Invoke();
+
+            Animation.Update(Raylib.GetFrameTime());
         }
 
         Raylib.CloseWindow();
