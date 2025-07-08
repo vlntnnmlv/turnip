@@ -3,6 +3,19 @@ using Raylib_cs;
 
 namespace BasicKafana;
 
+public struct EventInfo
+{
+    public Vector2 Position;
+    public MouseState State;
+}
+
+public enum MouseState
+{
+    FREE = 0,
+    PRESSED = 1,
+    DRAGGED = 2,
+}
+
 public struct Size
 {
     public SizeType AxisX;
@@ -15,12 +28,11 @@ public struct Size
 
 public enum SizeType
 {
-    FILL,
-    START,
-    END,
-    CENTER,
-
-    ABSOLUTE,
+    FILL = 0,
+    START = 1,
+    END = 2,
+    CENTER = 3,
+    ABSOLUTE = 4,
 }
 
 public class Node : ANode<Node>
@@ -40,16 +52,43 @@ public class Node : ANode<Node>
     public bool IsHovered;
     public bool IsFocused => Focused == this;
 
-    public static Node? Focused { get; private set; }
-
     public Action<Node>? OnClick;
 
-    public Action? CheckEvent(Vector2 _MousePositon, bool _IsMousePressed)
+    public static Node? Focused { get; private set; }
+
+    public static MouseState mState;
+    public static Vector2 mPos;
+    public static Vector2 mDelta;
+    static bool mPressed;
+
+    public static void CheckMouse()
     {
-        IsHovered = WorldRect.Contains(_MousePositon);
+        mDelta = Raylib.GetMousePosition() - mPos;
+        mPos = Raylib.GetMousePosition();
+
+        bool pressed = Raylib.IsMouseButtonDown(MouseButton.Left);
+
+        if (pressed)
+        {
+            if (mDelta != Vector2.Zero && mPressed)
+                mState = MouseState.DRAGGED;
+            else
+                mState = MouseState.PRESSED;
+
+            mPressed = pressed;
+        }
+        else
+        {
+            mState = MouseState.FREE;
+        }
+    }
+
+    public Action? CheckEvent(Vector2 _Position, bool _IsPressed)
+    {
+        IsHovered = WorldRect.Contains(_Position);
 
         bool wasFocused = IsFocused;
-        if (_IsMousePressed && IsHovered)
+        if (_IsPressed && IsHovered)
             Focused = this;
 
         if (!wasFocused && IsFocused)

@@ -6,19 +6,35 @@ namespace BasicKafana;
 
 public class Stack : Node
 {
+    public enum ContentType
+    {
+        START = 0,
+        END = 1,
+        CENTER = 2,
+    }
+
     public enum StackType
     {
-        VERTICAL,
-        HORIZONTAL,
+        VERTICAL = 0,
+        HORIZONTAL = 1,
     }
 
     StackType m_StackType;
+    ContentType m_ContentType;
+
     public float Spacing { get; set; }
 
-    public Stack(string _ID, Rectangle _Rect, StackType _StackType, Size _Size = new Size())
+    public Stack(
+        string _ID,
+        Rectangle _Rect,
+        StackType _StackType,
+        ContentType _ContentType,
+        Size _Size = new Size()
+    )
         : base(_ID, _Rect, _Size)
     {
         m_StackType = _StackType;
+        m_ContentType = _ContentType;
     }
 
     public override void Measure()
@@ -137,8 +153,50 @@ public class Stack : Node
         }
     }
 
+    float GetContentX()
+    {
+        float contentWidth = Children.Any(_C => _C.Size.AxisX == SizeType.FILL)
+            ? Rect.Width - Padding.Left - Padding.Right
+            : (Children.Select(_C => _C.Size.Width).Sum() + (Children.Count - 1) * Spacing ?? 0);
+
+        switch (m_ContentType)
+        {
+            case ContentType.START:
+                return Padding.Left;
+            case ContentType.END:
+                return Rect.Width - contentWidth;
+            case ContentType.CENTER:
+                return (Rect.Width - contentWidth) / 2.0f;
+            default:
+                return 0;
+        }
+    }
+
+    float GetContentY()
+    {
+        float contentHeight = Children.Any(_C => _C.Size.AxisY == SizeType.FILL)
+            ? Rect.Height - Padding.Top - Padding.Bottom
+            : (Children.Select(_C => _C.Size.Height).Sum() + (Children.Count - 1) * Spacing ?? 0);
+
+        switch (m_ContentType)
+        {
+            case ContentType.START:
+                return Padding.Top;
+            case ContentType.END:
+                return Rect.Height - contentHeight;
+            case ContentType.CENTER:
+                return (Rect.Height - contentHeight) / 2.0f;
+            default:
+                return 0;
+        }
+    }
+
     void ArrangeVertical()
     {
+        float contentHeight = Children.Any(_C => _C.Size.AxisY == SizeType.FILL)
+            ? Rect.Height - Padding.Top - Padding.Bottom
+            : (Children.Select(_C => _C.Size.Height).Sum() ?? 0);
+
         foreach (Node child in Children)
         {
             Size size = child.Size;
@@ -163,7 +221,7 @@ public class Stack : Node
                 case SizeType.END:
                 case SizeType.CENTER:
                     child.Rect.Y =
-                        Padding.Top
+                        GetContentY()
                         + Children
                             .Where(_C => _C.Order < child.Order)
                             .Select(_C => _C.Rect.Height)
@@ -176,6 +234,10 @@ public class Stack : Node
 
     void ArrangeHorizontal()
     {
+        float contentWidth = Children.Any(_C => _C.Size.AxisX == SizeType.FILL)
+            ? Rect.Width - Padding.Left - Padding.Right
+            : (Children.Select(_C => _C.Size.Width).Sum() ?? 0);
+
         foreach (Node child in Children)
         {
             Size size = child.Size;
@@ -200,7 +262,7 @@ public class Stack : Node
                 case SizeType.END:
                 case SizeType.CENTER:
                     child.Rect.X =
-                        Padding.Left
+                        GetContentX()
                         + Children
                             .Where(_C => _C.Order < child.Order)
                             .Select(_C => _C.Rect.Width)

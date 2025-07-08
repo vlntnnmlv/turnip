@@ -163,22 +163,66 @@ class Program
         Node uiTreeRoot = new Node("root", new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
         uiTreeRoot.Padding = new LRTB(10, 10, 10, 10);
 
-        Stack stack = new Stack("stack", new Rectangle(0, 0, 0, 0), Stack.StackType.HORIZONTAL);
+        Stack stack = new Stack(
+            "stack",
+            new Rectangle(0, 0, 0, 0),
+            Stack.StackType.HORIZONTAL,
+            Stack.ContentType.START
+        );
         stack.Spacing = 20;
         uiTreeRoot.LinkChild(stack);
 
         Stack stackLeft = new Stack(
             "stackLeft",
             new Rectangle(0, 0, 0, 0),
-            Stack.StackType.HORIZONTAL
+            Stack.StackType.HORIZONTAL,
+            Stack.ContentType.START
         );
         stackLeft.Spacing = 10;
         stack.LinkChild(stackLeft);
 
+        Stack nodeCenter = new Stack(
+            "stackCenter",
+            new Rectangle(0, 0, 0, 0),
+            Stack.StackType.VERTICAL,
+            Stack.ContentType.CENTER
+        );
+        nodeCenter.Spacing = 8;
+        stack.LinkChild(nodeCenter);
+
+        Text mouseState = new Text(
+            "mouseState",
+            new Rectangle(0, 0, 0, 0),
+            Node.mState.ToString(),
+            Color.Black,
+            24,
+            new Size { AxisY = SizeType.CENTER, Height = 60 }
+        );
+        nodeCenter.LinkChild(mouseState);
+        Text mouseDelta = new Text(
+            "mouseDelta",
+            new Rectangle(0, 0, 0, 0),
+            Node.mDelta.ToString(),
+            Color.Black,
+            24,
+            new Size { AxisY = SizeType.CENTER, Height = 60 }
+        );
+        nodeCenter.LinkChild(mouseDelta);
+        Text mousePos = new Text(
+            "mousePos",
+            new Rectangle(0, 0, 0, 0),
+            Node.mPos.ToString(),
+            Color.Black,
+            24,
+            new Size { AxisY = SizeType.CENTER, Height = 60 }
+        );
+        nodeCenter.LinkChild(mousePos);
+
         Stack stackRight = new Stack(
             "stackRight",
             new Rectangle(0, 0, 0, 0),
-            Stack.StackType.VERTICAL
+            Stack.StackType.VERTICAL,
+            Stack.ContentType.START
         );
         stackRight.Spacing = 10;
         stack.LinkChild(stackRight);
@@ -257,7 +301,8 @@ class Program
             {
                 img2.Size.Height = 50 + MathF.Abs(MathF.Sin(_P * 10 * MathF.PI)) * 100;
             },
-            null
+            null,
+            true
         );
         animation.Start();
 
@@ -274,6 +319,11 @@ class Program
             Raylib.ClearBackground(Color.RayWhite);
 
             // Renderer.DrawState(m_State);
+
+            Node.CheckMouse();
+            mouseState.SText = Node.mState.ToString();
+            mouseDelta.SText = Node.mDelta.ToString();
+            mousePos.SText = Node.mPos.ToString();
 
             uiTreeRoot.Traverse(_N =>
             {

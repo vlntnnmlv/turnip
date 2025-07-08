@@ -7,15 +7,22 @@ public class Animation
 
     float Duration;
     float StartTime;
+    bool Looped;
 
     Action<float>? Action;
     Action? OnFinish;
 
-    public Animation(float _Duration, Action<float>? _Update, Action? _OnFinish)
+    public Animation(
+        float _Duration,
+        Action<float>? _Update,
+        Action? _OnFinish,
+        bool _Looped = false
+    )
     {
         Duration = _Duration;
         Action = _Update;
         OnFinish = _OnFinish;
+        Looped = _Looped;
     }
 
     public void Start()
@@ -41,8 +48,13 @@ public class Animation
 
             if (animation.Duration < m_Time)
             {
-                animation.Stop();
-                m_ToDelete.Add(animation);
+                if (!animation.Looped)
+                {
+                    animation.Stop();
+                    m_ToDelete.Add(animation);
+                }
+                else
+                    animation.StartTime = m_Time;
             }
         }
 
