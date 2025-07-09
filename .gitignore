@@ -56,4 +56,6 @@ nunit-*.xml
 # Custom
 basic.sln
 .config
+.fleet
+.editorconfig
 .DS_Store

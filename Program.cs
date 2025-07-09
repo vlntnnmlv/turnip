@@ -229,7 +229,7 @@ class Program
 
         ImageInfo petalInfo = new ImageInfo
         {
-            Texture = Raylib.LoadTexture("frame@2x.png"),
+            Texture = Raylib.LoadTexture("Resources/Textures/frame@2x.png"),
             Patch = new LRTB(22, 22, 22, 22),
         };
 
@@ -357,7 +357,7 @@ class Program
                 _N.Draw();
             });
 
-            if (Garden.DebugUI)
+            if (God.DebugUI)
             {
                 uiTreeRoot.Traverse(_N =>
                 {

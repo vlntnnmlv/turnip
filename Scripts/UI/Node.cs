@@ -192,7 +192,7 @@ public class Node : ANode<Node>
 
         int fontSize = 8;
 
-        Vector2 textSize = Raylib.MeasureTextEx(Garden.Font, ID, fontSize, 0.0f);
+        Vector2 textSize = Raylib.MeasureTextEx(God.Font, ID, fontSize, 0.0f);
 
         if (IsHovered)
             Raylib.DrawCircle((int)WorldRect.X + 6, (int)WorldRect.Y + 6, 4, Color.Red);
@@ -201,7 +201,7 @@ public class Node : ANode<Node>
             Raylib.DrawCircle((int)WorldRect.X + 12, (int)WorldRect.Y + 6, 4, Color.Blue);
 
         Raylib.DrawTextEx(
-            Garden.Font,
+            God.Font,
             ID,
             WorldRect.Center() - textSize / 2,
             fontSize,

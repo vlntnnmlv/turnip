@@ -26,10 +26,10 @@ public class Text : Node
 
     public override void Draw()
     {
-        Vector2 textSize = Raylib.MeasureTextEx(Garden.Font, SText, m_TextSize, 5f);
+        Vector2 textSize = Raylib.MeasureTextEx(God.Font, SText, m_TextSize, 5f);
 
         Raylib.DrawTextEx(
-            Garden.Font,
+            God.Font,
             SText,
             WorldRect.Center() - textSize / 2,
             m_TextSize,
