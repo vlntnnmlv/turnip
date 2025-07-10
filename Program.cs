@@ -233,11 +233,11 @@ class Program
         // stackRight.LinkChild(img7);
         stackRight.LinkChild(img8);
 
-        Event.MousePressed += _V =>
+        void ShowEvent(Vector2 _V, string _Msg)
         {
             Text t = new Text(
                 "t",
-                "Pressed",
+                _Msg,
                 Color.Black,
                 12,
                 new Size
@@ -259,7 +259,11 @@ class Program
             animation.Start();
 
             stackRight.LinkChild(t);
-        };
+        }
+
+        Event.MousePressed += (_V) => ShowEvent(_V, "Pressed");
+        Event.MouseReleased += (_V) => ShowEvent(_V, "Released");
+        Event.MouseDragged += (_V) => ShowEvent(_V, "Dragged");
 
         void OnClick()
         {

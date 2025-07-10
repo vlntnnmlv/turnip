@@ -11,6 +11,7 @@ public static class Event
 {
     public static event Action<Vector2>? MousePressed;
     public static event Action<Vector2>? MouseReleased;
+    public static event Action<Vector2>? MouseDragged;
 
     public static MouseState MouseState;
 
@@ -21,8 +22,17 @@ public static class Event
         if (MouseState == MouseState.UP && _MousePressed)
             MousePressed?.Invoke(_MousePosition);
 
-        if (MouseState == MouseState.DOWN && !_MousePressed)
+        if (MouseState == MouseState.DOWN && _MouseReleased)
             MouseReleased?.Invoke(_MousePosition);
+
+        if (
+            _MousePressed
+            && MouseState == MouseState.DOWN
+            && (MousePosition - _MousePosition).Magnitude() > 5
+        )
+        {
+            MouseDragged?.Invoke(_MousePosition);
+        }
 
         if (_MousePressed)
         {
