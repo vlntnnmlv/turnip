@@ -46,7 +46,7 @@ public class Animation
         {
             animation.Action?.Invoke((m_Time - animation.StartTime) / animation.Duration);
 
-            if (animation.Duration < m_Time)
+            if (animation.StartTime + animation.Duration < m_Time)
             {
                 if (!animation.Looped)
                 {

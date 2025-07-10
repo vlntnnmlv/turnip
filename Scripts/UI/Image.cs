@@ -13,8 +13,8 @@ public class Image : Node
 {
     ImageInfo m_Info;
 
-    public Image(string _ID, Rectangle _Rect, ImageInfo _Info, Size _Size = new Size())
-        : base(_ID, _Rect, _Size)
+    public Image(string _ID, ImageInfo _Info, Size _Size = new Size())
+        : base(_ID, _Size)
     {
         m_Info = _Info;
     }

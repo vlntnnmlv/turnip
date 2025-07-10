@@ -13,7 +13,7 @@ class Program
 {
     const int WINDOW_WIDTH = 1080;
     const int WINDOW_HEIGHT = 720;
-    const string WINDOW_TITLE = "Basic Kafana";
+    const string WINDOW_TITLE = "BasicKafana Kafana";
 
     const int NUM_BOXES = 1;
     const int PLAYER_SPEED = 300;
@@ -160,30 +160,20 @@ class Program
 
         Raylib.SetRandomSeed((uint)random.Next());
 
-        Node uiTreeRoot = new Node("root", new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
+        Node uiTreeRoot = new Node("root");
+        uiTreeRoot.Rect = new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
         uiTreeRoot.Padding = new LRTB(10, 10, 10, 10);
 
-        Stack stack = new Stack(
-            "stack",
-            new Rectangle(0, 0, 0, 0),
-            Stack.StackType.HORIZONTAL,
-            Stack.ContentType.START
-        );
+        Stack stack = new Stack("stack", Stack.StackType.HORIZONTAL, Stack.ContentType.START);
         stack.Spacing = 20;
         uiTreeRoot.LinkChild(stack);
 
-        Stack stackLeft = new Stack(
-            "stackLeft",
-            new Rectangle(0, 0, 0, 0),
-            Stack.StackType.HORIZONTAL,
-            Stack.ContentType.START
-        );
+        Stack stackLeft = new Stack("stackLeft", Stack.StackType.HORIZONTAL, Stack.ContentType.END);
         stackLeft.Spacing = 10;
         stack.LinkChild(stackLeft);
 
         Stack nodeCenter = new Stack(
             "stackCenter",
-            new Rectangle(0, 0, 0, 0),
             Stack.StackType.VERTICAL,
             Stack.ContentType.CENTER
         );
@@ -192,25 +182,14 @@ class Program
 
         Text mouseState = new Text(
             "mouseState",
-            new Rectangle(0, 0, 0, 0),
             Node.mState.ToString(),
             Color.Black,
             24,
             new Size { AxisY = SizeType.CENTER, Height = 60 }
         );
         nodeCenter.LinkChild(mouseState);
-        Text mouseDelta = new Text(
-            "mouseDelta",
-            new Rectangle(0, 0, 0, 0),
-            Node.mDelta.ToString(),
-            Color.Black,
-            24,
-            new Size { AxisY = SizeType.CENTER, Height = 60 }
-        );
-        nodeCenter.LinkChild(mouseDelta);
         Text mousePos = new Text(
             "mousePos",
-            new Rectangle(0, 0, 0, 0),
             Node.mPos.ToString(),
             Color.Black,
             24,
@@ -220,7 +199,6 @@ class Program
 
         Stack stackRight = new Stack(
             "stackRight",
-            new Rectangle(0, 0, 0, 0),
             Stack.StackType.VERTICAL,
             Stack.ContentType.START
         );
@@ -233,34 +211,60 @@ class Program
             Patch = new LRTB(22, 22, 22, 22),
         };
 
-        Node img = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
+        Node img = new Image("image", petalInfo);
         Node img2 = new Image(
             "image",
-            new Rectangle(0, 0, 0, 0),
             petalInfo,
             new Size { AxisY = SizeType.CENTER, Height = 250 }
         );
-        Node img3 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
-        Node img4 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
+        Node img3 = new Image("image", petalInfo);
+        Node img4 = new Image("image", petalInfo);
         stackLeft.LinkChild(img);
         stackLeft.LinkChild(img2);
         stackLeft.LinkChild(img3);
         stackLeft.LinkChild(img4);
 
-        Node img5 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
-        Node img6 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
-        Node img7 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
-        Node img8 = new Image("image", new Rectangle(0, 0, 0, 0), petalInfo);
-        stackRight.LinkChild(img5);
-        stackRight.LinkChild(img6);
-        stackRight.LinkChild(img7);
+        // Node img5 = new Image("image", petalInfo);
+        // Node img6 = new Image("image", petalInfo);
+        // Node img7 = new Image("image", petalInfo);
+        Node img8 = new Image("image", petalInfo);
+        // stackRight.LinkChild(img5);
+        // stackRight.LinkChild(img6);
+        // stackRight.LinkChild(img7);
         stackRight.LinkChild(img8);
+
+        Event.MousePressed += _V =>
+        {
+            Text t = new Text(
+                "t",
+                "Pressed",
+                Color.Black,
+                12,
+                new Size
+                {
+                    AxisX = SizeType.FILL,
+                    AxisY = SizeType.END,
+                    Height = 40,
+                }
+            );
+
+            Animation animation = new Animation(
+                1.5f,
+                (_P) =>
+                {
+                    t.Color = new Color((float)_P, (float)_P, (float)_P);
+                },
+                () => t.Remove()
+            );
+            animation.Start();
+
+            stackRight.LinkChild(t);
+        };
 
         void OnClick()
         {
             Node tip = new Image(
                 "tip",
-                new Rectangle(0, 0, 0, 0),
                 petalInfo,
                 new Size
                 {
@@ -277,13 +281,12 @@ class Program
                 tip.Remove();
             }
             uiTreeRoot.LinkChild(tip);
-            Button tipbutton = new Button("tupbutton", new Rectangle(0, 0, 0, 0), OnTipClick);
+            Button tipbutton = new Button("tupbutton", OnTipClick);
             tip.LinkChild(tipbutton);
         }
 
         Button button = new Button(
             "button",
-            new Rectangle(0, 0, 0, 0),
             OnClick,
             new Size
             {
@@ -313,6 +316,8 @@ class Program
         while (!Raylib.WindowShouldClose())
         {
             lateActions.Clear();
+            Animation.Update(Raylib.GetFrameTime());
+
             // m_State = CreateState(NUM_BOXES);
 
             Raylib.BeginDrawing();
@@ -320,10 +325,15 @@ class Program
 
             // Renderer.DrawState(m_State);
 
-            Node.CheckMouse();
-            mouseState.SText = Node.mState.ToString();
-            mouseDelta.SText = Node.mDelta.ToString();
-            mousePos.SText = Node.mPos.ToString();
+            Event.Process(
+                Raylib.GetMousePosition(),
+                Raylib.IsMouseButtonPressed(MouseButton.Left),
+                Raylib.IsMouseButtonReleased(MouseButton.Left)
+            );
+
+            mouseState.SText = Event.MouseState.ToString();
+
+            mousePos.SText = Event.MousePosition.ToString();
 
             uiTreeRoot.Traverse(_N =>
             {
@@ -374,8 +384,6 @@ class Program
 
             foreach (Action action in lateActions)
                 action?.Invoke();
-
-            Animation.Update(Raylib.GetFrameTime());
         }
 
         Raylib.CloseWindow();

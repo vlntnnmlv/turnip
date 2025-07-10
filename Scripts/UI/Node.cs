@@ -37,10 +37,9 @@ public enum SizeType
 
 public class Node : ANode<Node>
 {
-    public Node(string _ID, Rectangle _Rect, Size _Size = new Size())
+    public Node(string _ID, Size _Size = new Size())
         : base(_ID)
     {
-        Rect = _Rect;
         Size = _Size;
     }
 
@@ -200,13 +199,6 @@ public class Node : ANode<Node>
         if (IsFocused)
             Raylib.DrawCircle((int)WorldRect.X + 12, (int)WorldRect.Y + 6, 4, Color.Blue);
 
-        Raylib.DrawTextEx(
-            God.Font,
-            ID,
-            WorldRect.Center() - textSize / 2,
-            fontSize,
-            5,
-            Color.Red
-        );
+        Raylib.DrawTextEx(God.Font, ID, WorldRect.Center() - textSize / 2, fontSize, 5, Color.Red);
     }
 }

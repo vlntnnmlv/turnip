@@ -7,8 +7,8 @@ public class Button : Node
 {
     Action m_Action;
 
-    public Button(string _ID, Rectangle _Rect, Action _Action, Size _Size = new Size())
-        : base(_ID, _Rect, _Size)
+    public Button(string _ID, Action _Action, Size _Size = new Size())
+        : base(_ID, _Size)
     {
         m_Action = _Action;
     }

@@ -26,12 +26,11 @@ public class Stack : Node
 
     public Stack(
         string _ID,
-        Rectangle _Rect,
         StackType _StackType,
         ContentType _ContentType,
         Size _Size = new Size()
     )
-        : base(_ID, _Rect, _Size)
+        : base(_ID, _Size)
     {
         m_StackType = _StackType;
         m_ContentType = _ContentType;
@@ -84,7 +83,8 @@ public class Stack : Node
             switch (size.AxisY)
             {
                 case SizeType.FILL:
-                    child.Rect.Height = freeSpace / childrenCountFill;
+                    child.Rect.Height +=
+                        0.01f * (freeSpace / childrenCountFill - child.Rect.Height);
                     break;
                 case SizeType.START:
                 case SizeType.END:

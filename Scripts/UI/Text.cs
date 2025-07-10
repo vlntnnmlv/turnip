@@ -9,15 +9,8 @@ public class Text : Node
     public string SText = string.Empty;
     public Color Color;
 
-    public Text(
-        string _ID,
-        Rectangle _Rect,
-        string _Text,
-        Color _Color,
-        int _TextSize = 24,
-        Size _Size = new Size()
-    )
-        : base(_ID, _Rect, _Size)
+    public Text(string _ID, string _Text, Color _Color, int _TextSize = 24, Size _Size = new Size())
+        : base(_ID, _Size)
     {
         m_TextSize = _TextSize;
         Color = _Color;
