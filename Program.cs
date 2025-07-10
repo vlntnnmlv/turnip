@@ -148,6 +148,8 @@ class Program
         return newState;
     }
 
+    static Engine? m_Engine;
+
     // TODO: Figure our wth is this?
     // STAThread is required if you deploy using NativeAOT on Windows - See https://github.com/raylib-cs/raylib-cs/issues/301
     [STAThread]
@@ -160,236 +162,190 @@ class Program
 
         Raylib.SetRandomSeed((uint)random.Next());
 
-        Node uiTreeRoot = new Node("root");
-        uiTreeRoot.Rect = new Rectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        uiTreeRoot.Padding = new LRTB(10, 10, 10, 10);
-
-        Stack stack = new Stack("stack", Stack.StackType.HORIZONTAL, Stack.ContentType.START);
-        stack.Spacing = 20;
-        uiTreeRoot.LinkChild(stack);
-
-        Stack stackLeft = new Stack("stackLeft", Stack.StackType.HORIZONTAL, Stack.ContentType.END);
-        stackLeft.Spacing = 10;
-        stack.LinkChild(stackLeft);
-
-        Stack nodeCenter = new Stack(
-            "stackCenter",
-            Stack.StackType.VERTICAL,
-            Stack.ContentType.CENTER
-        );
-        nodeCenter.Spacing = 8;
-        stack.LinkChild(nodeCenter);
-
-        Text mouseState = new Text(
-            "mouseState",
-            Node.mState.ToString(),
-            Color.Black,
-            24,
-            new Size { AxisY = SizeType.CENTER, Height = 60 }
-        );
-        nodeCenter.LinkChild(mouseState);
-        Text mousePos = new Text(
-            "mousePos",
-            Node.mPos.ToString(),
-            Color.Black,
-            24,
-            new Size { AxisY = SizeType.CENTER, Height = 60 }
-        );
-        nodeCenter.LinkChild(mousePos);
-
-        Stack stackRight = new Stack(
-            "stackRight",
-            Stack.StackType.VERTICAL,
-            Stack.ContentType.START
-        );
-        stackRight.Spacing = 10;
-        stack.LinkChild(stackRight);
-
-        ImageInfo petalInfo = new ImageInfo
+        m_Engine = new Engine(new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT));
+        m_Engine.CreateUI(_Root =>
         {
-            Texture = Raylib.LoadTexture("Resources/Textures/frame@2x.png"),
-            Patch = new LRTB(22, 22, 22, 22),
-        };
+            _Root.Padding = new LRTB(10, 10, 10, 10);
 
-        Node img = new Image("image", petalInfo);
-        Node img2 = new Image(
-            "image",
-            petalInfo,
-            new Size { AxisY = SizeType.CENTER, Height = 250 }
-        );
-        Node img3 = new Image("image", petalInfo);
-        Node img4 = new Image("image", petalInfo);
-        stackLeft.LinkChild(img);
-        stackLeft.LinkChild(img2);
-        stackLeft.LinkChild(img3);
-        stackLeft.LinkChild(img4);
+            Stack stack = new Stack("stack", Stack.StackType.HORIZONTAL, Stack.ContentType.START);
+            stack.Spacing = 20;
+            _Root.LinkChild(stack);
 
-        // Node img5 = new Image("image", petalInfo);
-        // Node img6 = new Image("image", petalInfo);
-        // Node img7 = new Image("image", petalInfo);
-        Node img8 = new Image("image", petalInfo);
-        // stackRight.LinkChild(img5);
-        // stackRight.LinkChild(img6);
-        // stackRight.LinkChild(img7);
-        stackRight.LinkChild(img8);
+            Stack stackLeft = new Stack(
+                "stackLeft",
+                Stack.StackType.HORIZONTAL,
+                Stack.ContentType.END
+            );
+            stackLeft.Spacing = 10;
+            stack.LinkChild(stackLeft);
 
-        void ShowEvent(Vector2 _V, string _Msg)
-        {
-            Text t = new Text(
-                "t",
-                _Msg,
+            Stack nodeCenter = new Stack(
+                "stackCenter",
+                Stack.StackType.VERTICAL,
+                Stack.ContentType.CENTER
+            );
+            nodeCenter.Spacing = 8;
+            stack.LinkChild(nodeCenter);
+
+            Text mouseState = new Text(
+                "mouseState",
+                Event.IsMouseDown.ToString(),
                 Color.Black,
-                12,
+                24,
+                new Size { AxisY = SizeType.CENTER, Height = 60 }
+            );
+            nodeCenter.LinkChild(mouseState);
+            Text mousePos = new Text(
+                "mousePos",
+                Event.MousePosition.ToString(),
+                Color.Black,
+                24,
+                new Size { AxisY = SizeType.CENTER, Height = 60 }
+            );
+            nodeCenter.LinkChild(mousePos);
+
+            Stack stackRight = new Stack(
+                "stackRight",
+                Stack.StackType.VERTICAL,
+                Stack.ContentType.START
+            );
+            stackRight.Spacing = 10;
+            stack.LinkChild(stackRight);
+
+            ImageInfo petalInfo = new ImageInfo
+            {
+                Texture = Raylib.LoadTexture("Resources/Textures/frame@2x.png"),
+                Patch = new LRTB(22, 22, 22, 22),
+            };
+
+            Node img = new Frame("image");
+            Node img2 = new Image(
+                "image",
+                petalInfo,
+                new Size { AxisY = SizeType.CENTER, Height = 250 }
+            );
+            Node img3 = new Image("image", petalInfo);
+            Node img4 = new Image("image", petalInfo);
+            stackLeft.LinkChild(img);
+            stackLeft.LinkChild(img2);
+            stackLeft.LinkChild(img3);
+            stackLeft.LinkChild(img4);
+
+            // Node img5 = new Image("image", petalInfo);
+            // Node img6 = new Image("image", petalInfo);
+            // Node img7 = new Image("image", petalInfo);
+            Node img8 = new Image("image", petalInfo);
+            // stackRight.LinkChild(img5);
+            // stackRight.LinkChild(img6);
+            // stackRight.LinkChild(img7);
+            stackRight.LinkChild(img8);
+
+            void ShowEvent(Vector2 _V, string _Msg)
+            {
+                if (_Msg == "MOVED")
+                    return;
+
+                Text t = new Text(
+                    "t",
+                    _Msg,
+                    Color.Black,
+                    12,
+                    new Size
+                    {
+                        AxisX = SizeType.FILL,
+                        AxisY = SizeType.END,
+                        Height = 40,
+                    }
+                );
+
+                Animation animation = new Animation(
+                    1.5f,
+                    (_P) =>
+                    {
+                        t.Color = new Color((float)_P, (float)_P, (float)_P);
+                    },
+                    () => t.Remove()
+                );
+                animation.Start();
+
+                stackRight.LinkChild(t);
+            }
+
+            Event.MouseEvent += (_I) => ShowEvent(_I.Position, _I.Type.ToString());
+
+            void OnClick()
+            {
+                Node tip = new Image(
+                    "tip",
+                    petalInfo,
+                    new Size
+                    {
+                        AxisX = SizeType.ABSOLUTE,
+                        AxisY = SizeType.ABSOLUTE,
+                        X = WINDOW_WIDTH / 2 - 50,
+                        Y = WINDOW_HEIGHT / 2 - 30,
+                        Width = 100,
+                        Height = 60,
+                    }
+                );
+                void OnTipClick()
+                {
+                    tip.Remove();
+                }
+                _Root.LinkChild(tip);
+                Button tipbutton = new Button("tupbutton", OnTipClick);
+                tip.LinkChild(tipbutton);
+            }
+
+            Button button = new Button(
+                "button",
+                OnClick,
                 new Size
                 {
-                    AxisX = SizeType.FILL,
+                    AxisX = SizeType.START,
+                    Width = 50,
                     AxisY = SizeType.END,
                     Height = 40,
                 }
             );
+            img8.LinkChild(button);
 
             Animation animation = new Animation(
-                1.5f,
+                20,
                 (_P) =>
                 {
-                    t.Color = new Color((float)_P, (float)_P, (float)_P);
+                    img2.Size.Height = 50 + MathF.Abs(MathF.Sin(_P * 10 * MathF.PI)) * 100;
                 },
-                () => t.Remove()
+                null,
+                true
             );
             animation.Start();
-
-            stackRight.LinkChild(t);
-        }
-
-        Event.MousePressed += (_V) => ShowEvent(_V, "Pressed");
-        Event.MouseReleased += (_V) => ShowEvent(_V, "Released");
-        Event.MouseDragged += (_V) => ShowEvent(_V, "Dragged");
-
-        void OnClick()
-        {
-            Node tip = new Image(
-                "tip",
-                petalInfo,
-                new Size
-                {
-                    AxisX = SizeType.ABSOLUTE,
-                    AxisY = SizeType.ABSOLUTE,
-                    X = WINDOW_WIDTH / 2 - 50,
-                    Y = WINDOW_HEIGHT / 2 - 30,
-                    Width = 100,
-                    Height = 60,
-                }
-            );
-            void OnTipClick()
-            {
-                tip.Remove();
-            }
-            uiTreeRoot.LinkChild(tip);
-            Button tipbutton = new Button("tupbutton", OnTipClick);
-            tip.LinkChild(tipbutton);
-        }
-
-        Button button = new Button(
-            "button",
-            OnClick,
-            new Size
-            {
-                AxisX = SizeType.START,
-                Width = 50,
-                AxisY = SizeType.END,
-                Height = 40,
-            }
-        );
-        img8.LinkChild(button);
-
-        Animation animation = new Animation(
-            20,
-            (_P) =>
-            {
-                img2.Size.Height = 50 + MathF.Abs(MathF.Sin(_P * 10 * MathF.PI)) * 100;
-            },
-            null,
-            true
-        );
-        animation.Start();
+        });
 
         // m_State = CreateState(NUM_BOXES);
 
-        List<Action> lateActions = new();
+        // List<Action> lateActions = new();
 
         while (!Raylib.WindowShouldClose())
         {
-            lateActions.Clear();
-            Animation.Update(Raylib.GetFrameTime());
+            m_DeltaTime = Raylib.GetFrameTime();
+
+            // lateActions.Clear();
 
             // m_State = CreateState(NUM_BOXES);
-
-            Raylib.BeginDrawing();
-            Raylib.ClearBackground(Color.RayWhite);
-
             // Renderer.DrawState(m_State);
 
-            Event.Process(
-                Raylib.GetMousePosition(),
-                Raylib.IsMouseButtonPressed(MouseButton.Left),
-                Raylib.IsMouseButtonReleased(MouseButton.Left)
-            );
-
-            mouseState.SText = Event.MouseState.ToString();
-
-            mousePos.SText = Event.MousePosition.ToString();
-
-            uiTreeRoot.Traverse(_N =>
-            {
-                if (_N == null)
-                    return;
-
-                Action? action = _N.CheckEvent(
-                    Raylib.GetMousePosition(),
-                    Raylib.IsMouseButtonPressed(MouseButton.Left)
-                );
-
-                if (action != null)
-                    lateActions.Add(action);
-            });
-
-            uiTreeRoot.Traverse(_N =>
-            {
-                if (_N == null)
-                    return;
-
-                _N.Measure();
-                _N.Arrange();
-                _N.PlaceInWorld();
-            });
-
-            uiTreeRoot.Traverse(_N =>
-            {
-                if (_N == null)
-                    return;
-
-                _N.Draw();
-            });
-
-            if (God.DebugUI)
-            {
-                uiTreeRoot.Traverse(_N =>
-                {
-                    if (_N == null)
-                        return;
-
-                    _N.DrawDebug();
-                });
-            }
-
-            Raylib.EndDrawing();
+            m_Engine.Update(m_DeltaTime);
+            m_Engine.Draw();
 
             // m_State = GetNextState(m_State, Raylib.GetFrameTime());
 
-            foreach (Action action in lateActions)
-                action?.Invoke();
+            // foreach (Action action in lateActions)
+            //     action?.Invoke();
         }
 
         Raylib.CloseWindow();
     }
+
+    static float m_DeltaTime;
 }

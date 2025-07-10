@@ -13,7 +13,7 @@ public class Button : Node
         m_Action = _Action;
     }
 
-    public override void OnClicked()
+    public override void OnClick()
     {
         m_Action?.Invoke();
     }

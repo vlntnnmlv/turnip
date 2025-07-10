@@ -83,8 +83,7 @@ public class Stack : Node
             switch (size.AxisY)
             {
                 case SizeType.FILL:
-                    child.Rect.Height +=
-                        0.01f * (freeSpace / childrenCountFill - child.Rect.Height);
+                    child.Rect.Height = freeSpace / childrenCountFill;
                     break;
                 case SizeType.START:
                 case SizeType.END:

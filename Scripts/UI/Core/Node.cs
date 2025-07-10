@@ -46,59 +46,13 @@ public class Node : ANode<Node>
     public Size Size;
     public LRTB Padding = new(0);
     public Rectangle Rect;
+    public Rectangle RealRect;
     public Rectangle WorldRect;
 
     public bool IsHovered;
     public bool IsFocused => Focused == this;
 
-    public Action<Node>? OnClick;
-
     public static Node? Focused { get; private set; }
-
-    public static MouseState mState;
-    public static Vector2 mPos;
-    public static Vector2 mDelta;
-    static bool mPressed;
-
-    public static void CheckMouse()
-    {
-        mDelta = Raylib.GetMousePosition() - mPos;
-        mPos = Raylib.GetMousePosition();
-
-        bool pressed = Raylib.IsMouseButtonDown(MouseButton.Left);
-
-        if (pressed)
-        {
-            if (mDelta != Vector2.Zero && mPressed)
-                mState = MouseState.DRAGGED;
-            else
-                mState = MouseState.PRESSED;
-
-            mPressed = pressed;
-        }
-        else
-        {
-            mState = MouseState.FREE;
-        }
-    }
-
-    public Action? CheckEvent(Vector2 _Position, bool _IsPressed)
-    {
-        IsHovered = WorldRect.Contains(_Position);
-
-        bool wasFocused = IsFocused;
-        if (_IsPressed && IsHovered)
-            Focused = this;
-
-        if (!wasFocused && IsFocused)
-        {
-            return OnClicked;
-        }
-
-        return null;
-    }
-
-    public virtual void OnClicked() { }
 
     public virtual void Measure()
     {
@@ -180,8 +134,34 @@ public class Node : ANode<Node>
 
     public void PlaceInWorld()
     {
-        WorldRect = Parent == null ? Rect : Rect.Move(Parent.WorldRect.Position);
+        // WorldRect = Parent == null ? Rect : Rect.Move(Parent.WorldRect.Position);
+        WorldRect = Parent == null ? RealRect : RealRect.Move(Parent.WorldRect.Position);
     }
+
+    public virtual void ProcessMouseEvent(MouseEvent _MouseEvent)
+    {
+        OnMouseEvent(_MouseEvent);
+
+        foreach (Node child in Children)
+        {
+            child.ProcessMouseEvent(_MouseEvent);
+        }
+    }
+
+    public virtual void OnMouseEvent(MouseEvent _MouseEvent)
+    {
+        IsHovered = WorldRect.Contains(_MouseEvent.Position);
+
+        if (IsHovered && _MouseEvent.Type == MouseEventType.CLICKED)
+        {
+            OnClick();
+            Focused = this;
+        }
+    }
+
+    public virtual void OnClick() { }
+
+    public virtual void Update(float _DeltaTime) { }
 
     public virtual void Draw() { }
 

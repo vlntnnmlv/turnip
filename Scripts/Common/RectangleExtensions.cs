@@ -29,6 +29,29 @@ public static class RectangleExtensions
         return _Rectangle;
     }
 
+    static float Lerp(float _A, float _B, float _Phase)
+    {
+        return _A + (_B - _A) * _Phase;
+    }
+
+    static float LerpEpsilon(float _A, float _B, float _Phase, float _Epsilon)
+    {
+        if (Math.Abs(_B - _A) > _Epsilon)
+            return Lerp(_A, _B, _Phase);
+
+        return _A;
+    }
+
+    public static Rectangle Lerp(this Rectangle _This, Rectangle _Other, float _Phase)
+    {
+        return new Rectangle(
+            LerpEpsilon(_This.X, _Other.X, _Phase, 2.0f),
+            LerpEpsilon(_This.Y, _Other.Y, _Phase, 2.0f),
+            LerpEpsilon(_This.Width, _Other.Width, _Phase, 2.0f),
+            LerpEpsilon(_This.Height, _Other.Height, _Phase, 2.0f)
+        );
+    }
+
     public static bool Contains(this Rectangle _Rectangle, Vector2 _Vector)
     {
         return _Vector.X > _Rectangle.X
