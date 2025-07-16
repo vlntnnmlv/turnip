@@ -214,11 +214,10 @@ class Program
 
             ImageInfo petalInfo = new ImageInfo
             {
-                Texture = Raylib.LoadTexture("Resources/Textures/frame@2x.png"),
-                Patch = new LRTB(22, 22, 22, 22),
+                Texture = Raylib.LoadTexture("Resources/Textures/frame_smooth_rect.png"),
+                Patch = new LRTB(16),
             };
 
-            Node img = new Frame("image");
             Node img2 = new Image(
                 "image",
                 petalInfo,
@@ -226,7 +225,6 @@ class Program
             );
             Node img3 = new Image("image", petalInfo);
             Node img4 = new Image("image", petalInfo);
-            stackLeft.LinkChild(img);
             stackLeft.LinkChild(img2);
             stackLeft.LinkChild(img3);
             stackLeft.LinkChild(img4);
@@ -329,6 +327,11 @@ class Program
         while (!Raylib.WindowShouldClose())
         {
             m_DeltaTime = Raylib.GetFrameTime();
+
+            if (Raylib.IsKeyPressed(KeyboardKey.S) && Raylib.IsKeyDown(KeyboardKey.LeftControl))
+            {
+                m_Engine.Serialize();
+            }
 
             // lateActions.Clear();
 

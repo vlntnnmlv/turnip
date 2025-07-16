@@ -17,8 +17,8 @@ public class Frame : Node
             "bg",
             new ImageInfo
             {
-                Patch = new LRTB(22),
-                Texture = Raylib.LoadTexture("Resources/Textures/frame@2x.png"),
+                Texture = Raylib.LoadTexture("Resources/Textures/frame_smooth_rect.png"),
+                Patch = new LRTB(16),
             }
         );
         LinkChild(m_Bg);
@@ -28,9 +28,9 @@ public class Frame : Node
             new Size
             {
                 AxisX = SizeType.END,
-                Width = 16,
+                Width = 36,
                 AxisY = SizeType.START,
-                Height = 16,
+                Height = 36,
             }
         );
 
@@ -40,8 +40,8 @@ public class Frame : Node
             "btnImg",
             new ImageInfo
             {
-                Patch = new LRTB(6, 6, 4, 4),
-                Texture = Raylib.LoadTexture("Resources/Textures/cross.png"),
+                Patch = new LRTB(16),
+                Texture = Raylib.LoadTexture("Resources/Textures/button_cross.png"),
             }
         );
 
