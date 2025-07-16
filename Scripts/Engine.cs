@@ -6,6 +6,12 @@ using Raylib_cs;
 
 namespace BasicKafana;
 
+// TODO: Resolve focus and hover - which element should count as focused?
+// TODO: Add new layout elements (grid, margin, clipping)
+// TODO: Add 3D layer under UI
+// TODO: Separate UI and GUI in engine
+// TODO: Refactor serializing, and add loading scenes from .json
+
 public class Engine
 {
     Vector2 m_Size;
@@ -90,6 +96,11 @@ public class Engine
             _N.Measure();
             _N.Arrange();
 
+            // bool reallyHovered = _N.GetType() == typeof(Image) && _N.IsHovered;
+
+            // Rectangle r = reallyHovered ? _N.Rect.Expand(Vector2.One * 10) : _N.Rect;
+            // r = reallyHovered ? r.Move(Vector2.One * -5) : r;
+
             _N.RealRect = _N.RealRect.Lerp(_N.Rect, God.UIAnimationRate);
 
             _N.PlaceInWorld();
@@ -125,6 +136,32 @@ public class Engine
 
     public void CreateUI(Action<Node> _CreateContent)
     {
-        _CreateContent(m_UIRoot);
+        Stack mainStack = new Stack(
+            "main_stack",
+            Stack.StackType.HORIZONTAL,
+            Stack.ContentType.CENTER
+        );
+        mainStack.Padding = new LRTB(5);
+        m_UIRoot.LinkChild(mainStack);
+
+        Node servicePanel = new Node(
+            "service_panel",
+            new Size
+            {
+                AxisX = SizeType.START,
+                Width = 400,
+                AxisY = SizeType.FILL,
+            }
+        );
+
+        Node scenePanel = new Node(
+            "scene_panel",
+            new Size { AxisX = SizeType.FILL, AxisY = SizeType.FILL }
+        );
+
+        mainStack.LinkChild(servicePanel);
+        mainStack.LinkChild(scenePanel);
+
+        _CreateContent(scenePanel);
     }
 }

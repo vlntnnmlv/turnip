@@ -29,17 +29,14 @@ public static class RectangleExtensions
         return _Rectangle;
     }
 
+    public static Rectangle Expand(this Rectangle _Rectangle, Vector2 _Offset)
+    {
+        return _Rectangle.Shrink(-_Offset);
+    }
+
     static float Lerp(float _A, float _B, float _Phase)
     {
         return _A + (_B - _A) * _Phase;
-    }
-
-    static float LerpEpsilon(float _A, float _B, float _Phase, float _Epsilon)
-    {
-        if (Math.Abs(_B - _A) > _Epsilon)
-            return Lerp(_A, _B, _Phase);
-
-        return _A;
     }
 
     public static Rectangle Lerp(this Rectangle _This, Rectangle _Other, float _Phase)
@@ -58,5 +55,13 @@ public static class RectangleExtensions
             && _Vector.X < _Rectangle.X + _Rectangle.Width
             && _Vector.Y > _Rectangle.Y
             && _Vector.Y < _Rectangle.Y + _Rectangle.Height;
+    }
+
+    static float LerpEpsilon(float _A, float _B, float _Phase, float _Epsilon)
+    {
+        if (Math.Abs(_B - _A) > _Epsilon)
+            return Lerp(_A, _B, _Phase);
+
+        return _A;
     }
 }

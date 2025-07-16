@@ -49,10 +49,11 @@ public class Node : ANode<Node>
     public Rectangle RealRect;
     public Rectangle WorldRect;
 
-    public bool IsHovered;
+    public bool IsHovered => Hovered == this;
     public bool IsFocused => Focused == this;
 
     public static Node? Focused { get; private set; }
+    public static Node? Hovered { get; private set; }
 
     public virtual void Measure()
     {
@@ -138,7 +139,7 @@ public class Node : ANode<Node>
         WorldRect = Parent == null ? RealRect : RealRect.Move(Parent.WorldRect.Position);
     }
 
-    public virtual void ProcessMouseEvent(MouseEvent _MouseEvent)
+    public void ProcessMouseEvent(MouseEvent _MouseEvent)
     {
         OnMouseEvent(_MouseEvent);
 
@@ -148,9 +149,10 @@ public class Node : ANode<Node>
         }
     }
 
-    public virtual void OnMouseEvent(MouseEvent _MouseEvent)
+    public void OnMouseEvent(MouseEvent _MouseEvent)
     {
-        IsHovered = WorldRect.Contains(_MouseEvent.Position);
+        if (WorldRect.Contains(_MouseEvent.Position))
+            Hovered = this;
 
         if (IsHovered && _MouseEvent.Type == MouseEventType.CLICKED)
         {
@@ -179,6 +181,13 @@ public class Node : ANode<Node>
         if (IsFocused)
             Raylib.DrawCircle((int)WorldRect.X + 12, (int)WorldRect.Y + 6, 4, Color.Blue);
 
-        Raylib.DrawTextEx(God.Font, ID, WorldRect.Center() - textSize / 2, fontSize, 5, Color.Red);
+        Raylib.DrawTextEx(
+            God.Font,
+            ID,
+            WorldRect.Position + new Vector2(5, textSize.Y),
+            fontSize,
+            5,
+            Color.Red
+        );
     }
 }
