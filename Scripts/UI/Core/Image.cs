@@ -33,13 +33,6 @@ public class Image : Node
             Layout = NPatchLayout.NinePatch,
         };
 
-        Raylib.DrawTextureNPatch(
-            m_Info.Texture,
-            patchInfo,
-            WorldRect,
-            Vector2.Zero,
-            0,
-            Color.White
-        );
+        Raylib.DrawTextureNPatch(m_Info.Texture, patchInfo, WorldRect, Vector2.Zero, 0, Color);
     }
 }

@@ -61,6 +61,9 @@ public class Node : ANode<Node>
     [Serialize]
     public LRTB Padding = new(0);
 
+    [Serialize]
+    public Color Color = Color.White;
+
     public Rectangle Rect;
     public Rectangle RealRect;
     public Rectangle WorldRect;

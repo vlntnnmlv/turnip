@@ -23,7 +23,9 @@ public class Engine
 
         m_Size = _Size;
         m_UIRoot = new Node("root");
-        m_UIRoot.Rect = new Rectangle(0, 0, m_Size);
+
+        // NOTICE: Idk why but if using window size values it's acatually smaller by two pixels
+        m_UIRoot.Rect = new Rectangle(2, 2, m_Size + Vector2.One * 2);
 
         Event.MouseEvent += m_UIRoot.ProcessMouseEvent;
     }
@@ -134,8 +136,12 @@ public class Engine
         Raylib.EndDrawing();
     }
 
-    public void CreateUI(Action<Node> _CreateContent)
+    public void CreateUI(Action<Node>? _CreateContent)
     {
+        Image bg = new Image("bg", new ImageInfo { Texture = God.Texture });
+        bg.Color = new Color(130, 175, 106);
+        m_UIRoot.LinkChild(bg);
+
         Stack mainStack = new Stack(
             "main_stack",
             Stack.StackType.HORIZONTAL,
@@ -162,6 +168,6 @@ public class Engine
         mainStack.LinkChild(servicePanel);
         mainStack.LinkChild(scenePanel);
 
-        _CreateContent(scenePanel);
+        _CreateContent?.Invoke(scenePanel);
     }
 }

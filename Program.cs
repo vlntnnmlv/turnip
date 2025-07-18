@@ -13,6 +13,7 @@ class Program
 {
     const int WINDOW_WIDTH = 1080;
     const int WINDOW_HEIGHT = 720;
+
     const string WINDOW_TITLE = "BasicKafana Kafana";
 
     const int NUM_BOXES = 1;
@@ -165,6 +166,11 @@ class Program
         m_Engine = new Engine(new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT));
         m_Engine.CreateUI(_Root =>
         {
+            ImageInfo bgImageInfo = new ImageInfo { Texture = God.Texture };
+            Image bg = new Image("bg", bgImageInfo);
+            bg.Color = new Color(0.5f, 0.5f, 0.5f);
+            _Root.LinkChild(bg);
+
             _Root.Padding = new LRTB(10, 10, 10, 10);
 
             Stack stack = new Stack("stack", Stack.StackType.HORIZONTAL, Stack.ContentType.START);
@@ -214,8 +220,8 @@ class Program
 
             ImageInfo petalInfo = new ImageInfo
             {
-                Texture = Raylib.LoadTexture("Resources/Textures/frame_smooth_rect.png"),
-                Patch = new LRTB(16),
+                Texture = Resources.LoadTexture("frame_simple"),
+                Patch = new LRTB(5),
             };
 
             Node img2 = new Image(
@@ -260,7 +266,7 @@ class Program
                     1.5f,
                     (_P) =>
                     {
-                        t.Color = new Color((float)_P, (float)_P, (float)_P);
+                        t.Color = new Color(t.Color.R, t.Color.G, t.Color.B, 1 - _P);
                     },
                     () => t.Remove()
                 );

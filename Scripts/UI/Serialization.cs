@@ -31,4 +31,26 @@ public static class Serialization
         string filePath = Path.Combine(DIRECTORY_PATH, JSON_PATH);
         File.WriteAllText(filePath, json);
     }
+
+    public static Action<Node>? Deserialize()
+    {
+        CheckSerializationRoot();
+
+        string filePath = Path.Combine(DIRECTORY_PATH, JSON_PATH);
+        if (!File.Exists(filePath))
+        {
+            return null;
+        }
+
+        string jsonString = File.ReadAllText(filePath);
+
+        return _N =>
+        {
+            Node? node = JsonSerializer.Deserialize<Node>(jsonString);
+            if (node != null)
+            {
+                _N.LinkChild(node);
+            }
+        };
+    }
 }
