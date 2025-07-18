@@ -138,20 +138,24 @@ public class Engine
 
     public void CreateUI(Action<Node>? _CreateContent)
     {
-        Image bg = new Image("bg", new ImageInfo { Texture = God.Texture });
-        bg.Color = new Color(130, 175, 106);
-        m_UIRoot.LinkChild(bg);
+        Image bg = new Image(
+            "bg",
+            m_UIRoot,
+            new ImageInfo { Texture = God.Texture },
+            _Color: new Color(130, 175, 106)
+        );
 
         Stack mainStack = new Stack(
             "main_stack",
+            m_UIRoot,
             Stack.StackType.HORIZONTAL,
             Stack.ContentType.CENTER
         );
         mainStack.Padding = new LRTB(5);
-        m_UIRoot.LinkChild(mainStack);
 
         Node servicePanel = new Node(
             "service_panel",
+            mainStack,
             new Size
             {
                 AxisX = SizeType.START,
@@ -162,11 +166,9 @@ public class Engine
 
         Node scenePanel = new Node(
             "scene_panel",
+            mainStack,
             new Size { AxisX = SizeType.FILL, AxisY = SizeType.FILL }
         );
-
-        mainStack.LinkChild(servicePanel);
-        mainStack.LinkChild(scenePanel);
 
         _CreateContent?.Invoke(scenePanel);
     }

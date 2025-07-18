@@ -21,7 +21,17 @@ public class ANode<T>
     [Serialize]
     public List<T> Children { get; } = new();
 
-    public T? Parent { get; set; }
+    T? m_Parent;
+
+    public T? Parent
+    {
+        get => m_Parent;
+        set
+        {
+            m_Parent = value;
+            m_Parent?.LinkChild((T)this);
+        }
+    }
 
     public int Order => Parent?.Children.IndexOf((T)this) ?? 0;
 
@@ -35,10 +45,9 @@ public class ANode<T>
     public void LinkChild(T _INode)
     {
         Children.Add(_INode);
-        _INode.SetParent((T)this);
     }
 
-    public void SetParent(T _INode)
+    public void SetParent(T? _INode)
     {
         Parent = _INode;
     }

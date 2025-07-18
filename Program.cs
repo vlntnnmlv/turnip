@@ -166,57 +166,60 @@ class Program
         m_Engine = new Engine(new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT));
         m_Engine.CreateUI(_Root =>
         {
-            ImageInfo bgImageInfo = new ImageInfo { Texture = God.Texture };
-            Image bg = new Image("bg", bgImageInfo);
-            bg.Color = new Color(0.5f, 0.5f, 0.5f);
-            _Root.LinkChild(bg);
-
             _Root.Padding = new LRTB(10, 10, 10, 10);
 
-            Stack stack = new Stack("stack", Stack.StackType.HORIZONTAL, Stack.ContentType.START);
+            ImageInfo bgImageInfo = new ImageInfo { Texture = God.Texture };
+            Image bg = new Image("bg", _Root, bgImageInfo, _Color: new Color(0.5f, 0.5f, 0.5f));
+
+            Stack stack = new Stack(
+                "stack",
+                _Root,
+                Stack.StackType.HORIZONTAL,
+                Stack.ContentType.START
+            );
             stack.Spacing = 20;
-            _Root.LinkChild(stack);
 
             Stack stackLeft = new Stack(
                 "stackLeft",
+                stack,
                 Stack.StackType.HORIZONTAL,
                 Stack.ContentType.END
             );
             stackLeft.Spacing = 10;
-            stack.LinkChild(stackLeft);
 
             Stack nodeCenter = new Stack(
                 "stackCenter",
+                stack,
                 Stack.StackType.VERTICAL,
                 Stack.ContentType.CENTER
             );
             nodeCenter.Spacing = 8;
-            stack.LinkChild(nodeCenter);
 
             Text mouseState = new Text(
                 "mouseState",
+                nodeCenter,
                 Event.IsMouseDown.ToString(),
-                Color.Black,
                 24,
-                new Size { AxisY = SizeType.CENTER, Height = 60 }
+                new Size { AxisY = SizeType.CENTER, Height = 60 },
+                Color.Black
             );
-            nodeCenter.LinkChild(mouseState);
+
             Text mousePos = new Text(
                 "mousePos",
+                nodeCenter,
                 Event.MousePosition.ToString(),
-                Color.Black,
                 24,
-                new Size { AxisY = SizeType.CENTER, Height = 60 }
+                new Size { AxisY = SizeType.CENTER, Height = 60 },
+                Color.Black
             );
-            nodeCenter.LinkChild(mousePos);
 
             Stack stackRight = new Stack(
                 "stackRight",
+                stack,
                 Stack.StackType.VERTICAL,
                 Stack.ContentType.START
             );
             stackRight.Spacing = 10;
-            stack.LinkChild(stackRight);
 
             ImageInfo petalInfo = new ImageInfo
             {
@@ -226,23 +229,14 @@ class Program
 
             Node img2 = new Image(
                 "image",
+                stackLeft,
                 petalInfo,
                 new Size { AxisY = SizeType.CENTER, Height = 250 }
             );
-            Node img3 = new Image("image", petalInfo);
-            Node img4 = new Image("image", petalInfo);
-            stackLeft.LinkChild(img2);
-            stackLeft.LinkChild(img3);
-            stackLeft.LinkChild(img4);
+            Node img3 = new Image("image", stackLeft, petalInfo);
+            Node img4 = new Image("image", stackLeft, petalInfo);
 
-            // Node img5 = new Image("image", petalInfo);
-            // Node img6 = new Image("image", petalInfo);
-            // Node img7 = new Image("image", petalInfo);
-            Node img8 = new Image("image", petalInfo);
-            // stackRight.LinkChild(img5);
-            // stackRight.LinkChild(img6);
-            // stackRight.LinkChild(img7);
-            stackRight.LinkChild(img8);
+            Node img8 = new Image("image", stackRight, petalInfo);
 
             void ShowEvent(Vector2 _V, string _Msg)
             {
@@ -251,15 +245,16 @@ class Program
 
                 Text t = new Text(
                     "t",
+                    stackRight,
                     _Msg,
-                    Color.Black,
                     12,
                     new Size
                     {
                         AxisX = SizeType.FILL,
                         AxisY = SizeType.END,
                         Height = 40,
-                    }
+                    },
+                    Color.Black
                 );
 
                 Animation animation = new Animation(
@@ -271,8 +266,6 @@ class Program
                     () => t.Remove()
                 );
                 animation.Start();
-
-                stackRight.LinkChild(t);
             }
 
             Event.MouseEvent += (_I) => ShowEvent(_I.Position, _I.Type.ToString());
@@ -281,6 +274,7 @@ class Program
             {
                 Node tip = new Image(
                     "tip",
+                    _Root,
                     petalInfo,
                     new Size
                     {
@@ -296,13 +290,13 @@ class Program
                 {
                     tip.Remove();
                 }
-                _Root.LinkChild(tip);
-                Button tipbutton = new Button("tupbutton", OnTipClick);
-                tip.LinkChild(tipbutton);
+
+                Button tipbutton = new Button("tupbutton", tip, OnTipClick);
             }
 
             Button button = new Button(
                 "button",
+                img8,
                 OnClick,
                 new Size
                 {
@@ -312,7 +306,6 @@ class Program
                     Height = 40,
                 }
             );
-            img8.LinkChild(button);
 
             Animation animation = new Animation(
                 20,

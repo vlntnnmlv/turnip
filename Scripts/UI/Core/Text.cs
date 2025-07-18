@@ -7,13 +7,18 @@ public class Text : Node
 {
     int m_TextSize = 24;
     public string SText = string.Empty;
-    public Color Color;
 
-    public Text(string _ID, string _Text, Color _Color, int _TextSize = 24, Size _Size = new Size())
-        : base(_ID, _Size)
+    public Text(
+        string _ID,
+        Node? _Parent,
+        string _Text,
+        int _TextSize = 24,
+        Size _Size = new Size(),
+        Color? _Color = null
+    )
+        : base(_ID, _Parent, _Size, _Color)
     {
         m_TextSize = _TextSize;
-        Color = _Color;
         SText = _Text;
     }
 

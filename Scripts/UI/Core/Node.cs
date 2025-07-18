@@ -49,10 +49,13 @@ public enum SizeType
 
 public class Node : ANode<Node>
 {
-    public Node(string _ID, Size _Size = new Size())
+    public Node(string _ID, Node? _Parent = null, Size _Size = new Size(), Color? _Color = null)
         : base(_ID)
     {
+        SetParent(_Parent);
+
         Size = _Size;
+        Color = _Color ?? Color.White;
     }
 
     [Serialize]

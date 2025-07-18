@@ -30,11 +30,13 @@ public class Stack : Node
 
     public Stack(
         string _ID,
+        Node? _Parent,
         StackType _StackType,
         ContentType _ContentType,
-        Size _Size = new Size()
+        Size _Size = new Size(),
+        Color? _Color = null
     )
-        : base(_ID, _Size)
+        : base(_ID, _Parent, _Size, _Color)
     {
         m_StackType = _StackType;
         m_ContentType = _ContentType;

@@ -7,8 +7,14 @@ public class Button : Node
 {
     Action m_Action;
 
-    public Button(string _ID, Action _Action, Size _Size = new Size())
-        : base(_ID, _Size)
+    public Button(
+        string _ID,
+        Node? _Parent,
+        Action _Action,
+        Size _Size = new Size(),
+        Color? _Color = null
+    )
+        : base(_ID, _Parent, _Size, _Color)
     {
         m_Action = _Action;
     }
