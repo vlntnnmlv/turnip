@@ -12,9 +12,15 @@ public class ANode<T>
 
     public static long UIDCount = 0;
 
+    [Serialize]
     public string ID { get; }
+
+    [Serialize]
     public long UID { get; }
+
+    [Serialize]
     public List<T> Children { get; } = new();
+
     public T? Parent { get; set; }
 
     public int Order => Parent?.Children.IndexOf((T)this) ?? 0;

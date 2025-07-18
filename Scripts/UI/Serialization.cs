@@ -24,7 +24,7 @@ public static class Serialization
             new JsonSerializerOptions
             {
                 WriteIndented = true,
-                ReferenceHandler = ReferenceHandler.Preserve,
+                TypeInfoResolver = new SerializeResolver(),
             }
         );
 

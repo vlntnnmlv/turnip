@@ -1,5 +1,5 @@
 {
     "debugPhysics": "false",
-    "debugUI": "true",
+    "debugUI": "false",
     "animateUIRate": "0.002"
 }

@@ -4,9 +4,16 @@ namespace BasicKafana;
 
 public struct LRTB
 {
+    [Serialize]
     public int Left;
+
+    [Serialize]
     public int Right;
+
+    [Serialize]
     public int Top;
+
+    [Serialize]
     public int Bottom;
 
     public LRTB(int _V)

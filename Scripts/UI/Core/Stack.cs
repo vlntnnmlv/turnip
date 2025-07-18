@@ -19,9 +19,13 @@ public class Stack : Node
         HORIZONTAL = 1,
     }
 
+    [Serialize]
     StackType m_StackType;
+
+    [Serialize]
     ContentType m_ContentType;
 
+    [Serialize]
     public float Spacing { get; set; }
 
     public Stack(

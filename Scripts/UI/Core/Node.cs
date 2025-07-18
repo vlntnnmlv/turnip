@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Runtime.Serialization;
 using Raylib_cs;
 
 namespace BasicKafana;
@@ -18,11 +19,22 @@ public enum MouseState
 
 public struct Size
 {
+    [Serialize]
     public SizeType AxisX;
+
+    [Serialize]
     public SizeType AxisY;
+
+    [Serialize]
     public float? X;
+
+    [Serialize]
     public float? Y;
+
+    [Serialize]
     public float? Width;
+
+    [Serialize]
     public float? Height;
 }
 
@@ -43,8 +55,12 @@ public class Node : ANode<Node>
         Size = _Size;
     }
 
+    [Serialize]
     public Size Size;
+
+    [Serialize]
     public LRTB Padding = new(0);
+
     public Rectangle Rect;
     public Rectangle RealRect;
     public Rectangle WorldRect;
