@@ -245,7 +245,7 @@ public class Node : ANode<Node>
     {
         Measure();
         Arrange();
-        RealRect = RealRect.Lerp(Rect, God.Instance.UIAnimationRate);
+        RealRect = RealRect.Lerp(Rect, God.Instance.UIAnimationRate * _DeltaTime);
 
         PlaceInWorld();
     }

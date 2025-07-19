@@ -39,13 +39,15 @@ public static class RectangleExtensions
         return _A + (_B - _A) * _Phase;
     }
 
+    const float EPSILON = 0.2f;
+
     public static Rectangle Lerp(this Rectangle _This, Rectangle _Other, float _Phase)
     {
         return new Rectangle(
-            LerpEpsilon(_This.X, _Other.X, _Phase, 2.0f),
-            LerpEpsilon(_This.Y, _Other.Y, _Phase, 2.0f),
-            LerpEpsilon(_This.Width, _Other.Width, _Phase, 2.0f),
-            LerpEpsilon(_This.Height, _Other.Height, _Phase, 2.0f)
+            LerpEpsilon(_This.X, _Other.X, _Phase, EPSILON),
+            LerpEpsilon(_This.Y, _Other.Y, _Phase, EPSILON),
+            LerpEpsilon(_This.Width, _Other.Width, _Phase, EPSILON),
+            LerpEpsilon(_This.Height, _Other.Height, _Phase, EPSILON)
         );
     }
 
