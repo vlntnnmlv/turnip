@@ -6,7 +6,6 @@ namespace BasicKafana;
 
 // TODO: Resolve focus and hover - which element should count as focused?
 // TODO: Add mechanism to bind values to text: actual binding? update actions? ...
-// TODO: UIAnimation jitters in some cases, find out why
 // TODO: Use shaders (optimize? - now it's 60 fps with shader/ 2500 fps without)
 // TODO: Add new layout elements (grid, margin, clipping)
 // TODO: Add 3D layer under UI
