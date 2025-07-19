@@ -62,6 +62,6 @@ public static class RectangleExtensions
         if (Math.Abs(_B - _A) > _Epsilon)
             return Lerp(_A, _B, _Phase);
 
-        return _A;
+        return _B;
     }
 }

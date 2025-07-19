@@ -24,8 +24,7 @@ public class Engine
         m_Size = _Size;
         m_UIRoot = new Node("root");
 
-        // NOTICE: Idk why but if using window size values it's acatually smaller by two pixels
-        m_UIRoot.Rect = new Rectangle(2, 2, m_Size + Vector2.One * 2);
+        m_UIRoot.Rect = new Rectangle(Vector2.Zero, m_Size);
 
         Event.MouseEvent += m_UIRoot.ProcessMouseEvent;
     }
@@ -142,7 +141,7 @@ public class Engine
             "bg",
             m_UIRoot,
             new ImageInfo { Texture = God.Texture },
-            _Color: new Color(130, 175, 106)
+            _Color: new Color(109, 146, 88)
         );
 
         Stack mainStack = new Stack(
@@ -162,6 +161,12 @@ public class Engine
                 Width = 400,
                 AxisY = SizeType.FILL,
             }
+        );
+
+        Image servicePanelImg = new Image(
+            "servicePanelImg",
+            servicePanel,
+            new ImageInfo { Texture = Resources.LoadTexture("panel_simple"), Patch = new LRTB(16) }
         );
 
         Node scenePanel = new Node(

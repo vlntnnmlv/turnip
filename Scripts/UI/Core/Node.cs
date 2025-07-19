@@ -174,16 +174,36 @@ public class Node : ANode<Node>
     public void OnMouseEvent(MouseEvent _MouseEvent)
     {
         if (WorldRect.Contains(_MouseEvent.Position))
-            Hovered = this;
-
-        if (IsHovered && _MouseEvent.Type == MouseEventType.CLICKED)
         {
-            OnClick();
-            Focused = this;
+            OnHover();
+            Hovered = this;
+        }
+
+        if (IsHovered)
+        {
+            switch (_MouseEvent.Type)
+            {
+                case MouseEventType.CLICKED:
+                    Focused = this;
+                    OnClick();
+                    break;
+                case MouseEventType.PRESSED:
+                    OnPress();
+                    break;
+                case MouseEventType.RELEASED:
+                    OnRelease();
+                    break;
+            }
         }
     }
 
+    public virtual void OnHover() { }
+
     public virtual void OnClick() { }
+
+    public virtual void OnPress() { }
+
+    public virtual void OnRelease() { }
 
     public virtual void Update(float _DeltaTime) { }
 

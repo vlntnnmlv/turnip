@@ -14,7 +14,12 @@ class Program
     const int WINDOW_WIDTH = 1080;
     const int WINDOW_HEIGHT = 720;
 
-    const string WINDOW_TITLE = "BasicKafana Kafana";
+    static float EaseInOutSine(float _Phase)
+    {
+        return -(MathF.Cos(MathF.PI * _Phase) - 1) / 2;
+    }
+
+    const string WINDOW_TITLE = "Turnip";
 
     const int NUM_BOXES = 1;
     const int PLAYER_SPEED = 300;
@@ -151,6 +156,203 @@ class Program
 
     static Engine? m_Engine;
 
+    static void CreateUI1(Node _Root)
+    {
+        _Root.Padding = new LRTB(10, 10, 10, 10);
+
+        ImageInfo bgImageInfo = new ImageInfo { Texture = God.Texture };
+        Image bg = new Image("bg", _Root, bgImageInfo, _Color: new Color(0.5f, 0.5f, 0.5f));
+
+        Stack stack = new Stack(
+            "stack",
+            _Root,
+            Stack.StackType.HORIZONTAL,
+            Stack.ContentType.START
+        );
+        stack.Spacing = 20;
+
+        Stack stackLeft = new Stack(
+            "stackLeft",
+            stack,
+            Stack.StackType.HORIZONTAL,
+            Stack.ContentType.END
+        );
+        stackLeft.Spacing = 10;
+
+        Stack nodeCenter = new Stack(
+            "stackCenter",
+            stack,
+            Stack.StackType.VERTICAL,
+            Stack.ContentType.CENTER
+        );
+        nodeCenter.Spacing = 8;
+
+        Text mouseState = new Text(
+            "mouseState",
+            nodeCenter,
+            Event.IsMouseDown.ToString(),
+            24,
+            new Size { AxisY = SizeType.CENTER, Height = 60 },
+            Color.Black
+        );
+
+        Text mousePos = new Text(
+            "mousePos",
+            nodeCenter,
+            Event.MousePosition.ToString(),
+            24,
+            new Size { AxisY = SizeType.CENTER, Height = 60 },
+            Color.Black
+        );
+
+        Stack stackRight = new Stack(
+            "stackRight",
+            stack,
+            Stack.StackType.VERTICAL,
+            Stack.ContentType.START
+        );
+        stackRight.Spacing = 10;
+
+        ImageInfo petalInfo = new ImageInfo
+        {
+            Texture = Resources.LoadTexture("frame_simple"),
+            Patch = new LRTB(5),
+        };
+
+        Node img2 = new Image(
+            "image",
+            stackLeft,
+            petalInfo,
+            new Size { AxisY = SizeType.CENTER, Height = 250 }
+        );
+        Node img3 = new Image("image", stackLeft, petalInfo);
+        Node img4 = new Image("image", stackLeft, petalInfo);
+
+        Node img8 = new Image("image", stackRight, petalInfo);
+
+        void ShowEvent(Vector2 _V, string _Msg)
+        {
+            if (_Msg == "MOVED")
+                return;
+
+            Text t = new Text(
+                "t",
+                stackRight,
+                _Msg,
+                12,
+                new Size
+                {
+                    AxisX = SizeType.FILL,
+                    AxisY = SizeType.END,
+                    Height = 40,
+                },
+                Color.Black
+            );
+
+            Animation animation = new Animation(
+                1.5f,
+                (_P) =>
+                {
+                    t.Color = new Color(t.Color.R, t.Color.G, t.Color.B, 1 - _P);
+                },
+                () => t.Remove()
+            );
+            animation.Start();
+        }
+
+        Event.MouseEvent += (_I) => ShowEvent(_I.Position, _I.Type.ToString());
+
+        void OnClick()
+        {
+            Node tip = new Image(
+                "tip",
+                _Root,
+                petalInfo,
+                new Size
+                {
+                    AxisX = SizeType.ABSOLUTE,
+                    AxisY = SizeType.ABSOLUTE,
+                    X = WINDOW_WIDTH / 2 - 50,
+                    Y = WINDOW_HEIGHT / 2 - 30,
+                    Width = 100,
+                    Height = 60,
+                }
+            );
+            void OnTipClick()
+            {
+                tip.Remove();
+            }
+
+            Button tipbutton = new Button("tupbutton", tip, OnTipClick);
+        }
+
+        Button button = new Button(
+            "button",
+            img8,
+            OnClick,
+            new Size
+            {
+                AxisX = SizeType.START,
+                Width = 50,
+                AxisY = SizeType.END,
+                Height = 40,
+            }
+        );
+
+        Animation animation = new Animation(
+            20,
+            (_P) =>
+            {
+                img2.Size.Height =
+                    50 + MathF.Abs(MathF.Sin(EaseInOutSine(_P) * 10 * MathF.PI)) * 200;
+            },
+            null,
+            true
+        );
+        animation.Start();
+    }
+
+    static void CreateUI2(Node _Root)
+    {
+        Stack horizontal = new Stack(
+            "stackH",
+            _Root,
+            Stack.StackType.HORIZONTAL,
+            Stack.ContentType.CENTER
+        );
+        horizontal.Spacing = 10;
+        horizontal.Padding = new LRTB(10);
+        ButtonInfo btnInfo = new ButtonInfo
+        {
+            Action = null,
+            Normal = new ImageInfo
+            {
+                Texture = Resources.LoadTexture("button"),
+                Patch = new LRTB(16),
+            },
+            Pressed = new ImageInfo
+            {
+                Texture = Resources.LoadTexture("button_pressed"),
+                Patch = new LRTB(8),
+            },
+        };
+
+        for (int i = 0; i < 6; i++)
+        {
+            Stack verical = new Stack(
+                "stackV",
+                horizontal,
+                Stack.StackType.VERTICAL,
+                Stack.ContentType.CENTER
+            );
+            verical.Spacing = 10;
+            for (int j = 0; j < 6; j++)
+            {
+                new Button($"btn{i}{j}", verical, btnInfo);
+            }
+        }
+    }
+
     // TODO: Figure our wth is this?
     // STAThread is required if you deploy using NativeAOT on Windows - See https://github.com/raylib-cs/raylib-cs/issues/301
     [STAThread]
@@ -164,160 +366,7 @@ class Program
         Raylib.SetRandomSeed((uint)random.Next());
 
         m_Engine = new Engine(new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT));
-        m_Engine.CreateUI(_Root =>
-        {
-            _Root.Padding = new LRTB(10, 10, 10, 10);
-
-            ImageInfo bgImageInfo = new ImageInfo { Texture = God.Texture };
-            Image bg = new Image("bg", _Root, bgImageInfo, _Color: new Color(0.5f, 0.5f, 0.5f));
-
-            Stack stack = new Stack(
-                "stack",
-                _Root,
-                Stack.StackType.HORIZONTAL,
-                Stack.ContentType.START
-            );
-            stack.Spacing = 20;
-
-            Stack stackLeft = new Stack(
-                "stackLeft",
-                stack,
-                Stack.StackType.HORIZONTAL,
-                Stack.ContentType.END
-            );
-            stackLeft.Spacing = 10;
-
-            Stack nodeCenter = new Stack(
-                "stackCenter",
-                stack,
-                Stack.StackType.VERTICAL,
-                Stack.ContentType.CENTER
-            );
-            nodeCenter.Spacing = 8;
-
-            Text mouseState = new Text(
-                "mouseState",
-                nodeCenter,
-                Event.IsMouseDown.ToString(),
-                24,
-                new Size { AxisY = SizeType.CENTER, Height = 60 },
-                Color.Black
-            );
-
-            Text mousePos = new Text(
-                "mousePos",
-                nodeCenter,
-                Event.MousePosition.ToString(),
-                24,
-                new Size { AxisY = SizeType.CENTER, Height = 60 },
-                Color.Black
-            );
-
-            Stack stackRight = new Stack(
-                "stackRight",
-                stack,
-                Stack.StackType.VERTICAL,
-                Stack.ContentType.START
-            );
-            stackRight.Spacing = 10;
-
-            ImageInfo petalInfo = new ImageInfo
-            {
-                Texture = Resources.LoadTexture("frame_simple"),
-                Patch = new LRTB(5),
-            };
-
-            Node img2 = new Image(
-                "image",
-                stackLeft,
-                petalInfo,
-                new Size { AxisY = SizeType.CENTER, Height = 250 }
-            );
-            Node img3 = new Image("image", stackLeft, petalInfo);
-            Node img4 = new Image("image", stackLeft, petalInfo);
-
-            Node img8 = new Image("image", stackRight, petalInfo);
-
-            void ShowEvent(Vector2 _V, string _Msg)
-            {
-                if (_Msg == "MOVED")
-                    return;
-
-                Text t = new Text(
-                    "t",
-                    stackRight,
-                    _Msg,
-                    12,
-                    new Size
-                    {
-                        AxisX = SizeType.FILL,
-                        AxisY = SizeType.END,
-                        Height = 40,
-                    },
-                    Color.Black
-                );
-
-                Animation animation = new Animation(
-                    1.5f,
-                    (_P) =>
-                    {
-                        t.Color = new Color(t.Color.R, t.Color.G, t.Color.B, 1 - _P);
-                    },
-                    () => t.Remove()
-                );
-                animation.Start();
-            }
-
-            Event.MouseEvent += (_I) => ShowEvent(_I.Position, _I.Type.ToString());
-
-            void OnClick()
-            {
-                Node tip = new Image(
-                    "tip",
-                    _Root,
-                    petalInfo,
-                    new Size
-                    {
-                        AxisX = SizeType.ABSOLUTE,
-                        AxisY = SizeType.ABSOLUTE,
-                        X = WINDOW_WIDTH / 2 - 50,
-                        Y = WINDOW_HEIGHT / 2 - 30,
-                        Width = 100,
-                        Height = 60,
-                    }
-                );
-                void OnTipClick()
-                {
-                    tip.Remove();
-                }
-
-                Button tipbutton = new Button("tupbutton", tip, OnTipClick);
-            }
-
-            Button button = new Button(
-                "button",
-                img8,
-                OnClick,
-                new Size
-                {
-                    AxisX = SizeType.START,
-                    Width = 50,
-                    AxisY = SizeType.END,
-                    Height = 40,
-                }
-            );
-
-            Animation animation = new Animation(
-                20,
-                (_P) =>
-                {
-                    img2.Size.Height = 50 + MathF.Abs(MathF.Sin(_P * 10 * MathF.PI)) * 100;
-                },
-                null,
-                true
-            );
-            animation.Start();
-        });
+        m_Engine.CreateUI(CreateUI2);
 
         // m_State = CreateState(NUM_BOXES);
 

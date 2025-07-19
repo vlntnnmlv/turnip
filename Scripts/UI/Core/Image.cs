@@ -12,6 +12,10 @@ public struct ImageInfo
 public class Image : Node
 {
     ImageInfo m_Info;
+    public ImageInfo Info
+    {
+        set => m_Info = value;
+    }
 
     public Image(
         string _ID,
