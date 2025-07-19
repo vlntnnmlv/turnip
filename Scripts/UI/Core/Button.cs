@@ -1,4 +1,3 @@
-using System.Numerics;
 using Raylib_cs;
 
 namespace BasicKafana;
@@ -16,16 +15,9 @@ public class Button : Node
     ButtonInfo m_Info;
     Image m_Image;
 
-    public Button(
-        string _ID,
-        Node? _Parent,
-        Action _Action,
-        Size _Size = new Size(),
-        Color? _Color = null
-    )
-        : base(_ID, _Parent, _Size, _Color)
+    public Action Action
     {
-        // m_Action = _Action;
+        set => m_Info.Action = value;
     }
 
     public Button(
@@ -40,27 +32,30 @@ public class Button : Node
         m_Info = _ButtonInfo;
 
         m_Image = new Image("img", this, _ButtonInfo.Normal, _Color: _Color);
+        m_Image.IgnoreEvents = true;
     }
 
-    public override void OnHover()
+    public override void OnHoverEnter()
     {
-        // m_Image.Info = m_Info.Hovered;
+        m_Image.Info = m_Info.Hovered;
     }
 
-    public override void OnClick()
+    public override void OnHoverExit()
     {
-        m_Info.Action?.Invoke();
+        m_Image.Info = m_Info.Normal;
     }
 
     public override void OnPress()
     {
-        // Console.WriteLine("Pressed");
-        m_Image.Info = m_Info.Pressed;
+        if (IsHovered)
+            m_Image.Info = m_Info.Pressed;
     }
 
     public override void OnRelease()
     {
-        // Console.WriteLine("Released");
         m_Image.Info = m_Info.Normal;
+
+        if (IsHovered)
+            m_Info.Action?.Invoke();
     }
 }

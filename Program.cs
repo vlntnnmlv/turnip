@@ -187,24 +187,6 @@ class Program
         );
         nodeCenter.Spacing = 8;
 
-        Text mouseState = new Text(
-            "mouseState",
-            nodeCenter,
-            Event.IsMouseDown.ToString(),
-            24,
-            new Size { AxisY = SizeType.CENTER, Height = 60 },
-            Color.Black
-        );
-
-        Text mousePos = new Text(
-            "mousePos",
-            nodeCenter,
-            Event.MousePosition.ToString(),
-            24,
-            new Size { AxisY = SizeType.CENTER, Height = 60 },
-            Color.Black
-        );
-
         Stack stackRight = new Stack(
             "stackRight",
             stack,
@@ -260,7 +242,7 @@ class Program
             animation.Start();
         }
 
-        Event.MouseEvent += (_I) => ShowEvent(_I.Position, _I.Type.ToString());
+        Event.OnMouseEvent += (_I) => ShowEvent(_I.Position, _I.Type.ToString());
 
         void OnClick()
         {
@@ -278,26 +260,7 @@ class Program
                     Height = 60,
                 }
             );
-            void OnTipClick()
-            {
-                tip.Remove();
-            }
-
-            Button tipbutton = new Button("tupbutton", tip, OnTipClick);
         }
-
-        Button button = new Button(
-            "button",
-            img8,
-            OnClick,
-            new Size
-            {
-                AxisX = SizeType.START,
-                Width = 50,
-                AxisY = SizeType.END,
-                Height = 40,
-            }
-        );
 
         Animation animation = new Animation(
             20,
@@ -333,7 +296,12 @@ class Program
             Pressed = new ImageInfo
             {
                 Texture = Resources.LoadTexture("button_pressed"),
-                Patch = new LRTB(8),
+                Patch = new LRTB(16),
+            },
+            Hovered = new ImageInfo
+            {
+                Texture = Resources.LoadTexture("button_hovered"),
+                Patch = new LRTB(16),
             },
         };
 
@@ -348,7 +316,16 @@ class Program
             verical.Spacing = 10;
             for (int j = 0; j < 6; j++)
             {
-                new Button($"btn{i}{j}", verical, btnInfo);
+                Button btn = new Button($"btn{i}{j}", verical, btnInfo);
+                Text t = new Text($"t{i}{j}", btn, "0", 16);
+                t.IgnoreEvents = true;
+
+                btn.Action = () =>
+                {
+                    t.SText = (int.Parse(t.SText) + 1).ToString();
+                    if (int.Parse(t.SText) > 3)
+                        Node.ScheduleToRemove(btn);
+                };
             }
         }
     }
@@ -358,14 +335,7 @@ class Program
     [STAThread]
     public static void Main()
     {
-        Raylib.InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
-
-        Random random = new Random();
-        random.Next();
-
-        Raylib.SetRandomSeed((uint)random.Next());
-
-        m_Engine = new Engine(new Vector2(WINDOW_WIDTH, WINDOW_HEIGHT));
+        m_Engine = new Engine(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
         m_Engine.CreateUI(CreateUI2);
 
         // m_State = CreateState(NUM_BOXES);
@@ -378,7 +348,7 @@ class Program
 
             if (Raylib.IsKeyPressed(KeyboardKey.S) && Raylib.IsKeyDown(KeyboardKey.LeftControl))
             {
-                m_Engine.Serialize();
+                m_Engine.SerializeUI();
             }
 
             // lateActions.Clear();

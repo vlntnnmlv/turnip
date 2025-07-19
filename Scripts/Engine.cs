@@ -1,12 +1,13 @@
-using System.IO;
 using System.Numerics;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Raylib_cs;
 
 namespace BasicKafana;
 
 // TODO: Resolve focus and hover - which element should count as focused?
+// TODO: Add mechanism to bind values to text: actual binding? update actions? ...
+// TODO: UIAnimation jitters in some cases, find out why
+// TODO: Use shaders (optimize? - now it's 60 fps with shader/ 2500 fps without)
 // TODO: Add new layout elements (grid, margin, clipping)
 // TODO: Add 3D layer under UI
 // TODO: Separate UI and GUI in engine
@@ -16,48 +17,37 @@ public class Engine
 {
     Vector2 m_Size;
     Node m_UIRoot;
+    public Random RNG { get; }
 
-    public Engine(Vector2 _Size)
+    public Engine(int _Width, int _Height, string _Name)
     {
-        ReadConfig();
+        RNG = new Random();
+        RNG.Next();
+        Raylib.SetRandomSeed((uint)RNG.Next());
 
-        m_Size = _Size;
+        TryApplyConfig();
+
+        Raylib.InitWindow(_Width, _Height, _Name);
+        m_Size = new Vector2(_Width, _Height);
+
         m_UIRoot = new Node("root");
-
         m_UIRoot.Rect = new Rectangle(Vector2.Zero, m_Size);
 
-        Event.MouseEvent += m_UIRoot.ProcessMouseEvent;
+        Event.OnMouseEvent += m_UIRoot.ProcessMouseEvent;
     }
 
-    const string PATH = ".engine/engineConfig.json";
+    const string CONFIG_PATH = ".engine/engineConfig.json";
 
-    public void ReadConfig()
+    static void TryApplyConfig()
     {
-        if (File.Exists(PATH))
+        if (File.Exists(CONFIG_PATH))
         {
-            string jsonString = File.ReadAllText(PATH);
-            Dictionary<string, string> data = JsonSerializer.Deserialize<
-                Dictionary<string, string>
-            >(jsonString);
+            string jsonString = File.ReadAllText(CONFIG_PATH);
+            God? god = JsonSerializer.Deserialize<God>(jsonString);
 
-            foreach (string key in data.Keys)
+            if (god != null)
             {
-                string value = data[key];
-                Console.WriteLine($"{key} : {data[key]}");
-                switch (key)
-                {
-                    case "debugPhysics":
-                        God.DebugPhysics = bool.Parse(value);
-                        break;
-                    case "debugUI":
-                        God.DebugUI = bool.Parse(value);
-                        break;
-                    case "animateUIRate":
-                        God.UIAnimationRate = float.Parse(value);
-                        break;
-                    default:
-                        break;
-                }
+                God.SetInstance(god);
             }
         }
         else
@@ -66,45 +56,31 @@ public class Engine
         }
     }
 
-    public void Serialize()
+    public void SerializeUI()
     {
         Serialization.Serialize(m_UIRoot);
     }
 
     public void Update(float _DeltaTime)
     {
+        Node.RemoveScheduled();
+
         Event.ProcessMouse(
             Raylib.GetMousePosition(),
             Raylib.IsMouseButtonPressed(MouseButton.Left),
             Raylib.IsMouseButtonReleased(MouseButton.Left)
         );
 
-        m_UIRoot.Traverse(_N =>
-        {
-            if (_N == null)
-                return;
-
-            _N.Update(_DeltaTime);
-        });
-
         Animation.Update(_DeltaTime);
 
         m_UIRoot.Traverse(_N =>
         {
-            if (_N == null)
-                return;
+            _N?.Update(_DeltaTime);
+        });
 
-            _N.Measure();
-            _N.Arrange();
-
-            // bool reallyHovered = _N.GetType() == typeof(Image) && _N.IsHovered;
-
-            // Rectangle r = reallyHovered ? _N.Rect.Expand(Vector2.One * 10) : _N.Rect;
-            // r = reallyHovered ? r.Move(Vector2.One * -5) : r;
-
-            _N.RealRect = _N.RealRect.Lerp(_N.Rect, God.UIAnimationRate);
-
-            _N.PlaceInWorld();
+        m_UIRoot.Traverse(_N =>
+        {
+            _N?.ProcessLayout(_DeltaTime);
         });
     }
 
@@ -115,20 +91,14 @@ public class Engine
 
         m_UIRoot.Traverse(_N =>
         {
-            if (_N == null)
-                return;
-
-            _N.Draw();
+            _N?.Draw();
         });
 
-        if (God.DebugUI)
+        if (God.Instance.DebugUI)
         {
             m_UIRoot.Traverse(_N =>
             {
-                if (_N == null)
-                    return;
-
-                _N.DrawDebug();
+                _N?.DrawDebug();
             });
         }
 
@@ -152,9 +122,11 @@ public class Engine
         );
         mainStack.Padding = new LRTB(5);
 
-        Node servicePanel = new Node(
+        Stack servicePanel = new Stack(
             "service_panel",
             mainStack,
+            Stack.StackType.VERTICAL,
+            Stack.ContentType.CENTER,
             new Size
             {
                 AxisX = SizeType.START,
@@ -168,6 +140,28 @@ public class Engine
             servicePanel,
             new ImageInfo { Texture = Resources.LoadTexture("panel_simple"), Patch = new LRTB(16) }
         );
+
+        Text lastMouseEvent = new Text(
+            "lastMouseEvent",
+            servicePanel,
+            "",
+            24,
+            _Color: new Color(17, 39, 5)
+        );
+
+        Text fps = new Text(
+            "fps",
+            servicePanel,
+            Raylib.GetFPS().ToString(),
+            24,
+            _Color: new Color(17, 39, 5)
+        );
+
+        Event.OnMouseEvent += (_E) =>
+        {
+            lastMouseEvent.SText = _E.Type.ToString();
+            fps.SText = Raylib.GetFPS().ToString();
+        };
 
         Node scenePanel = new Node(
             "scene_panel",

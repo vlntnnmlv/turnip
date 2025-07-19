@@ -7,7 +7,7 @@ public static class Resources
     {
         Texture2D texture = Raylib.LoadTexture($"Resources/Textures/{_Name}.png");
 
-        Raylib.SetTextureFilter(texture, TextureFilter.Anisotropic16X);
+        Raylib.SetTextureFilter(texture, TextureFilter.Point);
         return texture;
     }
 }

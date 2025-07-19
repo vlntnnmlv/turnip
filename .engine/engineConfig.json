@@ -1,5 +1,6 @@
 {
-    "debugPhysics": "false",
-    "debugUI": "false",
-    "animateUIRate": "0.01"
+    "DebugPhysics": false,
+    "DebugUI": false,
+    "UIAnimationRate": 0.02,
+    "FontName": "PlayfairDisplayBlack"
 }

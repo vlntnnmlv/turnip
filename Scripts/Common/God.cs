@@ -2,11 +2,28 @@ using Raylib_cs;
 
 namespace BasicKafana;
 
-public static class God
+public class God
 {
-    public static bool DebugPhysics { get; set; }
-    public static bool DebugUI { get; set; }
-    public static float UIAnimationRate { get; set; } = 0.002f;
+    static God? m_Instance;
+    public static God Instance
+    {
+        get
+        {
+            m_Instance ??= new God();
+            return m_Instance;
+        }
+        private set { m_Instance = value; }
+    }
+
+    public static void SetInstance(God _Instance)
+    {
+        Instance = _Instance;
+    }
+
+    public bool DebugPhysics { get; set; }
+    public bool DebugUI { get; set; }
+    public float UIAnimationRate { get; set; }
+    public string FontName = "PlayfairDisplayBlack";
 
     static Font? m_Font;
     public static Font Font
@@ -17,7 +34,7 @@ public static class God
                 return m_Font.Value;
 
             // TODO: Make this font look nice
-            m_Font = Raylib.LoadFont("Resources/Fonts/PlayfairDisplayBlack.ttf");
+            m_Font = Raylib.LoadFont($"Resources/Fonts/{Instance.FontName}.ttf");
             Raylib.SetTextureFilter(m_Font.Value.Texture, TextureFilter.Bilinear);
 
             return m_Font.Value;
@@ -36,9 +53,23 @@ public static class God
             Raylib.BeginTextureMode(t);
             Raylib.DrawPixel(0, 0, Color.White);
             Raylib.EndTextureMode();
-            Raylib.SetTextureFilter(t.Texture, TextureFilter.Anisotropic16X);
+            Raylib.SetTextureFilter(t.Texture, TextureFilter.Trilinear);
 
             return t.Texture;
+        }
+    }
+
+    static Shader? m_NoiseShader;
+    public static Shader NoiseShader
+    {
+        get
+        {
+            if (m_NoiseShader.HasValue)
+                return m_NoiseShader.Value;
+
+            m_NoiseShader = Raylib.LoadShader(null, "./Resources/Shaders/noise.glsl");
+
+            return m_NoiseShader.Value;
         }
     }
 }

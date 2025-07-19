@@ -43,6 +43,8 @@ public class Image : Node
             Layout = NPatchLayout.NinePatch,
         };
 
+        // Raylib.BeginShaderMode(God.NoiseShader);
         Raylib.DrawTextureNPatch(m_Info.Texture, patchInfo, WorldRect, Vector2.Zero, 0, Color);
+        // Raylib.EndShaderMode();
     }
 }

@@ -73,9 +73,24 @@ public class Node : ANode<Node>
 
     public bool IsHovered => Hovered == this;
     public bool IsFocused => Focused == this;
+    public bool IgnoreEvents { get; set; }
 
     public static Node? Focused { get; private set; }
-    public static Node? Hovered { get; private set; }
+
+    static Node? m_Hovered;
+    public static Node? Hovered
+    {
+        get => m_Hovered;
+        private set
+        {
+            if (m_Hovered?.UID == value?.UID)
+                return;
+
+            m_Hovered?.OnHoverExit();
+            m_Hovered = value;
+            m_Hovered?.OnHoverEnter();
+        }
+    }
 
     public virtual void Measure()
     {
@@ -157,13 +172,13 @@ public class Node : ANode<Node>
 
     public void PlaceInWorld()
     {
-        // WorldRect = Parent == null ? Rect : Rect.Move(Parent.WorldRect.Position);
         WorldRect = Parent == null ? RealRect : RealRect.Move(Parent.WorldRect.Position);
     }
 
     public void ProcessMouseEvent(MouseEvent _MouseEvent)
     {
-        OnMouseEvent(_MouseEvent);
+        if (!IgnoreEvents)
+            OnMouseEvent(_MouseEvent);
 
         foreach (Node child in Children)
         {
@@ -171,41 +186,69 @@ public class Node : ANode<Node>
         }
     }
 
+    static List<Node> m_ToRemove = new();
+
+    public static void ScheduleToRemove(Node _Node)
+    {
+        m_ToRemove.Add(_Node);
+    }
+
+    public static void RemoveScheduled()
+    {
+        foreach (Node node in m_ToRemove)
+        {
+            node.Remove();
+        }
+
+        m_ToRemove.Clear();
+    }
+
     public void OnMouseEvent(MouseEvent _MouseEvent)
     {
-        if (WorldRect.Contains(_MouseEvent.Position))
+        if (WorldRect.Contains(_MouseEvent.Position) && !IsHovered)
         {
-            OnHover();
             Hovered = this;
         }
 
-        if (IsHovered)
+        switch (_MouseEvent.Type)
         {
-            switch (_MouseEvent.Type)
-            {
-                case MouseEventType.CLICKED:
-                    Focused = this;
-                    OnClick();
-                    break;
-                case MouseEventType.PRESSED:
-                    OnPress();
-                    break;
-                case MouseEventType.RELEASED:
-                    OnRelease();
-                    break;
-            }
+            case MouseEventType.PRESSED:
+                OnPress();
+                break;
+            case MouseEventType.RELEASED:
+                OnRelease();
+                break;
+            case MouseEventType.MOVED:
+                OnMove();
+                break;
+            case MouseEventType.DRAGGED:
+                OnDrag();
+                break;
         }
     }
 
-    public virtual void OnHover() { }
+    public virtual void OnHoverEnter() { }
 
-    public virtual void OnClick() { }
+    public virtual void OnHoverExit() { }
 
     public virtual void OnPress() { }
 
     public virtual void OnRelease() { }
 
+    public virtual void OnMove() { }
+
+    public virtual void OnDrag() { }
+
     public virtual void Update(float _DeltaTime) { }
+
+    public void ProcessLayout(float _DeltaTime)
+    {
+        Measure();
+        Arrange();
+        RealRect = RealRect.Lerp(Rect, God.Instance.UIAnimationRate);
+
+        PlaceInWorld();
+    }
 
     public virtual void Draw() { }
 
