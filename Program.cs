@@ -1,7 +1,7 @@
 ﻿using System.Numerics;
 using Raylib_cs;
 
-namespace BasicKafana;
+namespace Turnip;
 
 public static class Globals
 {
@@ -349,6 +349,11 @@ class Program
             if (Raylib.IsKeyPressed(KeyboardKey.S) && Raylib.IsKeyDown(KeyboardKey.LeftControl))
             {
                 m_Engine.SerializeUI();
+            }
+
+            if (Raylib.IsKeyPressed(KeyboardKey.O) && Raylib.IsKeyDown(KeyboardKey.LeftControl))
+            {
+                m_Engine.DeserializeUI();
             }
 
             // lateActions.Clear();

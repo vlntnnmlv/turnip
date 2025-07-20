@@ -1,7 +1,7 @@
 using System.Numerics;
 using Raylib_cs;
 
-namespace BasicKafana;
+namespace Turnip;
 
 public static class Vector2Extensions
 {

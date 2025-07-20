@@ -2,15 +2,19 @@ using System.Numerics;
 using System.Text.Json;
 using Raylib_cs;
 
-namespace BasicKafana;
+namespace Turnip;
 
 // TODO: Resolve focus and hover - which element should count as focused?
 // TODO: Add mechanism to bind values to text: actual binding? update actions? ...
 // TODO: Use shaders (optimize? - now it's 60 fps with shader/ 2500 fps without)
 // TODO: Add new layout elements (grid, margin, clipping)
+// TODO: Recalculate layoyt only if needed
+// TODO: Change arrange and measure logic so they change the node itself, not it's children
 // TODO: Add 3D layer under UI
 // TODO: Separate UI and GUI in engine
 // TODO: Refactor serializing, and add loading scenes from .json
+// TODO: Add render modifiers, which don't affect layout calculations
+// TODO: Add text fitting
 
 public class Engine
 {
@@ -60,6 +64,11 @@ public class Engine
         Serialization.Serialize(m_UIRoot);
     }
 
+    public void DeserializeUI()
+    {
+        CreateUI(Serialization.Deserialize());
+    }
+
     public void Update(float _DeltaTime)
     {
         Node.RemoveScheduled();
@@ -106,6 +115,9 @@ public class Engine
 
     public void CreateUI(Action<Node>? _CreateContent)
     {
+        foreach (Node node in m_UIRoot.Children)
+            Node.ScheduleToRemove(node);
+
         Image bg = new Image(
             "bg",
             m_UIRoot,

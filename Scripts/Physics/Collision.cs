@@ -1,7 +1,7 @@
 using System.Numerics;
 using Raylib_cs;
 
-namespace BasicKafana;
+namespace Turnip;
 
 public struct Projection
 {
@@ -122,11 +122,12 @@ public struct Collision
         for (int i = 0; i < _Shape.Points.Length; i++)
         {
             float p = Vector2.Dot(_Shape.Points[i], _Axis);
-            if (p < min) min = p;
-            if (p > max) max = p;
+            if (p < min)
+                min = p;
+            if (p > max)
+                max = p;
         }
 
         return new Projection { Min = min, Max = max };
     }
-
 }

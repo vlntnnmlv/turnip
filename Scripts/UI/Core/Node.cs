@@ -2,7 +2,7 @@ using System.Numerics;
 using System.Runtime.Serialization;
 using Raylib_cs;
 
-namespace BasicKafana;
+namespace Turnip;
 
 public struct EventInfo
 {
@@ -47,8 +47,13 @@ public enum SizeType
     ABSOLUTE = 4,
 }
 
-public class Node : ANode<Node>
+public class Node : ANode<Node>, ISerializable
 {
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        Console.WriteLine($"serializing {GetType()}");
+    }
+
     public Node(string _ID, Node? _Parent = null, Size _Size = new Size(), Color? _Color = null)
         : base(_ID)
     {
@@ -170,11 +175,6 @@ public class Node : ANode<Node>
         }
     }
 
-    public void PlaceInWorld()
-    {
-        WorldRect = Parent == null ? RealRect : RealRect.Move(Parent.WorldRect.Position);
-    }
-
     public void ProcessMouseEvent(MouseEvent _MouseEvent)
     {
         if (!IgnoreEvents)
@@ -248,6 +248,11 @@ public class Node : ANode<Node>
         RealRect = RealRect.Lerp(Rect, God.Instance.UIAnimationRate * _DeltaTime);
 
         PlaceInWorld();
+    }
+
+    void PlaceInWorld()
+    {
+        WorldRect = Parent == null ? RealRect : RealRect.Move(Parent.WorldRect.Position);
     }
 
     public virtual void Draw() { }

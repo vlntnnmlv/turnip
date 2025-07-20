@@ -1,7 +1,7 @@
 using System.Numerics;
 using Raylib_cs;
 
-namespace BasicKafana;
+namespace Turnip;
 
 public static class RectangleExtensions
 {
@@ -32,6 +32,14 @@ public static class RectangleExtensions
     public static Rectangle Expand(this Rectangle _Rectangle, Vector2 _Offset)
     {
         return _Rectangle.Shrink(-_Offset);
+    }
+
+    public static Rectangle Scale(this Rectangle _Rectangle, Vector2 _Scale)
+    {
+        _Rectangle.Width *= _Scale.X;
+        _Rectangle.Height *= _Scale.Y;
+
+        return _Rectangle;
     }
 
     static float Lerp(float _A, float _B, float _Phase)

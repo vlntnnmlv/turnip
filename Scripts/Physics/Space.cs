@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace BasicKafana;
+namespace Turnip;
 
 public struct PhysicsRules
 {
@@ -22,7 +22,7 @@ public class Space(PhysicsRules? _Rules = null)
             Elasticity = 0.9f,
             Gravity = 9.81f,
             Friction = 0.1f,
-            Epsilon = 0.01f
+            Epsilon = 0.01f,
         };
     }
 
@@ -55,15 +55,23 @@ public class Space(PhysicsRules? _Rules = null)
                     newState[i].HadCollisionsThisFrame = true;
 
                     {
-                        float relativeVelocity = Vector2.Dot(newState[i].Velocity - newState[j].Velocity, collision.MTVDirection.Reversed(collision.MTVDirection.X != 0)); //Normal
+                        float relativeVelocity = Vector2.Dot(
+                            newState[i].Velocity - newState[j].Velocity,
+                            collision.MTVDirection.Reversed(collision.MTVDirection.X != 0)
+                        ); //Normal
                         float oneOverMassI = newState[i].IsStatic ? 0 : (1 / newState[i].Mass);
                         float oneOverMassJ = newState[j].IsStatic ? 0 : (1 / newState[j].Mass);
 
-                        float impluseMagnitude = -(1 + m_Rules.Elasticity) * relativeVelocity / (oneOverMassI + oneOverMassJ);
+                        float impluseMagnitude =
+                            -(1 + m_Rules.Elasticity)
+                            * relativeVelocity
+                            / (oneOverMassI + oneOverMassJ);
                         Vector2 impulse = impluseMagnitude * collision.MTVDirection;
 
-                        Vector2 forceI = j == 0 ? impulse.Normalized() * 500000 : impulse / _DeltaTime;
-                        Vector2 forceJ = i == 0 ? -impulse.Normalized() * 500000 : -impulse / _DeltaTime;
+                        Vector2 forceI =
+                            j == 0 ? impulse.Normalized() * 500000 : impulse / _DeltaTime;
+                        Vector2 forceJ =
+                            i == 0 ? -impulse.Normalized() * 500000 : -impulse / _DeltaTime;
 
                         if (!newState[i].IsStatic)
                             newState[i].NetForce += forceI;
@@ -114,12 +122,15 @@ public class Space(PhysicsRules? _Rules = null)
             else if (newState[collision.IndexOther].IsStatic)
                 ratio = 0;
             else
-                ratio = velocityMagnitudeSumm != 0 && collision.IndexOne != 0
-                    ? velocityMagnitudeI / velocityMagnitudeSumm
-                    : 0.5f;
+                ratio =
+                    velocityMagnitudeSumm != 0 && collision.IndexOne != 0
+                        ? velocityMagnitudeI / velocityMagnitudeSumm
+                        : 0.5f;
 
-            newState[collision.IndexOne].Position += collision.MTVMagnitude * collision.MTVDirection * (1 - ratio);
-            newState[collision.IndexOther].Position -= collision.MTVMagnitude * collision.MTVDirection * ratio;
+            newState[collision.IndexOne].Position +=
+                collision.MTVMagnitude * collision.MTVDirection * (1 - ratio);
+            newState[collision.IndexOther].Position -=
+                collision.MTVMagnitude * collision.MTVDirection * ratio;
 
             newState[collision.IndexOne].HP -= 20 * (1 - ratio);
             newState[collision.IndexOther].HP -= 20 * ratio;

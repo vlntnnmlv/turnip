@@ -1,11 +1,8 @@
-using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
-namespace BasicKafana;
+namespace Turnip;
 
 public class SerializeResolver : IJsonTypeInfoResolver
 {
@@ -15,6 +12,8 @@ public class SerializeResolver : IJsonTypeInfoResolver
     {
         if (_Type.IsPrimitive || _Type == typeof(string))
             return m_DefaultResolver.GetTypeInfo(_Type, _Options);
+
+        Console.WriteLine($"{_Type}");
 
         JsonTypeInfo jsonTypeInfo = JsonTypeInfo.CreateJsonTypeInfo(_Type, _Options);
         MemberInfo[] members =

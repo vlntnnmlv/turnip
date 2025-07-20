@@ -1,8 +1,7 @@
-using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace BasicKafana;
+namespace Turnip;
 
 public static class Serialization
 {
@@ -24,7 +23,8 @@ public static class Serialization
             new JsonSerializerOptions
             {
                 WriteIndented = true,
-                TypeInfoResolver = new SerializeResolver(),
+                ReferenceHandler = ReferenceHandler.Preserve,
+                // TypeInfoResolver = new SerializeResolver(),
             }
         );
 

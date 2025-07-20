@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace BasicKafana;
+namespace Turnip;
 
 public enum MouseEventType
 {
