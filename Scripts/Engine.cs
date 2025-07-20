@@ -5,6 +5,7 @@ using Raylib_cs;
 namespace Turnip;
 
 // TODO: Resolve focus and hover - which element should count as focused?
+// TODO: Add node removal mechanism
 // TODO: Add mechanism to bind values to text: actual binding? update actions? ...
 // TODO: Use shaders (optimize? - now it's 60 fps with shader/ 2500 fps without)
 // TODO: Add new layout elements (grid, margin, clipping)
@@ -15,6 +16,7 @@ namespace Turnip;
 // TODO: Refactor serializing, and add loading scenes from .json
 // TODO: Add render modifiers, which don't affect layout calculations
 // TODO: Add text fitting
+// TODO: Figure why Observer pattern can be usefull in UI systems?
 
 public class Engine
 {
