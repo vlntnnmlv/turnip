@@ -36,7 +36,7 @@ public class Engine
         m_Size = new Vector2(_Width, _Height);
 
         m_UIRoot = new Node("root");
-        m_UIRoot.Rect = new Rectangle(Vector2.Zero, m_Size);
+        // m_UIRoot.Rect = new Rectangle(Vector2.Zero, m_Size);
 
         Event.OnMouseEvent += m_UIRoot.ProcessMouseEvent;
     }
@@ -119,6 +119,11 @@ public class Engine
     {
         foreach (Node node in m_UIRoot.Children)
             Node.ScheduleToRemove(node);
+
+        _CreateContent?.Invoke(m_UIRoot);
+        return;
+
+        //  _CreateContent?.Invoke(scenePanel);
 
         Image bg = new Image(
             "bg",

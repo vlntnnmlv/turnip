@@ -330,13 +330,20 @@ class Program
         }
     }
 
+    static void CreateUI3(Node _Root)
+    {
+        _Root.Padding = new LRTB(50);
+
+        new Node("t", _Root);
+    }
+
     // TODO: Figure our wth is this?
     // STAThread is required if you deploy using NativeAOT on Windows - See https://github.com/raylib-cs/raylib-cs/issues/301
     [STAThread]
     public static void Main()
     {
         m_Engine = new Engine(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
-        m_Engine.CreateUI(CreateUI2);
+        m_Engine.CreateUI(CreateUI3);
 
         // m_State = CreateState(NUM_BOXES);
 
