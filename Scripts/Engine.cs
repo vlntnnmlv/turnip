@@ -22,6 +22,7 @@ public class Engine
 {
     Vector2 m_Size;
     Node m_UIRoot;
+
     public Random RNG { get; }
 
     public Engine(int _Width, int _Height, string _Name)
@@ -32,11 +33,12 @@ public class Engine
 
         TryApplyConfig();
 
+        Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
         Raylib.InitWindow(_Width, _Height, _Name);
         m_Size = new Vector2(_Width, _Height);
 
         m_UIRoot = new Node("root");
-        // m_UIRoot.Rect = new Rectangle(Vector2.Zero, m_Size);
+        m_UIRoot.Rect = new Rectangle(Vector2.Zero, m_Size);
 
         Event.OnMouseEvent += m_UIRoot.ProcessMouseEvent;
     }
@@ -118,19 +120,9 @@ public class Engine
     public void CreateUI(Action<Node>? _CreateContent)
     {
         foreach (Node node in m_UIRoot.Children)
-            Node.ScheduleToRemove(node);
+            node.Remove();
 
-        _CreateContent?.Invoke(m_UIRoot);
-        return;
-
-        //  _CreateContent?.Invoke(scenePanel);
-
-        Image bg = new Image(
-            "bg",
-            m_UIRoot,
-            new ImageInfo { Texture = God.Texture },
-            _Color: new Color(109, 146, 88)
-        );
+        Frame bg = new Frame("bg", m_UIRoot);
 
         Stack mainStack = new Stack(
             "main_stack",
@@ -152,27 +144,29 @@ public class Engine
                 AxisY = SizeType.FILL,
             }
         );
+        servicePanel.Padding = new LRTB(16);
 
-        Image servicePanelImg = new Image(
-            "servicePanelImg",
-            servicePanel,
-            new ImageInfo { Texture = Resources.LoadTexture("panel_simple"), Patch = new LRTB(16) }
+        Frame servicePanelImg = new Frame("servicePanelImg", servicePanel);
+        Stack serviceStack = new Stack(
+            "stack",
+            servicePanelImg,
+            Stack.StackType.VERTICAL,
+            Stack.ContentType.CENTER
         );
-
         Text lastMouseEvent = new Text(
             "lastMouseEvent",
-            servicePanel,
-            "",
+            serviceStack,
+            "NONE",
             24,
-            _Color: new Color(17, 39, 5)
+            _Color: Color.Black
         );
 
         Text fps = new Text(
             "fps",
-            servicePanel,
+            serviceStack,
             Raylib.GetFPS().ToString(),
             24,
-            _Color: new Color(17, 39, 5)
+            _Color: Color.Black
         );
 
         Event.OnMouseEvent += (_E) =>

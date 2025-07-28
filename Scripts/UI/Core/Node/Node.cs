@@ -22,26 +22,6 @@ public partial class Node : ANode<Node>
     public Rectangle RealRect;
     public Rectangle WorldRect;
 
-    public bool IsHovered => Hovered == this;
-    public bool IsFocused => Focused == this;
-
-    public static Node? Focused { get; private set; }
-
-    static Node? m_Hovered;
-    public static Node? Hovered
-    {
-        get => m_Hovered;
-        private set
-        {
-            if (m_Hovered?.UID == value?.UID)
-                return;
-
-            m_Hovered?.OnHoverExit();
-            m_Hovered = value;
-            m_Hovered?.OnHoverEnter();
-        }
-    }
-
     public virtual void Update(float _DeltaTime) { }
 
     void PlaceInWorld()

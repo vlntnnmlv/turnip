@@ -10,15 +10,13 @@ public class ANode<T>
         UIDCount++;
     }
 
-    public static long UIDCount = 0;
+    public static ulong UIDCount = 0;
 
     [Serialize]
     public string ID { get; }
 
-    [Serialize]
-    public long UID { get; }
+    public ulong UID { get; }
 
-    [Serialize]
     public List<T> Children { get; } = new();
 
     T? m_Parent;
@@ -35,7 +33,7 @@ public class ANode<T>
 
     public int Order => Parent?.Children.IndexOf((T)this) ?? 0;
 
-    public void Remove()
+    public void RemoveImmediate()
     {
         Children.Clear();
         Parent?.Children.Remove((T)this);

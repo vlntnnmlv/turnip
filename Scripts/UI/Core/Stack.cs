@@ -55,6 +55,7 @@ public class Stack : Node
         }
     }
 
+    // TODO: Aknowldege that children have margin...
     void MeasureVertical()
     {
         int childrenCount = Children.Count;

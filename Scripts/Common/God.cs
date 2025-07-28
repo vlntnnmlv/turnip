@@ -58,18 +58,4 @@ public class God
             return t.Texture;
         }
     }
-
-    static Shader? m_NoiseShader;
-    public static Shader NoiseShader
-    {
-        get
-        {
-            if (m_NoiseShader.HasValue)
-                return m_NoiseShader.Value;
-
-            m_NoiseShader = Raylib.LoadShader(null, "./Resources/Shaders/noise.glsl");
-
-            return m_NoiseShader.Value;
-        }
-    }
 }

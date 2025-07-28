@@ -291,17 +291,17 @@ class Program
             Normal = new ImageInfo
             {
                 Texture = Resources.LoadTexture("button"),
-                Patch = new LRTB(16),
+                Patch = new LRTB(7),
             },
             Pressed = new ImageInfo
             {
                 Texture = Resources.LoadTexture("button_pressed"),
-                Patch = new LRTB(16),
+                Patch = new LRTB(9),
             },
             Hovered = new ImageInfo
             {
                 Texture = Resources.LoadTexture("button_hovered"),
-                Patch = new LRTB(16),
+                Patch = new LRTB(7),
             },
         };
 
@@ -317,14 +317,14 @@ class Program
             for (int j = 0; j < 6; j++)
             {
                 Button btn = new Button($"btn{i}{j}", verical, btnInfo);
-                Text t = new Text($"t{i}{j}", btn, "0", 16);
+                Text t = new Text($"t{i}{j}", btn, "0", 16, _Color: Color.Black);
                 t.IgnoreEvents = true;
 
                 btn.Action = () =>
                 {
                     t.SText = (int.Parse(t.SText) + 1).ToString();
                     if (int.Parse(t.SText) > 3)
-                        Node.ScheduleToRemove(btn);
+                        btn.Remove();
                 };
             }
         }
@@ -334,7 +334,26 @@ class Program
     {
         _Root.Padding = new LRTB(50);
 
-        new Node("t", _Root);
+        ButtonInfo btnInfo = new ButtonInfo
+        {
+            Action = null,
+            Normal = new ImageInfo
+            {
+                Texture = Resources.LoadTexture("button"),
+                Patch = new LRTB(16),
+            },
+            Pressed = new ImageInfo
+            {
+                Texture = Resources.LoadTexture("button_pressed"),
+                Patch = new LRTB(16),
+            },
+            Hovered = new ImageInfo
+            {
+                Texture = Resources.LoadTexture("button_hovered"),
+                Patch = new LRTB(16),
+            },
+        };
+        new Button("t", _Root, btnInfo);
     }
 
     // TODO: Figure our wth is this?
@@ -343,11 +362,7 @@ class Program
     public static void Main()
     {
         m_Engine = new Engine(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
-        m_Engine.CreateUI(CreateUI3);
-
-        // m_State = CreateState(NUM_BOXES);
-
-        // List<Action> lateActions = new();
+        m_Engine.CreateUI(CreateUI2);
 
         while (!Raylib.WindowShouldClose())
         {
@@ -363,18 +378,8 @@ class Program
                 m_Engine.DeserializeUI();
             }
 
-            // lateActions.Clear();
-
-            // m_State = CreateState(NUM_BOXES);
-            // Renderer.DrawState(m_State);
-
             m_Engine.Update(m_DeltaTime);
             m_Engine.Draw();
-
-            // m_State = GetNextState(m_State, Raylib.GetFrameTime());
-
-            // foreach (Action action in lateActions)
-            //     action?.Invoke();
         }
 
         Raylib.CloseWindow();

@@ -67,6 +67,18 @@ public static class RectangleExtensions
             && _Vector.Y < _Rectangle.Y + _Rectangle.Height;
     }
 
+    public static bool ContainsWithin(this Rectangle _Rectangle, Vector2 _Vector, float _Delta)
+    {
+        return _Rectangle
+                .Move(-Vector2.One * _Delta)
+                .Expand(Vector2.One * 2 * _Delta)
+                .Contains(_Vector)
+            && !_Rectangle
+                .Move(Vector2.One * _Delta)
+                .Shrink(Vector2.One * 2 * _Delta)
+                .Contains(_Vector);
+    }
+
     static float LerpEpsilon(float _A, float _B, float _Phase, float _Epsilon)
     {
         if (Math.Abs(_B - _A) > _Epsilon)

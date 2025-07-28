@@ -2,7 +2,28 @@ namespace Turnip;
 
 public partial class Node
 {
+    static List<Node> m_ToRemove = new();
     public bool IgnoreEvents { get; set; }
+
+    public bool IsHovered => Hovered == this;
+    public bool IsFocused => Focused == this;
+
+    public static Node? Focused { get; private set; }
+
+    static Node? m_Hovered;
+    public static Node? Hovered
+    {
+        get => m_Hovered;
+        private set
+        {
+            if (m_Hovered?.UID == value?.UID)
+                return;
+
+            m_Hovered?.OnHoverExit();
+            m_Hovered = value;
+            m_Hovered?.OnHoverEnter();
+        }
+    }
 
     public void ProcessMouseEvent(MouseEvent _MouseEvent)
     {
@@ -15,29 +36,44 @@ public partial class Node
         }
     }
 
-    static List<Node> m_ToRemove = new();
-
-    public static void ScheduleToRemove(Node _Node)
+    public void Remove()
     {
-        m_ToRemove.Add(_Node);
+        m_ToRemove.Add(this);
     }
 
     public static void RemoveScheduled()
     {
         foreach (Node node in m_ToRemove)
         {
-            node.Remove();
+            node.RemoveImmediate();
         }
 
         m_ToRemove.Clear();
     }
 
-    public void OnMouseEvent(MouseEvent _MouseEvent)
+    public virtual void OnHoverEnter() { }
+
+    public virtual void OnHoverExit() { }
+
+    public virtual void OnPress() { }
+
+    public virtual void OnRelease() { }
+
+    public virtual void OnMove() { }
+
+    public virtual void OnDrag() { }
+
+    void OnMouseEvent(MouseEvent _MouseEvent)
     {
         if (WorldRect.Contains(_MouseEvent.Position) && !IsHovered)
         {
             Hovered = this;
         }
+
+        // if (WorldRect.ContainsWithin(_MouseEvent.Position, 5) && !IsHovered)
+        // {
+        //     Hovered = this;
+        // }
 
         switch (_MouseEvent.Type)
         {
@@ -55,16 +91,4 @@ public partial class Node
                 break;
         }
     }
-
-    public virtual void OnHoverEnter() { }
-
-    public virtual void OnHoverExit() { }
-
-    public virtual void OnPress() { }
-
-    public virtual void OnRelease() { }
-
-    public virtual void OnMove() { }
-
-    public virtual void OnDrag() { }
 }
