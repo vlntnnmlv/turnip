@@ -6,6 +6,8 @@ namespace Turnip;
 public class Text : Node
 {
     int m_TextSize = 24;
+
+    [Serialize]
     public string SText = string.Empty;
 
     public Text(

@@ -65,15 +65,10 @@ public partial class Node
 
     void OnMouseEvent(MouseEvent _MouseEvent)
     {
-        if (WorldRect.Contains(_MouseEvent.Position) && !IsHovered)
+        if (WorldRect.Contains(_MouseEvent.Position) && !IsHovered && !IgnoreEvents)
         {
             Hovered = this;
         }
-
-        // if (WorldRect.ContainsWithin(_MouseEvent.Position, 5) && !IsHovered)
-        // {
-        //     Hovered = this;
-        // }
 
         switch (_MouseEvent.Type)
         {

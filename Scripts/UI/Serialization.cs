@@ -41,7 +41,10 @@ public static class Serialization
             data[_N.UID] = SerializeNode(_N);
         });
 
-        string json = JsonSerializer.Serialize(data);
+        string json = JsonSerializer.Serialize(
+            data,
+            new JsonSerializerOptions { WriteIndented = true }
+        );
 
         string filePath = Path.Combine(DIRECTORY_PATH, JSON_PATH);
         File.WriteAllText(filePath, json);
@@ -59,9 +62,11 @@ public static class Serialization
                 .Where(_M => _M.GetCustomAttribute<SerializeAttribute>() != null),
         ];
 
+        data["type"] = _Node.GetType().ToString();
+
         foreach (MemberInfo memberInfo in members)
         {
-            data[memberInfo.Name] = SetializeMember(GetMemberValue(_Node, memberInfo));
+            data[memberInfo.Name] = SerializeMember(GetMemberValue(_Node, memberInfo));
         }
 
         List<ulong> childrenUIDs = new();
@@ -74,7 +79,7 @@ public static class Serialization
         return data;
     }
 
-    static object? SetializeMember(object? _Member) // Dictionary<string, object?>
+    static object? SerializeMember(object? _Member)
     {
         if (_Member == null)
             return null;

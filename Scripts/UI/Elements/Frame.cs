@@ -4,20 +4,17 @@ namespace Turnip;
 
 public class Frame : Node
 {
-    Image m_Frame;
-    Image m_Background;
-
     public Frame(string _ID, Node _Parent, Size _Size = new Size())
         : base(_ID, _Parent, _Size)
     {
-        m_Background = new Image(
+        new Image(
             "background",
             this,
             new ImageInfo { Texture = God.Texture },
             _Color: new Color(240, 250, 255)
         );
 
-        m_Frame = new Image(
+        new Image(
             "frame",
             this,
             new ImageInfo { Texture = Resources.LoadTexture("frame_internal"), Patch = new LRTB(8) }

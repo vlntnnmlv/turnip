@@ -3,12 +3,6 @@ using Raylib_cs;
 
 namespace Turnip;
 
-public static class Globals
-{
-    public const int WINDOW_WIDTH = 1080;
-    public const int WINDOW_HEIGHT = 720;
-}
-
 class Program
 {
     const int WINDOW_WIDTH = 1080;
@@ -361,6 +355,13 @@ class Program
     [STAThread]
     public static void Main()
     {
+        // TODO:
+        //
+        // new engine();
+        //
+        // engine.run()
+        //
+
         m_Engine = new Engine(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
         m_Engine.CreateUI(CreateUI2);
 
