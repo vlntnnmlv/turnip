@@ -19,7 +19,6 @@ public partial class Node
             if (m_Hovered?.UID == value?.UID)
                 return;
 
-            Console.WriteLine($"{m_Hovered?.UID} -> {value?.UID}");
             m_Hovered?.OnHoverExit();
             m_Hovered = value;
             m_Hovered?.OnHoverEnter();
@@ -66,6 +65,11 @@ public partial class Node
 
     void OnMouseEvent(MouseEvent _MouseEvent)
     {
+        if (WorldRect.Contains(_MouseEvent.Position) && !IsHovered && !IgnoreEvents)
+        {
+            Hovered = this;
+        }
+
         switch (_MouseEvent.Type)
         {
             case MouseEventType.PRESSED:
