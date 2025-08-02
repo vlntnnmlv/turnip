@@ -25,30 +25,27 @@ namespace Turnip;
 
 public class Engine
 {
+    const string CONFIG_PATH = ".engine/engineConfig.json";
+
     Vector2 m_Size;
     Node m_UIRoot;
 
-    public Random RNG { get; }
+    public Random? RNG { get; private set; }
 
-    public Engine(int _Width, int _Height, string _Name)
+    public Engine(int _WindowWidth, int _WindowHeight, string _WindowTitle)
     {
-        RNG = new Random();
-        RNG.Next();
-        Raylib.SetRandomSeed((uint)RNG.Next());
+        m_Size = new Vector2(_WindowWidth, _WindowHeight);
 
         TryApplyConfig();
 
-        Raylib.SetConfigFlags(ConfigFlags.ResizableWindow); // | ConfigFlags.HighDpiWindow);
-        Raylib.InitWindow(_Width, _Height, _Name);
-        m_Size = new Vector2(_Width, _Height);
+        CreateWindow(_WindowTitle);
 
-        m_UIRoot = new Node("root");
-        m_UIRoot.Rect = new Rectangle(Vector2.Zero, m_Size);
+        InitUIRoot();
+        if (m_UIRoot == null)
+            throw new NullReferenceException("UI Root failed to initialized");
 
-        Event.OnMouseEvent += m_UIRoot.ProcessMouseEvent;
+        InitRandom();
     }
-
-    const string CONFIG_PATH = ".engine/engineConfig.json";
 
     static void TryApplyConfig()
     {
@@ -64,8 +61,29 @@ public class Engine
         }
         else
         {
-            Console.WriteLine("File not found.");
+            Console.WriteLine($"Engine config file not found at {CONFIG_PATH}");
         }
+    }
+
+    void CreateWindow(string _Title)
+    {
+        Raylib.SetConfigFlags(ConfigFlags.ResizableWindow); // | ConfigFlags.HighDpiWindow);
+        Raylib.InitWindow((int)m_Size.X, (int)m_Size.Y, _Title);
+    }
+
+    void InitUIRoot()
+    {
+        m_UIRoot = new Node("root");
+        m_UIRoot.Rect = new Rectangle(Vector2.Zero, m_Size);
+
+        Event.OnMouseEvent += m_UIRoot.ProcessMouseEvent;
+    }
+
+    void InitRandom()
+    {
+        RNG = new Random();
+        RNG.Next();
+        Raylib.SetRandomSeed((uint)RNG.Next());
     }
 
     public void SerializeUI()

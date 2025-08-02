@@ -238,24 +238,6 @@ class Program
 
         Event.OnMouseEvent += (_I) => ShowEvent(_I.Position, _I.Type.ToString());
 
-        void OnClick()
-        {
-            Node tip = new Image(
-                "tip",
-                _Root,
-                petalInfo,
-                new Size
-                {
-                    AxisX = SizeType.ABSOLUTE,
-                    AxisY = SizeType.ABSOLUTE,
-                    X = WINDOW_WIDTH / 2 - 50,
-                    Y = WINDOW_HEIGHT / 2 - 30,
-                    Width = 100,
-                    Height = 60,
-                }
-            );
-        }
-
         Animation animation = new Animation(
             20,
             (_P) =>
