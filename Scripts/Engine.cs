@@ -5,6 +5,11 @@ using Raylib_cs;
 namespace Turnip;
 
 // TODO: Resolve focus and hover - which element should count as focused?
+
+// TODO: Hover element is recalclated every mouse event.
+//       It changes all the way from the root to the leaf node, because of this state of the pressed buttons is lost.
+//       It shouldnt change until the traversal is finished.
+
 // TODO: Add node removal mechanism
 // TODO: Add mechanism to bind values to text: actual binding? update actions? ...
 // TODO: Use shaders (optimize? - now it's 60 fps with shader/ 2500 fps without)
@@ -33,7 +38,7 @@ public class Engine
 
         TryApplyConfig();
 
-        Raylib.SetConfigFlags(ConfigFlags.ResizableWindow);
+        Raylib.SetConfigFlags(ConfigFlags.ResizableWindow); // | ConfigFlags.HighDpiWindow);
         Raylib.InitWindow(_Width, _Height, _Name);
         m_Size = new Vector2(_Width, _Height);
 
@@ -126,7 +131,7 @@ public class Engine
 
         Stack mainStack = new Stack(
             "main_stack",
-            m_UIRoot,
+            bg,
             Stack.StackType.HORIZONTAL,
             Stack.ContentType.CENTER
         );
@@ -153,6 +158,7 @@ public class Engine
             Stack.StackType.VERTICAL,
             Stack.ContentType.CENTER
         );
+        serviceStack.Padding = new LRTB(0, 0, 50, 50);
         Text lastMouseEvent = new Text(
             "lastMouseEvent",
             serviceStack,
@@ -167,6 +173,20 @@ public class Engine
             Raylib.GetFPS().ToString(),
             24,
             _Color: Color.Black
+        );
+
+        Switch debugUISwitch = new Switch(
+            "debugUISwitch",
+            serviceStack,
+            _V => God.Instance.DebugUI = _V,
+            string.Empty,
+            new Size
+            {
+                AxisX = SizeType.CENTER,
+                AxisY = SizeType.CENTER,
+                Width = 64,
+                Height = 32,
+            }
         );
 
         Event.OnMouseEvent += (_E) =>

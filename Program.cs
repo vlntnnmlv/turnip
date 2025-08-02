@@ -363,7 +363,7 @@ class Program
         //
 
         m_Engine = new Engine(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
-        m_Engine.CreateUI(CreateUI2);
+        m_Engine.CreateUI(CreateUI3);
 
         while (!Raylib.WindowShouldClose())
         {

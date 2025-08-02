@@ -40,18 +40,19 @@ public partial class Node : ANode<Node>
         Vector2 textSize = Raylib.MeasureTextEx(God.Font, ID, fontSize, 0.0f);
 
         if (IsHovered)
+        {
             Raylib.DrawCircle((int)WorldRect.X + 6, (int)WorldRect.Y + 6, 4, Color.Red);
+            Raylib.DrawTextEx(
+                God.Font,
+                $"{UID} : {ID}",
+                WorldRect.Position + new Vector2(5, textSize.Y),
+                fontSize,
+                5,
+                Color.Red
+            );
+        }
 
         if (IsFocused)
             Raylib.DrawCircle((int)WorldRect.X + 12, (int)WorldRect.Y + 6, 4, Color.Blue);
-
-        Raylib.DrawTextEx(
-            God.Font,
-            ID,
-            WorldRect.Position + new Vector2(5, textSize.Y),
-            fontSize,
-            5,
-            Color.Red
-        );
     }
 }
