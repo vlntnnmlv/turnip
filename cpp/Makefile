@@ -1,14 +1,22 @@
 CC := clang++
 SRC := src/*.cpp
+LOCALINCLUDE := include/
 
 LIBDIR := /usr/local/lib/
 
-INCLUDEDIR := /usr/local/include
+LIBINCLUDEDIR := /usr/local/include
 INCLUDE_RAYLIB := /raylib
 INCLUDE_RAYLIB_CPP := /raylib-cpp
 
+
 LIB = -L ${LIBDIR} -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreAudio -framework CoreVideo -framework AudioToolbox
-INCLUDE = -I${INCLUDEDIR}${INCLUDE_RAYLIB} -I${INCLUDEDIR}${INCLUDE_RAYLIB_CPP}
+INCLUDE = -I${LIBINCLUDEDIR}${INCLUDE_RAYLIB} -I${LIBINCLUDEDIR}${INCLUDE_RAYLIB_CPP} -I${LOCALINCLUDE}
 
 all:
-	$(CC) $(SRC) ${LIB} ${INCLUDE} -o turnip 
+	$(CC) $(SRC) ${LIB} ${INCLUDE} -o turnip
+
+debug:
+	$(CC) -g $(SRC) ${LIB} ${INCLUDE} -o turnip
+
+run: all
+	./turnip

@@ -1,17 +1,12 @@
 // Copyright 2025 Valentin Namleev
 
-#include <raylib-cpp.hpp>
 #include "./engine.hpp"
-#include "./node.hpp"
+#include <raylib-cpp.hpp>
 
 int main() {
-    Turnip::Engine engine = Turnip::Engine(800, 450, "Turnip");
-    auto a = Turnip::Node::Create("FFF");
-    auto b = Turnip::Node::Create("Fdd", a);
 
-    engine.Run();
+  turnip::Engine engine = turnip::Engine(640, 480, "Turnip");
+  engine.Run();
 
-    // UnloadTexture() and CloseWindow() are called automatically.
-
-    return 0;
+  return 0;
 }
