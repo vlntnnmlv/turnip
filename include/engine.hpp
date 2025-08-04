@@ -8,6 +8,13 @@
 #include <Vector2.hpp>
 #include <Window.hpp>
 
+#include "./ecs/components/childrenComponent.hpp"
+#include "./ecs/components/layoutComponent.hpp"
+#include "./ecs/components/spriteComponent.hpp"
+#include "./ecs/components/transformComponent.hpp"
+#include "./ecs/registry.hpp"
+#include "./ecs/systems/UISystem.hpp"
+#include "./ecs/systems/renderSystem.hpp"
 #include "./image.hpp"
 #include "./lrtb.hpp"
 #include "./node.hpp"
@@ -21,15 +28,17 @@ public:
     m_Size = {_WindowWidth, _WindowHeight};
 
     InitWindow(_WindowTitle);
+    InitSystems();
     InitUI();
   }
 
   ~Engine() { delete m_Window; }
 
   void Run() {
+    SetTargetFPS(120);
+
     while (!m_Window->ShouldClose()) {
       Update();
-      Render();
     }
   }
 
@@ -41,48 +50,52 @@ private:
         new raylib::Window(m_Size.x, m_Size.y, _WindowTitle, windowFlags);
   }
 
-  void InitUI() {
-    m_UIRoot = turnip::Node::Create("root", nullptr);
-    m_UIRoot->SetRect(Rectangle{0, 0, m_Size.x, m_Size.y});
-    m_UIRoot->SetPadding({15, 15, 15, 15});
+  void InitUI() { CreateRootNode(); }
 
-    auto mainStack =
-        Stack::Create("mainStack", m_UIRoot, Stack::StackType::HORIZONTAL);
-    mainStack->SetSpacing(15);
-    mainStack->SetPadding(LRTB{20, 20, 20, 20});
-
-    Image::Create("img", mainStack,
-                  ImageInfo{LoadTexture("bean.png"), {0, 0, 0, 0}},
-                  turnip::Size{
-                      SizeType::START,
-                      SizeType::FILL,
-                      200,
-                  })
-        ->SetMargin({15, 15, 15, 15});
-
-    // Image::Create("img2", mainStack,
-    //               ImageInfo{LoadTexture("crate.png"), {0, 0, 0, 0}});
-    // Image::Create("img3", mainStack,
-    //               ImageInfo{LoadTexture("turnip.png"), {0, 0, 0, 0}});
+  void InitSystems() {
+    m_UISystem.Init(m_Size);
+    m_RenderSystem.Init(m_Window);
   }
 
   void Update() {
-    m_UIRoot->Traverse([](auto _Node) { _Node->ProcessLayout(); });
+    float deltaTime = GetFrameTime();
+
+    m_UISystem.Update(deltaTime);
+    m_RenderSystem.Update(deltaTime);
   }
 
-  void Render() {
-    BeginDrawing();
-    m_Window->ClearBackground(WHITE);
+  void CreateRootNode() {
+    m_UIRoot = m_Registry.CreateEntity();
 
-    m_UIRoot->Traverse([](auto _Node) { _Node->Render(); });
-    m_UIRoot->Traverse([](auto _Node) { _Node->RenderDebug(); });
+    m_Registry.AddComponent<ecs::TransformComponent>(m_UIRoot);
+    m_Registry.AddComponent<ecs::ChildrenComponent>(m_UIRoot);
+    m_Registry.AddComponent<ecs::LayoutComponent>(
+        m_UIRoot, turnip::Size{SizeType::FILL, SizeType::FILL},
+        LRTB{0, 0, 0, 0}, LRTB{20, 20, 20, 20});
 
-    EndDrawing();
+    auto p = m_Registry.CreateEntity();
+    m_Registry.AddComponent<ecs::TransformComponent>(p);
+    m_Registry.AddComponent<ecs::ParentComponent>(p, m_UIRoot);
+
+    m_Registry.GetComponent<ecs::ChildrenComponent>(m_UIRoot)
+        ->children.push_back(p);
+
+    m_Registry.AddComponent<ecs::LayoutComponent>(
+        p, turnip::Size{SizeType::FILL, SizeType::FILL}, LRTB{0, 0, 0, 0},
+        LRTB{0, 0, 0, 0});
+    m_Registry.AddComponent<ecs::SpriteComponent>(
+        p, LoadTexture("./resources/textures/crate.png"));
   }
 
 private:
   Vector2 m_Size;
   raylib::Window *m_Window;
-  std::shared_ptr<Node> m_UIRoot;
+
+  ecs::EntityID m_UIRoot;
+
+  ecs::Registry m_Registry;
+
+  ecs::UISystem m_UISystem{m_Registry};
+  ecs::RenderSystem m_RenderSystem{m_Registry};
 };
 } // namespace turnip

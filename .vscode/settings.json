@@ -33,7 +33,12 @@
         "locale": "cpp",
         "ratio": "cpp",
         "variant": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "typeindex": "cpp",
+        "__hash_table": "cpp",
+        "array": "cpp",
+        "type_traits": "cpp",
+        "mutex": "cpp"
     },
     "editor.formatOnSave": true,
     "clang-format.executable": "/opt/homebrew/opt/llvm/bin//clang-format"

@@ -1,0 +1,16 @@
+// Copyright 2025 Valentin Namleev
+
+#pragma once
+
+#include "../component.hpp"
+
+#include <Rectangle.hpp>
+
+namespace turnip::ecs {
+struct TransformComponent : IComponent {
+  Rectangle rect;
+  Rectangle worldRect;
+
+  TransformComponent(Rectangle _Rect = Rectangle{0, 0, 0, 0}) : rect(_Rect) {}
+};
+} // namespace turnip::ecs
