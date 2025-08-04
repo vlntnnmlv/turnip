@@ -1,7 +1,22 @@
-all: build run
+CC := clang++
+SRC := src/*.cpp
+LOCALINCLUDE := include/
 
-build:
-	dotnet build
+LIBDIR := /usr/local/lib/
 
-run:
-	./bin/Debug/net8.0/basic
+LIBINCLUDEDIR := /usr/local/include
+INCLUDE_RAYLIB := /raylib
+INCLUDE_RAYLIB_CPP := /raylib-cpp
+
+
+LIB = -L ${LIBDIR} -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreAudio -framework CoreVideo -framework AudioToolbox
+INCLUDE = -I${LIBINCLUDEDIR}${INCLUDE_RAYLIB} -I${LIBINCLUDEDIR}${INCLUDE_RAYLIB_CPP} -I${LOCALINCLUDE}
+
+all:
+	$(CC) --std=c++20 $(SRC) ${LIB} ${INCLUDE} -o turnip
+
+debug:
+	$(CC) -g $(SRC) ${LIB} ${INCLUDE} -o turnip
+
+run: all
+	./turnip
