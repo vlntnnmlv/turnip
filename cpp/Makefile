@@ -13,7 +13,7 @@ LIB = -L ${LIBDIR} -lraylib -framework OpenGL -framework Cocoa -framework IOKit 
 INCLUDE = -I${LIBINCLUDEDIR}${INCLUDE_RAYLIB} -I${LIBINCLUDEDIR}${INCLUDE_RAYLIB_CPP} -I${LOCALINCLUDE}
 
 all:
-	$(CC) $(SRC) ${LIB} ${INCLUDE} -o turnip
+	$(CC) --std=c++20 $(SRC) ${LIB} ${INCLUDE} -o turnip
 
 debug:
 	$(CC) -g $(SRC) ${LIB} ${INCLUDE} -o turnip

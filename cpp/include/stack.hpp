@@ -11,7 +11,7 @@
 namespace turnip {
 class Stack : public Node {
 public:
-  enum StackType { VERTICAL = 0, HORIZINTAL = 1 };
+  enum StackType { VERTICAL = 0, HORIZONTAL = 1 };
   enum ContentType { START = 0, END = 1, CENTER = 2 };
 
   Stack(const std::string &_ID, StackType _Type, ContentType _ContentType,
@@ -67,8 +67,10 @@ private:
         fillChildrenCount += 1;
     }
 
+    Axis orthogonalAxis = (_Axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
+
     for (auto const &child : Children()) {
-      turnip::Size size = child->Size();
+      turnip::Size const &size = child->Size();
       Rectangle childRect = child->Rect();
 
       switch (AxisHelper::GetLayoutSizeType(size, _Axis)) {
@@ -82,8 +84,6 @@ private:
         break;
       }
 
-      Axis orthogonalAxis =
-          (_Axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
       float orthoAvailable =
           AxisHelper::GetRectSize(Rect(), orthogonalAxis) -
           AxisHelper::GetPadding(Padding(), orthogonalAxis, true) -
@@ -106,6 +106,9 @@ private:
   }
 
   void ArrangeAxis(Axis _Axis) {
+    Axis orthogonalAxis =
+          (_Axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
+
     for (auto const &child : Children()) {
       turnip::Size size = child->Size();
       Rectangle childRect = child->Rect();
@@ -142,8 +145,6 @@ private:
 
       AxisHelper::GetRectPosition(childRect, _Axis) = position;
 
-      Axis orthogonalAxis =
-          (_Axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
       float &pos = AxisHelper::GetRectPosition(childRect, orthogonalAxis);
       float orthoSize = AxisHelper::GetRectSize(childRect, orthogonalAxis);
 
@@ -153,19 +154,16 @@ private:
         pos = AxisHelper::GetPadding(Padding(), orthogonalAxis, true) +
               AxisHelper::GetMargin(child->Margin(), orthogonalAxis, true);
         break;
-
       case SizeType::END:
         pos = AxisHelper::GetRectSize(Rect(), orthogonalAxis) -
               AxisHelper::GetPadding(Padding(), orthogonalAxis, false) -
               AxisHelper::GetMargin(child->Margin(), orthogonalAxis, false) -
               orthoSize;
         break;
-
       case SizeType::CENTER:
         pos = AxisHelper::GetRectSize(Rect(), orthogonalAxis) / 2.0f -
               orthoSize / 2.0f;
         break;
-
       case SizeType::ABSOLUTE:
         pos = (orthogonalAxis == Axis::HORIZONTAL) ? size.x : size.y;
         break;

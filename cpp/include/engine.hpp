@@ -47,7 +47,7 @@ private:
     m_UIRoot->SetPadding({15, 15, 15, 15});
 
     auto mainStack =
-        Stack::Create("mainStack", m_UIRoot, Stack::StackType::HORIZINTAL);
+        Stack::Create("mainStack", m_UIRoot, Stack::StackType::HORIZONTAL);
     mainStack->SetSpacing(15);
     mainStack->SetPadding(LRTB{20, 20, 20, 20});
 
