@@ -67,7 +67,8 @@ private:
         fillChildrenCount += 1;
     }
 
-    Axis orthogonalAxis = (_Axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
+    Axis orthogonalAxis =
+        (_Axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
 
     for (auto const &child : Children()) {
       turnip::Size const &size = child->Size();
@@ -107,7 +108,7 @@ private:
 
   void ArrangeAxis(Axis _Axis) {
     Axis orthogonalAxis =
-          (_Axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
+        (_Axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
 
     for (auto const &child : Children()) {
       turnip::Size size = child->Size();
