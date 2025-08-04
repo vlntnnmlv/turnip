@@ -38,7 +38,11 @@
         "__hash_table": "cpp",
         "array": "cpp",
         "type_traits": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "__split_buffer": "cpp",
+        "deque": "cpp",
+        "queue": "cpp",
+        "__bit_reference": "cpp"
     },
     "editor.formatOnSave": true,
     "clang-format.executable": "/opt/homebrew/opt/llvm/bin//clang-format"

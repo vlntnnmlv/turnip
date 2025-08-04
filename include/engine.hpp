@@ -13,10 +13,9 @@
 #include "./ecs/components/spriteComponent.hpp"
 #include "./ecs/components/transformComponent.hpp"
 #include "./ecs/registry.hpp"
-#include "./ecs/systems/UISystem.hpp"
 #include "./ecs/systems/renderSystem.hpp"
+#include "./ecs/systems/uiSystem.hpp"
 #include "./image.hpp"
-#include "./lrtb.hpp"
 #include "./node.hpp"
 #include "./stack.hpp"
 
@@ -73,18 +72,48 @@ private:
         m_UIRoot, turnip::Size{SizeType::FILL, SizeType::FILL},
         LRTB{0, 0, 0, 0}, LRTB{20, 20, 20, 20});
 
-    auto p = m_Registry.CreateEntity();
-    m_Registry.AddComponent<ecs::TransformComponent>(p);
-    m_Registry.AddComponent<ecs::ParentComponent>(p, m_UIRoot);
+    auto stack = CreateStack(m_UIRoot);
 
-    m_Registry.GetComponent<ecs::ChildrenComponent>(m_UIRoot)
-        ->children.push_back(p);
+    CreateImage(stack);
+    CreateImage(stack);
+    CreateImage(stack);
+  }
+
+  ecs::EntityID CreateStack(ecs::EntityID _Parent) {
+    ecs::EntityID stack = m_Registry.CreateEntity();
+
+    m_Registry.AddComponent<ecs::TransformComponent>(stack);
+    m_Registry.AddComponent<ecs::ParentComponent>(stack, _Parent);
+
+    m_Registry.GetComponent<ecs::ChildrenComponent>(_Parent)
+        ->children.push_back(stack);
+
+    m_Registry.AddComponent<ecs::ChildrenComponent>(stack);
+    m_Registry.AddComponent<ecs::LayoutComponent>(
+        stack, turnip::Size{SizeType::FILL, SizeType::FILL}, LRTB{0, 0, 0, 0},
+        LRTB{20, 20, 20, 20});
+    m_Registry.AddComponent<ecs::StackComponent>(
+        stack, ecs::StackType::HORIZONTAL, ecs::StackContentType::CENTER, 10);
+
+    return stack;
+  }
+
+  ecs::EntityID CreateImage(ecs::EntityID _Parent) {
+    ecs::EntityID image = m_Registry.CreateEntity();
+
+    m_Registry.AddComponent<ecs::TransformComponent>(image);
+    m_Registry.AddComponent<ecs::ParentComponent>(image, _Parent);
+
+    m_Registry.GetComponent<ecs::ChildrenComponent>(_Parent)
+        ->children.push_back(image);
 
     m_Registry.AddComponent<ecs::LayoutComponent>(
-        p, turnip::Size{SizeType::FILL, SizeType::FILL}, LRTB{0, 0, 0, 0},
-        LRTB{0, 0, 0, 0});
+        image, turnip::Size{SizeType::FILL, SizeType::FILL}, LRTB{0, 0, 0, 0});
+
     m_Registry.AddComponent<ecs::SpriteComponent>(
-        p, LoadTexture("./resources/textures/crate.png"));
+        image, LoadTexture("./resources/textures/crate.png"));
+
+    return image;
   }
 
 private:
