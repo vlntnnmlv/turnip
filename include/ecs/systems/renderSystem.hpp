@@ -13,10 +13,10 @@
 namespace turnip::ecs {
 class RenderSystem : protected ISystem {
 public:
-    RenderSystem(Registry &_Registry) : ISystem(_Registry) {}
+    RenderSystem(Registry &_Registry, std::unique_ptr<raylib::Window> &_Window)
+        : ISystem(_Registry), m_Window(_Window) {}
 
     void Update(float _DeltaTime) override { Render(); }
-    void Init(raylib::Window *_Window) { m_Window = _Window; }
 
 private:
     void Render() {
@@ -54,6 +54,6 @@ private:
         EndDrawing();
     }
 
-    raylib::Window *m_Window;
+    std::unique_ptr<raylib::Window> &m_Window;
 };
 } // namespace turnip::ecs

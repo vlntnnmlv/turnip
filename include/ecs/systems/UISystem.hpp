@@ -16,10 +16,9 @@
 namespace turnip::ecs {
 class UISystem : protected ISystem {
 public:
-    UISystem(Registry &_Registry) : ISystem(_Registry) {}
+    UISystem(Registry &_Registry, Vector2 _Size) : ISystem(_Registry), m_Size(_Size) {}
 
     void Update(float _DeltaTime) override { ProcessLayout(); }
-    void Init(Vector2 _Size) { m_Size = _Size; }
 
 private:
     Vector2 m_Size;

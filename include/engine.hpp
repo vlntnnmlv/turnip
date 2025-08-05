@@ -22,15 +22,16 @@
 namespace turnip {
 class Engine {
 public:
-    Engine(float _WindowWidth, float _WindowHeight, const std::string &_WindowTitle) {
-        m_Size = {_WindowWidth, _WindowHeight};
+    Engine(float _WindowWidth, float _WindowHeight, const std::string &_WindowTitle)
+        : m_Size{_WindowWidth, _WindowHeight},
+          m_Window(
+              std::make_unique<raylib::Window>(m_Size.x, m_Size.y, _WindowTitle, m_WindowFlags)),
+          m_UISystem(m_Registry, m_Size), m_RenderSystem(m_Registry, m_Window) {
 
-        InitWindow(_WindowTitle);
-        InitSystems();
         InitUI();
     }
 
-    ~Engine() { delete m_Window; }
+    ~Engine() = default;
 
     void Run() {
         SetTargetFPS(120);
@@ -41,17 +42,9 @@ public:
     }
 
 private:
-    void InitWindow(const std::string &_WindowTitle) {
-        unsigned int windowFlags = FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE;
-        m_Window = new raylib::Window(m_Size.x, m_Size.y, _WindowTitle, windowFlags);
-    }
+    unsigned int m_WindowFlags = FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE;
 
     void InitUI() { CreateRootNode(); }
-
-    void InitSystems() {
-        m_UISystem.Init(m_Size);
-        m_RenderSystem.Init(m_Window);
-    }
 
     void Update() {
         float deltaTime = GetFrameTime();
@@ -113,13 +106,13 @@ private:
 
 private:
     Vector2 m_Size;
-    raylib::Window *m_Window;
+    std::unique_ptr<raylib::Window> m_Window;
 
     ecs::EntityID m_UIRoot;
 
     ecs::Registry m_Registry;
 
-    ecs::UISystem m_UISystem{m_Registry};
-    ecs::RenderSystem m_RenderSystem{m_Registry};
+    ecs::UISystem m_UISystem;
+    ecs::RenderSystem m_RenderSystem;
 };
 } // namespace turnip
