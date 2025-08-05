@@ -8,9 +8,9 @@
 
 namespace turnip::ecs {
 struct TransformComponent : IComponent {
-  Rectangle rect;
-  Rectangle worldRect;
+    Rectangle rect;
+    Rectangle worldRect;
 
-  TransformComponent(Rectangle _Rect = Rectangle{0, 0, 0, 0}) : rect(_Rect) {}
+    TransformComponent(Rectangle _Rect = Rectangle{0, 0, 0, 0}) : rect(_Rect) {}
 };
 } // namespace turnip::ecs

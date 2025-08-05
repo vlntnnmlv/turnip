@@ -8,7 +8,7 @@
 
 namespace turnip {
 struct ImageInfo {
-  Texture2D texture;
-  LRTB patch;
+    Texture2D texture;
+    LRTB patch;
 };
 } // namespace turnip

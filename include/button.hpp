@@ -4,8 +4,10 @@
 
 #include "./node.hpp"
 
-namespace turnip {
-class Button : public Node {
+namespace turnip
+{
+class Button : public Node
+{
 public:
 private:
 };

@@ -8,9 +8,8 @@
 
 namespace turnip::ecs {
 struct ChildrenComponent : IComponent {
-  std::vector<EntityID> children;
+    std::vector<EntityID> children;
 
-  ChildrenComponent(std::vector<EntityID> _Children = {})
-      : children(_Children) {}
+    ChildrenComponent(std::vector<EntityID> _Children = {}) : children(_Children) {}
 };
 } // namespace turnip::ecs

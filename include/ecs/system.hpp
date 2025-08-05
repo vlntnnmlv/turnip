@@ -4,11 +4,11 @@
 
 namespace turnip::ecs {
 struct ISystem {
-  ISystem(Registry &_Registry) : m_Registry(_Registry) {}
-  virtual ~ISystem() = default;
-  virtual void Update(float _DeltaTime) {}
+    ISystem(Registry &_Registry) : m_Registry(_Registry) {}
+    virtual ~ISystem() = default;
+    virtual void Update(float _DeltaTime) {}
 
 protected:
-  Registry &m_Registry;
+    Registry &m_Registry;
 };
 } // namespace turnip::ecs

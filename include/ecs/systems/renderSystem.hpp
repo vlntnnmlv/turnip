@@ -13,52 +13,47 @@
 namespace turnip::ecs {
 class RenderSystem : protected ISystem {
 public:
-  RenderSystem(Registry &_Registry) : ISystem(_Registry) {}
+    RenderSystem(Registry &_Registry) : ISystem(_Registry) {}
 
-  void Update(float _DeltaTime) override { Render(); }
-  void Init(raylib::Window *_Window) { m_Window = _Window; }
+    void Update(float _DeltaTime) override { Render(); }
+    void Init(raylib::Window *_Window) { m_Window = _Window; }
 
 private:
-  void Render() {
-    BeginDrawing();
-    m_Window->ClearBackground(raylib::WHITE);
+    void Render() {
+        BeginDrawing();
+        m_Window->ClearBackground(raylib::WHITE);
 
-    std::vector<EntityID> toRender =
-        m_Registry.With<TransformComponent, SpriteComponent>();
+        std::vector<EntityID> toRender = m_Registry.With<TransformComponent, SpriteComponent>();
 
-    for (EntityID e : toRender) {
-      TransformComponent *transformComponent =
-          m_Registry.GetComponent<TransformComponent>(e);
+        for (EntityID e : toRender) {
+            TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(e);
 
-      SpriteComponent *spriteComponent =
-          m_Registry.GetComponent<SpriteComponent>(e);
+            SpriteComponent *spriteComponent = m_Registry.GetComponent<SpriteComponent>(e);
 
-      ColorComponent *colorComponent =
-          m_Registry.GetComponent<ColorComponent>(e);
+            ColorComponent *colorComponent = m_Registry.GetComponent<ColorComponent>(e);
 
-      ::Color color =
-          colorComponent ? colorComponent->color : ::Color{255, 255, 255, 255};
+            ::Color color = colorComponent ? colorComponent->color : ::Color{255, 255, 255, 255};
 
-      NPatchInfo patchInfo = NPatchInfo{
-          Rectangle{0, 0, static_cast<float>(spriteComponent->texture.width),
-                    static_cast<float>(spriteComponent->texture.height)},
-          static_cast<int>(spriteComponent->patch.left),
-          static_cast<int>(spriteComponent->patch.top),
-          static_cast<int>(spriteComponent->patch.right),
-          static_cast<int>(spriteComponent->patch.bottom),
-          NPATCH_NINE_PATCH};
+            NPatchInfo patchInfo =
+                NPatchInfo{Rectangle{0, 0, static_cast<float>(spriteComponent->texture.width),
+                                     static_cast<float>(spriteComponent->texture.height)},
+                           static_cast<int>(spriteComponent->patch.left),
+                           static_cast<int>(spriteComponent->patch.top),
+                           static_cast<int>(spriteComponent->patch.right),
+                           static_cast<int>(spriteComponent->patch.bottom),
+                           NPATCH_NINE_PATCH};
 
-      DrawTextureNPatch(spriteComponent->texture, patchInfo,
-                        transformComponent->worldRect, {0, 0}, 0, color);
+            DrawTextureNPatch(spriteComponent->texture, patchInfo, transformComponent->worldRect,
+                              {0, 0}, 0, color);
+        }
+
+        // ---
+        DrawText(std::to_string(GetFPS()).c_str(), 0, 0, 24, RED);
+        // ---
+
+        EndDrawing();
     }
 
-    // ---
-    DrawText(std::to_string(GetFPS()).c_str(), 0, 0, 24, RED);
-    // ---
-
-    EndDrawing();
-  }
-
-  raylib::Window *m_Window;
+    raylib::Window *m_Window;
 };
 } // namespace turnip::ecs

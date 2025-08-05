@@ -3,8 +3,8 @@
 #include "./engine.hpp"
 
 int main() {
-  turnip::Engine engine = turnip::Engine(640, 480, "Turnip");
-  engine.Run();
+    turnip::Engine engine = turnip::Engine(640, 480, "Turnip");
+    engine.Run();
 
-  return 0;
+    return 0;
 }

@@ -4,6 +4,6 @@
 
 namespace turnip::ecs {
 struct IComponent {
-  virtual ~IComponent() = default;
+    virtual ~IComponent() = default;
 };
 } // namespace turnip::ecs
