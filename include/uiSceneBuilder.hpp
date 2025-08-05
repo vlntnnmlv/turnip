@@ -28,7 +28,7 @@ public:
         }
 
         m_Registry.AddComponent<ecs::TransformComponent>(node);
-        m_Registry.AddComponent<ecs::LayoutComponent>(node, _Size);
+        m_Registry.AddComponent<ecs::LayoutComponent>(node, _Size, _Margin, _Padding);
 
         return node;
     }
@@ -38,8 +38,9 @@ public:
                           _Padding);
     }
 
-    ecs::EntityID CreateImage(ecs::EntityID _Parent, Texture2D _Texture, LRTB _Patch,
-                              Color _Color = {255, 255, 255, 255},
+    ecs::EntityID CreateImage(ecs::EntityID _Parent, raylib::Texture2D &_Texture,
+                              LRTB _Patch = {0, 0, 0, 0},
+                              raylib::Color _Color = {255, 255, 255, 255},
                               Size _Size = Size{SizeType::FILL, SizeType::FILL},
                               LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0}) {
         ecs::EntityID node = CreateNode(_Parent, _Size, _Margin, _Padding);
@@ -50,25 +51,32 @@ public:
         return node;
     }
 
+    ecs::EntityID
+    CreateStack(ecs::EntityID _Parent, ecs::StackType _StackType,
+                ecs::StackContentType _StackContentType = ecs::StackContentType::CENTER,
+                float _Spacing = 0, raylib::Color _Color = {255, 255, 255, 255},
+                Size _Size = Size{SizeType::FILL, SizeType::FILL}, LRTB _Margin = {0, 0, 0, 0},
+                LRTB _Padding = {0, 0, 0, 0}) {
+        ecs::EntityID node = CreateNode(_Parent, _Size, _Margin, _Padding);
+
+        m_Registry.AddComponent<ecs::StackComponent>(node, _StackType, _StackContentType, _Spacing);
+
+        return node;
+    }
+
 private:
     ecs::Registry &m_Registry;
 
     void SetParent(ecs::EntityID _Child, ecs::EntityID _Parent) {
-        std::cout << "C: " << _Child << ", P: " << _Parent << "\n";
-        m_Registry.AddComponent<ecs::ParentComponent>(_Child);
+        m_Registry.AddComponent<ecs::ParentComponent>(_Child, _Parent);
 
         ecs::ChildrenComponent *childrenComponent =
             m_Registry.GetComponent<ecs::ChildrenComponent>(_Parent);
-
-        std::cout << childrenComponent << "\n";
 
         if (!childrenComponent)
             m_Registry.AddComponent<ecs::ChildrenComponent>(_Parent);
 
         childrenComponent = m_Registry.GetComponent<ecs::ChildrenComponent>(_Parent);
-
-        std::cout << childrenComponent << "\n";
-        std::cout << childrenComponent << " " << &childrenComponent->children << "\n";
 
         childrenComponent->children.push_back(_Child);
     }

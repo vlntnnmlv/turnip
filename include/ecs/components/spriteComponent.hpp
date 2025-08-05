@@ -9,10 +9,10 @@
 
 namespace turnip::ecs {
 struct SpriteComponent : IComponent {
-    Texture2D texture;
+    raylib::Texture2D &texture;
     LRTB patch;
 
-    SpriteComponent(Texture2D _Texture, LRTB _Patch = LRTB{0, 0, 0, 0})
+    SpriteComponent(raylib::Texture2D &_Texture, LRTB _Patch = LRTB{0, 0, 0, 0})
         : texture(_Texture), patch(_Patch) {}
 };
 } // namespace turnip::ecs
