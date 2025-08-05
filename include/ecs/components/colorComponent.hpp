@@ -7,7 +7,7 @@
 
 namespace turnip::ecs {
 struct ColorComponent : IComponent {
-    Color color;
+    ::Color color;
 
     ColorComponent(Color _Color = {255, 255, 255, 255}) : color(_Color) {}
 };

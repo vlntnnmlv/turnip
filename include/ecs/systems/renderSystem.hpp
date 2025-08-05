@@ -7,6 +7,7 @@
 #include "../components/transformComponent.hpp"
 #include "../registry.hpp"
 #include "../system.hpp"
+#include <raylib.h>
 
 #include <memory>
 
@@ -17,11 +18,12 @@ public:
         : ISystem(_Registry), m_Window(_Window) {}
 
     void Update(float _DeltaTime) override { Render(); }
+    void SetBackgroundColor(Color _Color) { m_BackgroundColor = _Color; }
 
 private:
     void Render() {
         BeginDrawing();
-        m_Window->ClearBackground(raylib::WHITE);
+        m_Window->ClearBackground(m_BackgroundColor);
 
         std::vector<EntityID> toRender = m_Registry.With<TransformComponent, SpriteComponent>();
 
@@ -32,7 +34,7 @@ private:
 
             ColorComponent *colorComponent = m_Registry.GetComponent<ColorComponent>(e);
 
-            ::Color color = colorComponent ? colorComponent->color : ::Color{255, 255, 255, 255};
+            Color color = colorComponent ? colorComponent->color : Color{255, 255, 255, 255};
 
             NPatchInfo patchInfo =
                 NPatchInfo{Rectangle{0, 0, static_cast<float>(spriteComponent->texture.width),
@@ -54,6 +56,7 @@ private:
         EndDrawing();
     }
 
+    Color m_BackgroundColor;
     std::unique_ptr<raylib::Window> &m_Window;
 };
 } // namespace turnip::ecs
