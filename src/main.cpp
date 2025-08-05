@@ -21,6 +21,9 @@ int main() {
         }
     }
 
+    turnip::ecs::EntityID text =
+        sceneBuilder.CreateText(sceneRoot, "HELLO!", turnip::Resources::GetFont("PlayfairDisplay"));
+
     engine.Run();
 
     return 0;

@@ -31,8 +31,10 @@ private:
         for (auto root : roots) {
 
             auto transform = m_Registry.GetComponent<TransformComponent>(root);
-            transform->rect.width = GetScreenWidth() * GetWindowScaleDPI().x;   // m_Size.x;
-            transform->rect.height = GetScreenHeight() * GetWindowScaleDPI().y; // m_Size.y
+            transform->rect.width = // GetScreenWidth() * GetWindowScaleDPI().x;
+                m_Size.x;
+            transform->rect.height = // GetScreenHeight() * GetWindowScaleDPI().y;
+                m_Size.y;
 
             MeasureEntityContent(root);
             ArrangeEntityContent(root);

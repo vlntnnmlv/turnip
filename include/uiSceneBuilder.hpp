@@ -64,6 +64,18 @@ public:
         return node;
     }
 
+    ecs::EntityID CreateText(ecs::EntityID _Parent, const std::string &_Text, raylib::Font &_Font,
+                             float _FontSize = 24, float _Spacing = 5,
+                             raylib::Color _Color = {255, 255, 255, 255},
+                             Size _Size = Size{SizeType::FILL, SizeType::FILL},
+                             LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0}) {
+        ecs::EntityID node = CreateNode(_Parent, _Size, _Margin, _Padding);
+
+        m_Registry.AddComponent<ecs::TextComponent>(node, _Text, _Font, _FontSize, _Spacing);
+
+        return node;
+    }
+
 private:
     ecs::Registry &m_Registry;
 

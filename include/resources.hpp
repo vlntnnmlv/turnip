@@ -18,7 +18,17 @@ public:
         return *m_Textures[_Name];
     }
 
+    static raylib::Font &GetFont(const std::string &_Name) {
+        if (!m_Fonts.contains(_Name)) {
+            const std::string &pathToTTF = std::format("./resources/fonts/{}.ttf", _Name);
+            m_Fonts[_Name] = std::make_unique<raylib::Font>(pathToTTF);
+        }
+
+        return *m_Fonts[_Name];
+    }
+
 private:
     static std::unordered_map<std::string, std::unique_ptr<raylib::Texture2D>> m_Textures;
+    static std::unordered_map<std::string, std::unique_ptr<raylib::Font>> m_Fonts;
 };
 } // namespace turnip

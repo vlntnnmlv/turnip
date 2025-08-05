@@ -2,12 +2,14 @@
 
 #pragma once
 
+#include "../../rectangleUtils.hpp"
 #include "../components/colorComponent.hpp"
 #include "../components/spriteComponent.hpp"
+#include "../components/textComponent.hpp"
 #include "../components/transformComponent.hpp"
 #include "../registry.hpp"
 #include "../system.hpp"
-#include <raylib.h>
+#include <raylib-cpp.hpp>
 
 #include <memory>
 
@@ -25,13 +27,22 @@ private:
         BeginDrawing();
         m_Window->ClearBackground(m_BackgroundColor);
 
+        RenderSprites();
+        RenderTexts();
+
+        // ---
+        DrawText(std::to_string(GetFPS()).c_str(), 0, 0, 24, RED);
+        // ---
+
+        EndDrawing();
+    }
+
+    void RenderSprites() {
         std::vector<EntityID> toRender = m_Registry.With<TransformComponent, SpriteComponent>();
 
         for (EntityID e : toRender) {
             TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(e);
-
             SpriteComponent *spriteComponent = m_Registry.GetComponent<SpriteComponent>(e);
-
             ColorComponent *colorComponent = m_Registry.GetComponent<ColorComponent>(e);
 
             Color color = colorComponent ? colorComponent->color : Color{255, 255, 255, 255};
@@ -48,12 +59,30 @@ private:
             DrawTextureNPatch(spriteComponent->texture, patchInfo, transformComponent->worldRect,
                               {0, 0}, 0, color);
         }
+    }
 
-        // ---
-        DrawText(std::to_string(GetFPS()).c_str(), 0, 0, 24, RED);
-        // ---
+    void RenderTexts() {
+        std::vector<EntityID> toRender = m_Registry.With<TransformComponent, TextComponent>();
 
-        EndDrawing();
+        for (EntityID e : toRender) {
+            TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(e);
+            TextComponent *textComponent = m_Registry.GetComponent<TextComponent>(e);
+            ColorComponent *colorComponent = m_Registry.GetComponent<ColorComponent>(e);
+
+            Color color = colorComponent ? colorComponent->color : Color{255, 255, 255, 255};
+
+            Vector2 textSize = textComponent->font.MeasureText(
+                textComponent->text.c_str(), textComponent->fontSize,
+                textComponent->spacing); // textComponent->fontSize);
+
+            Vector2 center = RectangleUtils::Center(transformComponent->worldRect);
+
+            Vector2 textPosition =
+                Vector2{center.x - textSize.x * 0.5f, center.y - textSize.y * 0.5f};
+
+            textComponent->font.DrawText(textComponent->text.c_str(), textPosition,
+                                         textComponent->fontSize, textComponent->spacing, color);
+        }
     }
 
     Color m_BackgroundColor;
