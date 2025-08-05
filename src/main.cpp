@@ -4,11 +4,13 @@
 #include "./resources.hpp"
 
 int main() {
-    turnip::Engine engine = turnip::Engine(640, 480, "Turnip");
+    turnip::Engine engine(640, 480, "Turnip");
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
 
     turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene(turnip::LRTB{10, 10, 10, 10});
+    sceneBuilder.CreateImage(sceneRoot, turnip::Resources::GetTexture("turnip"));
+
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
         sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 10);
 
@@ -17,12 +19,13 @@ int main() {
             stackH, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::CENTER, 10);
 
         for (int j = 0; j < 10; ++j) {
-            sceneBuilder.CreateImage(stackV, turnip::Resources::GetTexture("crate"));
+            sceneBuilder.CreateImage(stackV, turnip::Resources::GetTexture("frame_internal"),
+                                     {8, 8, 8, 8});
         }
     }
 
     turnip::ecs::EntityID text = sceneBuilder.CreateText(
-        sceneRoot, "HELLO!", turnip::Resources::GetFont("PlayfairDisplay"), 48, 5, RED);
+        sceneRoot, "HELLO!", turnip::Resources::GetFont("PlayfairDisplay"), 64, 5, WHITE);
 
     engine.Run();
 

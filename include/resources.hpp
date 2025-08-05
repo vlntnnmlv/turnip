@@ -21,7 +21,7 @@ public:
     static raylib::Font &GetFont(const std::string &_Name) {
         if (!m_Fonts.contains(_Name)) {
             const std::string &pathToTTF = std::format("./resources/fonts/{}.ttf", _Name);
-            m_Fonts[_Name] = std::make_unique<raylib::Font>(pathToTTF);
+            m_Fonts[_Name] = std::make_unique<raylib::Font>(pathToTTF, 128);
         }
 
         return *m_Fonts[_Name];
