@@ -72,6 +72,7 @@ public:
         ecs::EntityID node = CreateNode(_Parent, _Size, _Margin, _Padding);
 
         m_Registry.AddComponent<ecs::TextComponent>(node, _Text, _Font, _FontSize, _Spacing);
+        m_Registry.AddComponent<ecs::ColorComponent>(node, _Color);
 
         return node;
     }

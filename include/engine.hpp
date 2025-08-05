@@ -15,9 +15,6 @@
 #include "./ecs/registry.hpp"
 #include "./ecs/systems/renderSystem.hpp"
 #include "./ecs/systems/uiSystem.hpp"
-#include "./image.hpp"
-#include "./node.hpp"
-#include "./stack.hpp"
 #include "./uiSceneBuilder.hpp"
 
 namespace turnip {
