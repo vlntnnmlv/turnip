@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <any>
 #include <cstddef>
 #include <typeindex>
 #include <unordered_map>
@@ -57,11 +58,9 @@ public:
     }
 
     template <typename T0, typename T1, typename... TRest> std::vector<EntityID> With() {
-        // 1) Start from the smallest component map, to minimize loops
         auto &map0 = GetComponentMap<T0>();
         auto &map1 = GetComponentMap<T1>();
 
-        // choose the smaller of map0 and map1 as the “driver”
         auto *driver = &map0;
         std::type_index otherType = typeid(T1);
         if (map1.size() < map0.size()) {
@@ -72,19 +71,15 @@ public:
         std::vector<EntityID> result;
         result.reserve(driver->size());
 
-        // 2) For each entity in the driver, check all other components
         for (auto const &[id, _] : *driver) {
-            // must have the “other” first
             if (!HasComponentByType(id, otherType))
                 continue;
 
-            // then check any remaining TRest...
             if constexpr (sizeof...(TRest) > 0) {
                 if (!(HasComponent<TRest>(id) && ...))
                     continue;
             }
 
-            // finally, check the driver’s own type if it wasn’t the “other”
             if (otherType == typeid(T0) ? !hasComponent<T1>(id) : !hasComponent<T0>(id))
                 continue;
 
