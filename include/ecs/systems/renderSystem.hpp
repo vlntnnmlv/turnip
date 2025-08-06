@@ -10,9 +10,9 @@
 #include "../components/transformComponent.hpp"
 #include "../registry.hpp"
 #include "../system.hpp"
-#include <raylib-cpp.hpp>
 
 #include <memory>
+#include <raylib-cpp.hpp>
 
 namespace turnip::ecs {
 class RenderSystem : protected ISystem {

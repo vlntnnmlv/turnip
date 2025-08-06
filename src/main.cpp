@@ -8,8 +8,7 @@ int main() {
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
     turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
-
-    turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene(turnip::LRTB{10, 10, 10, 10});
+    turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene();
 
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
         sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 0);

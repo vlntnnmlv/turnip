@@ -28,7 +28,7 @@ public:
         : m_Size{_WindowWidth, _WindowHeight},
           m_Window(
               std::make_unique<raylib::Window>(m_Size.x, m_Size.y, _WindowTitle, m_WindowFlags)),
-          m_InputSystem(m_Registry), m_UISystem(m_Registry, m_Size),
+          m_InputSystem(m_Registry, m_EventQueue), m_UISystem(m_Registry, m_EventQueue, m_Size),
           m_RenderSystem(m_Registry, m_Window), m_UISceneBuilder(m_Registry) {
         InitUI();
     }
@@ -70,6 +70,8 @@ private:
     ecs::UISystem m_UISystem;
     ecs::RenderSystem m_RenderSystem;
     ecs::InputSystem m_InputSystem;
+
+    events::EventQueue m_EventQueue;
 
     ecs::EntityID m_UIRoot;
 

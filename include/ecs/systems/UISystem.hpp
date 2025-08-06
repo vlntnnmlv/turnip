@@ -3,6 +3,7 @@
 #pragma once
 
 #include "../../axis.hpp"
+#include "../../events/eventQueue.hpp"
 #include "../../rectangleUtils.hpp"
 #include "../components/layoutComponent.hpp"
 #include "../components/parentComponent.hpp"
@@ -17,15 +18,25 @@
 namespace turnip::ecs {
 class UISystem : protected ISystem {
 public:
-    UISystem(Registry &_Registry, Vector2 _Size)
-        : ISystem(_Registry), m_LayoutEngine(m_Registry), m_Size(_Size) {}
+    UISystem(Registry &_Registry, events::EventQueue &_EventQueue, Vector2 _Size)
+        : ISystem(_Registry), m_LayoutEngine(m_Registry), m_EventQueue(_EventQueue), m_Size(_Size) {
+    }
 
-    void Update(float _DeltaTime) override { ProcessLayout(); }
+    void Update(float _DeltaTime) override {
+        ProcessLayout();
+        PollEvents();
+    }
 
 private:
+    events::EventQueue &m_EventQueue;
     Vector2 m_Size;
     LayoutEngine m_LayoutEngine;
     bool m_WasResized;
+
+    void PollEvents() {
+        while (auto event = m_EventQueue.Pop()) {
+        }
+    }
 
     void ProcessLayout() {
         auto roots = FindRoots();
