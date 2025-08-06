@@ -1,12 +1,12 @@
 // Copyright 2025 Valentin Namleev
 
 #include "./engine.hpp"
-#include "./resources.hpp"
 
 int main() {
     turnip::Engine engine(640, 480, "Turnip");
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
+    turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
 
     turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene(turnip::LRTB{10, 10, 10, 10});
     // sceneBuilder.CreateImage(sceneRoot, turnip::Resources::GetDefaultTexture("turnip"));
@@ -19,12 +19,13 @@ int main() {
             stackH, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::CENTER, 10);
 
         for (int j = 0; j < 10; ++j) {
-            sceneBuilder.CreateImage(stackV, turnip::Resources::GetDefaultTexture());
+            sceneBuilder.CreateImage(stackV, resourcesManager.GetDefaultTexture(), {0, 0, 0, 0},
+                                     BLUE);
         }
     }
 
-    turnip::ecs::EntityID text = sceneBuilder.CreateText(
-        sceneRoot, "HELLO!", turnip::Resources::GetFont("PlayfairDisplay"), 64, 5, WHITE);
+    // turnip::ecs::EntityID text = sceneBuilder.CreateText(
+    //     sceneRoot, "HELLO!", turnip::Resources::GetFont("PlayfairDisplay"), 64, 5, WHITE);
 
     engine.Run();
 

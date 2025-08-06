@@ -15,6 +15,7 @@
 #include "./ecs/registry.hpp"
 #include "./ecs/systems/renderSystem.hpp"
 #include "./ecs/systems/uiSystem.hpp"
+#include "./resourcesManager.hpp"
 #include "./uiSceneBuilder.hpp"
 
 namespace turnip {
@@ -32,6 +33,7 @@ public:
     ~Engine() = default;
 
     UISceneBuilder &UISceneBuilder() { return m_UISceneBuilder; }
+    ResourcesManager &ResourcesManager() { return m_ResourcesManager; }
 
     void Run() {
         SetTargetFPS(120);
@@ -59,12 +61,14 @@ private:
     Vector2 m_Size;
     std::unique_ptr<raylib::Window> m_Window;
 
-    ecs::EntityID m_UIRoot;
-
     ecs::Registry m_Registry;
 
     ecs::UISystem m_UISystem;
     ecs::RenderSystem m_RenderSystem;
+
+    ecs::EntityID m_UIRoot;
+
+    turnip::ResourcesManager m_ResourcesManager;
 
     turnip::UISceneBuilder m_UISceneBuilder;
 };

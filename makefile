@@ -16,7 +16,7 @@ all:
 	$(CC) --std=c++20 $(SRC) ${LIB} ${INCLUDE} -o turnip
 
 debug:
-	$(CC) -g $(SRC) ${LIB} ${INCLUDE} -o turnip
+	$(CC) -g --std=c++20 $(SRC) ${LIB} ${INCLUDE} -o turnip
 
 run: all
 	./turnip
