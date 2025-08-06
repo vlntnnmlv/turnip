@@ -42,7 +42,19 @@
         "__split_buffer": "cpp",
         "deque": "cpp",
         "queue": "cpp",
-        "__bit_reference": "cpp"
+        "__bit_reference": "cpp",
+        "chrono": "cpp",
+        "__node_handle": "cpp",
+        "optional": "cpp",
+        "stack": "cpp",
+        "__threading_support": "cpp",
+        "any": "cpp",
+        "charconv": "cpp",
+        "clocale": "cpp",
+        "complex": "cpp",
+        "cstdarg": "cpp",
+        "execution": "cpp",
+        "sstream": "cpp"
     },
     "editor.formatOnSave": true,
     "clang-format.executable": "/opt/homebrew/opt/llvm/bin//clang-format"

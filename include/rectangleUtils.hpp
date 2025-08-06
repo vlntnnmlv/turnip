@@ -26,4 +26,17 @@ public:
         return _Rect;
     }
 };
+
+inline Rectangle operator+(const raylib::Rectangle a, const raylib::Rectangle b) {
+    return Rectangle(a.x + b.x, a.y + b.y, a.width + b.width, a.height + b.height);
+}
+
+inline Rectangle operator-(const raylib::Rectangle a, const raylib::Rectangle b) {
+    return Rectangle(a.x - b.x, a.y - b.y, a.width - b.width, a.height - b.height);
+}
+
+inline Rectangle operator*(const raylib::Rectangle a, float b) {
+    return Rectangle(a.x * b, a.y * b, a.width * b, a.height * b);
+}
+
 } // namespace turnip

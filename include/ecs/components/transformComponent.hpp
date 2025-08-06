@@ -2,8 +2,8 @@
 
 #pragma once
 
+// #include "../../interpolated/interpolated.hpp"
 #include "../component.hpp"
-
 #include <Rectangle.hpp>
 
 namespace turnip::ecs {

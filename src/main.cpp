@@ -9,7 +9,7 @@ int main() {
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
 
     turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene(turnip::LRTB{10, 10, 10, 10});
-    sceneBuilder.CreateImage(sceneRoot, turnip::Resources::GetTexture("turnip"));
+    // sceneBuilder.CreateImage(sceneRoot, turnip::Resources::GetDefaultTexture("turnip"));
 
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
         sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 10);
@@ -19,8 +19,7 @@ int main() {
             stackH, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::CENTER, 10);
 
         for (int j = 0; j < 10; ++j) {
-            sceneBuilder.CreateImage(stackV, turnip::Resources::GetTexture("frame_internal"),
-                                     {8, 8, 8, 8});
+            sceneBuilder.CreateImage(stackV, turnip::Resources::GetDefaultTexture());
         }
     }
 
