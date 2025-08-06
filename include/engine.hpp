@@ -12,13 +12,13 @@
 #include "./ecs/components/layoutComponent.hpp"
 #include "./ecs/components/spriteComponent.hpp"
 #include "./ecs/components/transformComponent.hpp"
+#include "./ecs/entity.hpp"
 #include "./ecs/registry.hpp"
 #include "./ecs/systems/inputSystem.hpp"
 #include "./ecs/systems/renderSystem.hpp"
 #include "./ecs/systems/uiSystem.hpp"
 #include "./resourcesManager.hpp"
 #include "./uiSceneBuilder.hpp"
-
 // TODO: Add dirtyComponent, to not update every system every frame
 
 namespace turnip {
@@ -37,6 +37,8 @@ public:
 
     UISceneBuilder &UISceneBuilder() { return m_UISceneBuilder; }
     ResourcesManager &ResourcesManager() { return m_ResourcesManager; }
+
+    ecs::Entity CreateEntity() { return ecs::Entity(m_Registry); }
 
     void Run() {
         SetTargetFPS(120);

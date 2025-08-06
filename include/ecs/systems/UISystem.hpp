@@ -5,6 +5,7 @@
 #include "../../axis.hpp"
 #include "../../events/eventQueue.hpp"
 #include "../../rectangleUtils.hpp"
+#include "../components/buttonComponent.hpp"
 #include "../components/hoverComponent.hpp"
 #include "../components/layoutComponent.hpp"
 #include "../components/parentComponent.hpp"
@@ -43,7 +44,9 @@ private:
 
             for (auto root : roots) {
                 EntityID hit = FindEventHit(root, event.value());
-                SetHoveredEntity(hit);
+
+                if (event->type == events::InputEventType::PRESSED)
+                    SetHoveredEntity(hit);
             }
         }
     }
@@ -66,6 +69,14 @@ private:
 
         if (rtc)
             rtc->rectOffset = _Enable ? LRTB{5, 5, 5, 5} : LRTB{0, 0, 0, 0};
+    }
+
+    void TryUseButton(EntityID _EntityID) {
+        ButtonComponent *buttonComponent = m_Registry.GetComponent<ButtonComponent>(_EntityID);
+
+        if (buttonComponent) {
+            buttonComponent->onClick();
+        }
     }
 
     EntityID FindEventHit(EntityID _EntityID, const events::InputEvent &_Event) {

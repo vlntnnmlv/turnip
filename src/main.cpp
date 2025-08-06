@@ -1,6 +1,7 @@
 // Copyright 2025 Valentin Namleev
 
 #include "./colorUtils.hpp"
+#include "./ecs/entity.hpp"
 #include "./engine.hpp"
 
 int main() {
