@@ -1,5 +1,6 @@
 // Copyright 2025 Valentin Namleev
 
+#include "./colorUtils.hpp"
 #include "./engine.hpp"
 
 int main() {
@@ -12,15 +13,17 @@ int main() {
     // sceneBuilder.CreateImage(sceneRoot, turnip::Resources::GetDefaultTexture("turnip"));
 
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
-        sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 10);
+        sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 0);
 
-    for (int i = 0; i < 10; ++i) {
+    int dimension = 100;
+    for (int x = 0; x < dimension; ++x) {
         turnip::ecs::EntityID stackV = sceneBuilder.CreateStack(
-            stackH, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::CENTER, 10);
+            stackH, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::CENTER, 0);
 
-        for (int j = 0; j < 10; ++j) {
-            sceneBuilder.CreateImage(stackV, resourcesManager.GetDefaultTexture(), {0, 0, 0, 0},
-                                     BLUE);
+        for (int y = 0; y < dimension; ++y) {
+            sceneBuilder.CreateImage(
+                stackV, resourcesManager.GetDefaultTexture(), {0, 0, 0, 0},
+                turnip::ColorUtils::GetColorShade((x + y) * (1.0f / (2 * dimension)), RED));
         }
     }
 

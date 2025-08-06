@@ -55,7 +55,7 @@ private:
         m_RenderSystem.Update(deltaTime);
     }
 
-    void CreateRootNode() { m_RenderSystem.SetBackgroundColor(Color{86, 86, 86, 255}); }
+    void CreateRootNode() { m_RenderSystem.SetBackgroundColor(WHITE); }
 
 private:
     Vector2 m_Size;
