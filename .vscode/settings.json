@@ -54,7 +54,8 @@
         "complex": "cpp",
         "cstdarg": "cpp",
         "execution": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "functional": "cpp"
     },
     "editor.formatOnSave": true,
     "clang-format.executable": "/opt/homebrew/opt/llvm/bin//clang-format"
