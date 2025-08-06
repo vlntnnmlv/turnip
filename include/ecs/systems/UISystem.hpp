@@ -5,6 +5,7 @@
 #include "../../axis.hpp"
 #include "../../events/eventQueue.hpp"
 #include "../../rectangleUtils.hpp"
+#include "../components/hoverComponent.hpp"
 #include "../components/layoutComponent.hpp"
 #include "../components/parentComponent.hpp"
 #include "../components/stackComponent.hpp"
@@ -29,13 +30,63 @@ public:
 
 private:
     events::EventQueue &m_EventQueue;
-    Vector2 m_Size;
     LayoutEngine m_LayoutEngine;
+
+    Vector2 m_Size;
     bool m_WasResized;
+
+    EntityID m_HoveredEntity = ecs::NullEntity;
 
     void PollEvents() {
         while (auto event = m_EventQueue.Pop()) {
+            auto roots = FindRoots();
+
+            for (auto root : roots) {
+                EntityID hit = FindEventHit(root, event.value());
+                SetHoveredEntity(hit);
+            }
         }
+    }
+
+    void SetHoveredEntity(EntityID _Entity) {
+        if (m_HoveredEntity == _Entity)
+            return;
+
+        if (m_HoveredEntity != ecs::NullEntity)
+            HoverdEffect(false);
+
+        HoverdEffect(true);
+    }
+
+    void HoverdEffect(bool _Enable) {
+        if (!m_Registry.GetComponent<HoverComponent>(m_HoveredEntity))
+            return;
+        RenderTransformComponent *rtc =
+            m_Registry.GetComponent<RenderTransformComponent>(m_HoveredEntity);
+
+        if (rtc)
+            rtc->rectOffset = _Enable ? LRTB{5, 5, 5, 5} : LRTB{0, 0, 0, 0};
+    }
+
+    EntityID FindEventHit(EntityID _EntityID, const events::InputEvent &_Event) {
+        TransformComponent *transformComponent =
+            m_Registry.GetComponent<TransformComponent>(_EntityID);
+
+        if (!transformComponent || !transformComponent->worldRect.CheckCollision(_Event.position))
+            return ecs::NullEntity;
+
+        ChildrenComponent *childrenComponent =
+            m_Registry.GetComponent<ChildrenComponent>(_EntityID);
+
+        if (childrenComponent) {
+            for (auto const &child : childrenComponent->children) {
+                EntityID hit = FindEventHit(child, _Event);
+                if (hit != ecs::NullEntity)
+                    return hit;
+            }
+        }
+
+        return _EntityID;
     }
 
     void ProcessLayout() {
