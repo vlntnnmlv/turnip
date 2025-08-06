@@ -6,6 +6,7 @@
 #include "./ecs/components/colorComponent.hpp"
 #include "./ecs/components/layoutComponent.hpp"
 #include "./ecs/components/parentComponent.hpp"
+#include "./ecs/components/renderTransformComponent.hpp"
 #include "./ecs/components/spriteComponent.hpp"
 #include "./ecs/components/stackComponent.hpp"
 #include "./ecs/components/transformComponent.hpp"
@@ -29,7 +30,7 @@ public:
 
         m_Registry.AddComponent<ecs::TransformComponent>(node);
         m_Registry.AddComponent<ecs::LayoutComponent>(node, _Size, _Margin, _Padding);
-
+        m_Registry.AddComponent<ecs::RenderTransformComponent>(node);
         return node;
     }
 

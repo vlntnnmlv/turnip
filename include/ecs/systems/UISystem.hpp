@@ -25,16 +25,22 @@ public:
 private:
     Vector2 m_Size;
     LayoutEngine m_LayoutEngine;
+    bool m_WasResized;
 
     void ProcessLayout() {
         auto roots = FindRoots();
-        for (auto root : roots) {
+        m_WasResized |= IsWindowResized();
 
+        for (auto root : roots) {
             auto transform = m_Registry.GetComponent<TransformComponent>(root);
-            transform->rect.width = // GetScreenWidth() * GetWindowScaleDPI().x;
-                m_Size.x;
-            transform->rect.height = // GetScreenHeight() * GetWindowScaleDPI().y;
-                m_Size.y;
+
+            if (!m_WasResized) {
+                transform->rect.width = m_Size.x;
+                transform->rect.height = m_Size.y;
+            } else {
+                transform->rect.width = GetRenderWidth();
+                transform->rect.height = GetRenderHeight();
+            }
 
             MeasureEntityContent(root);
             ArrangeEntityContent(root);

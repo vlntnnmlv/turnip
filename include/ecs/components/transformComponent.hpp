@@ -8,8 +8,8 @@
 
 namespace turnip::ecs {
 struct TransformComponent : IComponent {
-    Rectangle rect;
-    Rectangle worldRect;
+    raylib::Rectangle rect;
+    raylib::Rectangle worldRect;
 
     TransformComponent(Rectangle _Rect = Rectangle{0, 0, 0, 0}) : rect(_Rect) {}
 };

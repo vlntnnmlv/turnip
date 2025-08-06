@@ -13,10 +13,13 @@
 #include "./ecs/components/spriteComponent.hpp"
 #include "./ecs/components/transformComponent.hpp"
 #include "./ecs/registry.hpp"
+#include "./ecs/systems/inputSystem.hpp"
 #include "./ecs/systems/renderSystem.hpp"
 #include "./ecs/systems/uiSystem.hpp"
 #include "./resourcesManager.hpp"
 #include "./uiSceneBuilder.hpp"
+
+// TODO: Add dirtyComponent, to not update every system every frame
 
 namespace turnip {
 class Engine {
@@ -25,8 +28,8 @@ public:
         : m_Size{_WindowWidth, _WindowHeight},
           m_Window(
               std::make_unique<raylib::Window>(m_Size.x, m_Size.y, _WindowTitle, m_WindowFlags)),
-          m_UISystem(m_Registry, m_Size), m_RenderSystem(m_Registry, m_Window),
-          m_UISceneBuilder(m_Registry) {
+          m_InputSystem(m_Registry), m_UISystem(m_Registry, m_Size),
+          m_RenderSystem(m_Registry, m_Window), m_UISceneBuilder(m_Registry) {
         InitUI();
     }
 
@@ -51,6 +54,7 @@ private:
     void Update() {
         float deltaTime = GetFrameTime();
 
+        m_InputSystem.Update(deltaTime);
         m_UISystem.Update(deltaTime);
         m_RenderSystem.Update(deltaTime);
     }
@@ -65,6 +69,7 @@ private:
 
     ecs::UISystem m_UISystem;
     ecs::RenderSystem m_RenderSystem;
+    ecs::InputSystem m_InputSystem;
 
     ecs::EntityID m_UIRoot;
 

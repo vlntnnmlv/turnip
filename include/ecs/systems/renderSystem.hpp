@@ -4,6 +4,7 @@
 
 #include "../../rectangleUtils.hpp"
 #include "../components/colorComponent.hpp"
+#include "../components/renderTransformComponent.hpp"
 #include "../components/spriteComponent.hpp"
 #include "../components/textComponent.hpp"
 #include "../components/transformComponent.hpp"
@@ -56,8 +57,8 @@ private:
                            static_cast<int>(spriteComponent->patch.bottom),
                            NPATCH_NINE_PATCH};
 
-            DrawTextureNPatch(spriteComponent->texture, patchInfo, transformComponent->worldRect,
-                              {0, 0}, 0, color);
+            DrawTextureNPatch(spriteComponent->texture, patchInfo,
+                              GetRenderRect(e, transformComponent), {0, 0}, 0, color);
         }
     }
 
@@ -75,7 +76,8 @@ private:
                 textComponent->text.c_str(), textComponent->fontSize,
                 textComponent->spacing); // textComponent->fontSize);
 
-            Vector2 center = RectangleUtils::Center(transformComponent->worldRect);
+            Rectangle renderRect = GetRenderRect(e, transformComponent);
+            Vector2 center = RectangleUtils::Center(renderRect);
 
             Vector2 textPosition =
                 Vector2{center.x - textSize.x * 0.5f, center.y - textSize.y * 0.5f};
@@ -83,6 +85,19 @@ private:
             textComponent->font.DrawText(textComponent->text.c_str(), textPosition,
                                          textComponent->fontSize, textComponent->spacing, color);
         }
+    }
+
+    Rectangle GetRenderRect(EntityID _EntityID, TransformComponent *_TransformComponent) {
+        RenderTransformComponent *renderTransformComponent =
+            m_Registry.GetComponent<RenderTransformComponent>(_EntityID);
+
+        if (!renderTransformComponent)
+            return _TransformComponent->worldRect;
+
+        Rectangle expandedRect = RectangleUtils::Expand(_TransformComponent->worldRect,
+                                                        renderTransformComponent->rectOffset);
+
+        return RectangleUtils::Move(expandedRect, renderTransformComponent->offset);
     }
 
     Color m_BackgroundColor;

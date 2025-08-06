@@ -6,7 +6,7 @@ namespace turnip::ecs {
 struct ISystem {
     ISystem(Registry &_Registry) : m_Registry(_Registry) {}
     virtual ~ISystem() = default;
-    virtual void Update(float _DeltaTime) {}
+    virtual void Update(float _DeltaTime) = 0;
 
 protected:
     Registry &m_Registry;

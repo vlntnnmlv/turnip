@@ -10,12 +10,11 @@ int main() {
     turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
 
     turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene(turnip::LRTB{10, 10, 10, 10});
-    // sceneBuilder.CreateImage(sceneRoot, turnip::Resources::GetDefaultTexture("turnip"));
 
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
         sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 0);
 
-    int dimension = 100;
+    int dimension = 10;
     for (int x = 0; x < dimension; ++x) {
         turnip::ecs::EntityID stackV = sceneBuilder.CreateStack(
             stackH, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::CENTER, 0);
