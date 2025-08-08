@@ -12,20 +12,20 @@ int main() {
     turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene();
 
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
-        sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 5);
+        sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::END, 5);
 
     turnip::ecs::EntityID panelLeft = sceneBuilder.CreateNode(
-        stackH, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL, 200, 10});
+        stackH, turnip::Size{turnip::SizeType::CENTER, turnip::SizeType::FILL, 150, 10});
 
     turnip::ecs::EntityID panelRight = sceneBuilder.CreateNode(
-        stackH, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL, 200, 10});
+        stackH, turnip::Size{turnip::SizeType::CENTER, turnip::SizeType::FILL, 150, 10});
 
     turnip::ecs::EntityID imgLeft =
-        sceneBuilder.CreateImage(panelLeft, resourcesManager.GetDefaultTexture(), {0, 0, 0, 0},
+        sceneBuilder.CreateImage(panelLeft, resourcesManager.GetFrameTexture(5), {5, 5, 5, 5},
                                  turnip::ColorUtils::GetColorShade(0.6f, RED));
 
     turnip::ecs::EntityID imgRight =
-        sceneBuilder.CreateImage(panelRight, resourcesManager.GetDefaultTexture(), {0, 0, 0, 0},
+        sceneBuilder.CreateImage(panelRight, resourcesManager.GetFrameTexture(5), {5, 5, 5, 5},
                                  turnip::ColorUtils::GetColorShade(0.6f, BLUE));
 
     // int dimension = 10;

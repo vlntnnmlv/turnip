@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <raylib-cpp.hpp>
+#include <string>
 
 namespace turnip::ecs {
 class RenderSystem : protected ISystem {
@@ -57,8 +58,8 @@ private:
                            static_cast<int>(spriteComponent->patch.bottom),
                            NPATCH_NINE_PATCH};
 
-            DrawTextureNPatch(spriteComponent->texture, patchInfo,
-                              GetRenderRect(e, transformComponent), {0, 0}, 0, color);
+            Rectangle renderRect = GetRenderRect(e, transformComponent);
+            DrawTextureNPatch(spriteComponent->texture, patchInfo, renderRect, {0, 0}, 0, color);
         }
     }
 

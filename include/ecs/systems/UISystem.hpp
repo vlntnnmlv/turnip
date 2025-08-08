@@ -45,18 +45,20 @@ private:
             for (auto root : roots) {
                 EntityID hit = FindEventHit(root, event.value());
 
-                if (event->type == events::InputEventType::PRESSED)
+                if (event->type == events::InputEventType::MOVED)
                     SetHoveredEntity(hit);
             }
         }
     }
 
-    void SetHoveredEntity(EntityID _Entity) {
-        if (m_HoveredEntity == _Entity)
+    void SetHoveredEntity(EntityID _EntityID) {
+        if (m_HoveredEntity == _EntityID)
             return;
 
         if (m_HoveredEntity != ecs::NullEntity)
             HoverdEffect(false);
+
+        m_HoveredEntity = _EntityID;
 
         HoverdEffect(true);
     }

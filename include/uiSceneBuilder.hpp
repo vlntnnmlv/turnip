@@ -4,6 +4,7 @@
 
 #include "./ecs/components/childrenComponent.hpp"
 #include "./ecs/components/colorComponent.hpp"
+#include "./ecs/components/hoverComponent.hpp"
 #include "./ecs/components/layoutComponent.hpp"
 #include "./ecs/components/parentComponent.hpp"
 #include "./ecs/components/renderTransformComponent.hpp"
@@ -31,6 +32,7 @@ public:
         m_Registry.AddComponent<ecs::TransformComponent>(node);
         m_Registry.AddComponent<ecs::LayoutComponent>(node, _Size, _Margin, _Padding);
         m_Registry.AddComponent<ecs::RenderTransformComponent>(node);
+        m_Registry.AddComponent<ecs::HoverComponent>(node);
         return node;
     }
 
