@@ -58,7 +58,11 @@ private:
                            static_cast<int>(spriteComponent->patch.bottom),
                            NPATCH_NINE_PATCH};
 
+            // std::cout << "RENDER RECT BEFORE: " << e << "; " << transformComponent->worldRect.x
+            //           << "\n";
             Rectangle renderRect = GetRenderRect(e, transformComponent);
+            // std::cout << "RENDER RECT AFTER: " << e << "; " << renderRect.x << "\n";
+
             DrawTextureNPatch(spriteComponent->texture, patchInfo, renderRect, {0, 0}, 0, color);
         }
     }
@@ -74,8 +78,7 @@ private:
             Color color = colorComponent ? colorComponent->color : Color{255, 255, 255, 255};
 
             Vector2 textSize = textComponent->font.MeasureText(
-                textComponent->text.c_str(), textComponent->fontSize,
-                textComponent->spacing); // textComponent->fontSize);
+                textComponent->text.c_str(), textComponent->fontSize, textComponent->spacing);
 
             Rectangle renderRect = GetRenderRect(e, transformComponent);
             Vector2 center = RectangleUtils::Center(renderRect);
@@ -95,10 +98,14 @@ private:
         if (!renderTransformComponent)
             return _TransformComponent->worldRect;
 
+        // std::cout << "RENDER RECT: " << _EntityID << "; "
+        //           << renderTransformComponent->rectOffset.left << "\n";
+
         Rectangle expandedRect = RectangleUtils::Expand(_TransformComponent->worldRect,
                                                         renderTransformComponent->rectOffset);
 
-        return RectangleUtils::Move(expandedRect, renderTransformComponent->offset);
+        Rectangle movedRect = RectangleUtils::Move(expandedRect, renderTransformComponent->offset);
+        return movedRect;
     }
 
     Color m_BackgroundColor;

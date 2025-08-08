@@ -15,6 +15,8 @@
 #include "../registry.hpp"
 #include "../system.hpp"
 
+#include <optional>
+#include <type_traits>
 #include <unordered_map>
 
 namespace turnip::ecs {
@@ -37,17 +39,41 @@ private:
     bool m_WasResized;
 
     EntityID m_HoveredEntity = ecs::NullEntity;
+    EntityID m_PressedEntity = ecs::NullEntity;
 
     void PollEvents() {
-        while (auto event = m_EventQueue.Pop()) {
+        while (auto optionalEvent = m_EventQueue.Pop()) {
+
+            if (!optionalEvent.has_value())
+                continue;
+
+            events::InputEvent event = optionalEvent.value();
             auto roots = FindRoots();
 
             for (auto root : roots) {
-                EntityID hit = FindEventHit(root, event.value());
-
-                if (event->type == events::InputEventType::MOVED)
-                    SetHoveredEntity(hit);
+                OnMouseEvent(event, root);
             }
+        }
+    }
+
+    void OnMouseEvent(events::InputEvent &_Event, EntityID _UIRootEntityID) {
+        EntityID hit;
+
+        switch (_Event.type) {
+        case events::InputEventType::PRESSED:
+            hit = FindEventHit<ButtonComponent>(_UIRootEntityID, _Event);
+            SetPressedEntity(hit);
+            break;
+        case events::InputEventType::RELEASED:
+            hit = FindEventHit<ButtonComponent>(_UIRootEntityID, _Event);
+            TryUseButton(hit);
+            break;
+        case events::InputEventType::MOVED:
+            hit = FindEventHit<HoverComponent>(_UIRootEntityID, _Event);
+            SetHoveredEntity(hit);
+            break;
+        default:
+            break;
         }
     }
 
@@ -58,14 +84,14 @@ private:
         if (m_HoveredEntity != ecs::NullEntity)
             HoverdEffect(false);
 
-        m_HoveredEntity = _EntityID;
+        if (m_PressedEntity != _EntityID)
+            SetPressedEntity(ecs::NullEntity);
 
+        m_HoveredEntity = _EntityID;
         HoverdEffect(true);
     }
 
     void HoverdEffect(bool _Enable) {
-        if (!m_Registry.GetComponent<HoverComponent>(m_HoveredEntity))
-            return;
         RenderTransformComponent *rtc =
             m_Registry.GetComponent<RenderTransformComponent>(m_HoveredEntity);
 
@@ -73,34 +99,72 @@ private:
             rtc->rectOffset = _Enable ? LRTB{5, 5, 5, 5} : LRTB{0, 0, 0, 0};
     }
 
+    void SetPressedEntity(EntityID _EntityID) {
+        if (m_PressedEntity == _EntityID)
+            return;
+
+        m_PressedEntity = _EntityID;
+    }
+
     void TryUseButton(EntityID _EntityID) {
+        if (_EntityID != m_PressedEntity)
+            return;
+
         ButtonComponent *buttonComponent = m_Registry.GetComponent<ButtonComponent>(_EntityID);
 
         if (buttonComponent) {
             buttonComponent->onClick();
         }
+
+        SetPressedEntity(ecs::NullEntity);
     }
 
+    template <typename TComponent = void>
     EntityID FindEventHit(EntityID _EntityID, const events::InputEvent &_Event) {
-        TransformComponent *transformComponent =
-            m_Registry.GetComponent<TransformComponent>(_EntityID);
+        auto *transform = m_Registry.GetComponent<TransformComponent>(_EntityID);
 
-        if (!transformComponent || !transformComponent->worldRect.CheckCollision(_Event.position))
+        if (!transform || !transform->worldRect.CheckCollision(_Event.position))
             return ecs::NullEntity;
 
-        ChildrenComponent *childrenComponent =
-            m_Registry.GetComponent<ChildrenComponent>(_EntityID);
-
-        if (childrenComponent) {
-            for (auto const &child : childrenComponent->children) {
-                EntityID hit = FindEventHit(child, _Event);
-                if (hit != ecs::NullEntity)
+        if (auto *children = m_Registry.GetComponent<ChildrenComponent>(_EntityID)) {
+            // Reverse order so the *last* child wins.
+            for (auto it = children->children.rbegin(); it != children->children.rend(); ++it) {
+                if (EntityID hit = FindEventHit<TComponent>(*it, _Event); hit != ecs::NullEntity)
                     return hit;
             }
         }
 
-        return _EntityID;
+        if constexpr (std::is_void_v<TComponent>) {
+            // No filter requested → any entity counts.
+            std::cout << "is void!\n";
+            return _EntityID;
+        } else {
+            // Filtered mode → only entities that have TComponent.
+            return m_Registry.GetComponent<TComponent>(_EntityID) ? _EntityID : ecs::NullEntity;
+        }
     }
+
+    // EntityID FindEventHit(EntityID _EntityID, const events::InputEvent &_Event) {
+    //     TransformComponent *transformComponent =
+    //         m_Registry.GetComponent<TransformComponent>(_EntityID);
+
+    //     if (!transformComponent ||
+    //     !transformComponent->worldRect.CheckCollision(_Event.position))
+    //         return ecs::NullEntity;
+
+    //     ChildrenComponent *childrenComponent =
+    //         m_Registry.GetComponent<ChildrenComponent>(_EntityID);
+
+    //     if (childrenComponent) {
+    //         for (auto const &child : childrenComponent->children) {
+    //             EntityID hit = FindEventHit(child, _Event);
+    //             if (hit != ecs::NullEntity)
+    //                 return hit;
+    //         }
+    //     }
+
+    //     return _EntityID;
+    // }
 
     void ProcessLayout() {
         auto roots = FindRoots();

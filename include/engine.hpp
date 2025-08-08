@@ -37,6 +37,7 @@ public:
 
     UISceneBuilder &UISceneBuilder() { return m_UISceneBuilder; }
     ResourcesManager &ResourcesManager() { return m_ResourcesManager; }
+    ecs::Registry &Registry() { return m_Registry; }
 
     ecs::Entity CreateEntity() { return ecs::Entity(m_Registry); }
 

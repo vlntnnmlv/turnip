@@ -32,7 +32,6 @@ public:
         m_Registry.AddComponent<ecs::TransformComponent>(node);
         m_Registry.AddComponent<ecs::LayoutComponent>(node, _Size, _Margin, _Padding);
         m_Registry.AddComponent<ecs::RenderTransformComponent>(node);
-        m_Registry.AddComponent<ecs::HoverComponent>(node);
         return node;
     }
 
@@ -50,6 +49,7 @@ public:
 
         m_Registry.AddComponent<ecs::SpriteComponent>(node, _Texture, _Patch);
         m_Registry.AddComponent<ecs::ColorComponent>(node, _Color);
+        m_Registry.AddComponent<ecs::HoverComponent>(node);
 
         return node;
     }
@@ -76,6 +76,18 @@ public:
 
         m_Registry.AddComponent<ecs::TextComponent>(node, _Text, _Font, _FontSize, _Spacing);
         m_Registry.AddComponent<ecs::ColorComponent>(node, _Color);
+        // m_Registry.AddComponent<ecs::HoverComponent>(node);
+
+        return node;
+    }
+
+    ecs::EntityID CreateButton(ecs::EntityID _Parent, std::function<void()> _OnClick,
+                               raylib::Color _Color = {255, 255, 255, 255},
+                               Size _Size = Size{SizeType::FILL, SizeType::FILL},
+                               LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0}) {
+        ecs::EntityID node = CreateNode(_Parent, _Size, _Margin, _Padding);
+
+        m_Registry.AddComponent<ecs::ButtonComponent>(node, _OnClick);
 
         return node;
     }

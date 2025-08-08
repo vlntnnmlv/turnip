@@ -5,5 +5,7 @@
 #include "../component.hpp"
 
 namespace turnip::ecs {
-struct HoverComponent : IComponent {};
+struct HoverComponent : IComponent {
+    bool hovered;
+};
 } // namespace turnip::ecs

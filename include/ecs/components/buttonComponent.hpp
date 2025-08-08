@@ -8,5 +8,7 @@
 namespace turnip::ecs {
 struct ButtonComponent : IComponent {
     std::function<void()> onClick;
+
+    ButtonComponent(std::function<void()> _OnClick) : onClick(_OnClick) {};
 };
 } // namespace turnip::ecs
