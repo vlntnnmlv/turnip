@@ -103,7 +103,25 @@ private:
         if (m_PressedEntity == _EntityID)
             return;
 
+        if (m_PressedEntity != ecs::NullEntity)
+            PressedEffect(false);
+
         m_PressedEntity = _EntityID;
+        PressedEffect(true);
+    }
+
+    void PressedEffect(bool _Enable) {
+        ButtonComponent *buttonComponent =
+            m_Registry.GetComponent<ButtonComponent>(m_PressedEntity);
+
+        if (!buttonComponent)
+            return;
+
+        RenderTransformComponent *rtc =
+            m_Registry.GetComponent<RenderTransformComponent>(buttonComponent->image);
+
+        if (rtc)
+            rtc->rectOffset = _Enable ? LRTB{-5, -5, -5, -5} : LRTB{0, 0, 0, 0};
     }
 
     void TryUseButton(EntityID _EntityID) {

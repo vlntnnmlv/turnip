@@ -76,18 +76,24 @@ public:
 
         m_Registry.AddComponent<ecs::TextComponent>(node, _Text, _Font, _FontSize, _Spacing);
         m_Registry.AddComponent<ecs::ColorComponent>(node, _Color);
-        // m_Registry.AddComponent<ecs::HoverComponent>(node);
 
         return node;
     }
 
+    // TODO: Think how to make this better!
     ecs::EntityID CreateButton(ecs::EntityID _Parent, std::function<void()> _OnClick,
+                               raylib::Texture2D &_Texture, LRTB _Patch = {0, 0, 0, 0},
                                raylib::Color _Color = {255, 255, 255, 255},
                                Size _Size = Size{SizeType::FILL, SizeType::FILL},
                                LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0}) {
         ecs::EntityID node = CreateNode(_Parent, _Size, _Margin, _Padding);
 
-        m_Registry.AddComponent<ecs::ButtonComponent>(node, _OnClick);
+        ecs::EntityID img = CreateNode(_Parent, _Size, _Margin, _Padding);
+        m_Registry.AddComponent<ecs::SpriteComponent>(img, _Texture, _Patch);
+        m_Registry.AddComponent<ecs::ColorComponent>(img, _Color);
+        m_Registry.AddComponent<ecs::HoverComponent>(img);
+
+        m_Registry.AddComponent<ecs::ButtonComponent>(node, _OnClick, img);
 
         return node;
     }
