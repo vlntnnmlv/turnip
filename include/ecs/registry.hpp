@@ -80,7 +80,7 @@ public:
                     continue;
             }
 
-            if (otherType == typeid(T0) ? !hasComponent<T1>(id) : !hasComponent<T0>(id))
+            if (otherType == typeid(T0) ? !HasComponent<T1>(id) : !HasComponent<T0>(id))
                 continue;
 
             result.push_back(id);
@@ -109,7 +109,7 @@ private:
         return it->second.find(_EntyityID) != it->second.end();
     }
 
-    template <typename T> bool hasComponent(EntityID _EntyityID) {
+    template <typename T> bool HasComponent(EntityID _EntyityID) {
         return GetComponent<T>(_EntyityID) != nullptr;
     }
 
