@@ -1,6 +1,7 @@
 CC := clang++
-SRC := src/*.cpp
-LOCALINCLUDE := include/
+SRC := $(wildcard src/*.cpp) $(wildcard src/ecs/*.cpp) $(wildcard src/events/*.cpp)
+
+LOCALINCLUDE := ./include/
 
 LIBDIR := /usr/local/lib/
 

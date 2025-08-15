@@ -60,6 +60,6 @@ BasicKafana.sln
 .fleet
 .editorconfig
 .DS_Store
-
+.cache
 turnip
 turnip.dSYM
