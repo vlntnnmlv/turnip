@@ -9,7 +9,7 @@
 #include <string>
 
 int main() {
-    turnip::Engine engine(640, 480, "Turnip");
+    turnip::Engine engine(620, 480, "Turnip");
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
     turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();

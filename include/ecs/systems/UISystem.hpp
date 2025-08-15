@@ -23,7 +23,7 @@ namespace turnip::ecs {
 class UISystem : protected ISystem {
 public:
     UISystem(Registry &_Registry, events::EventQueue &_EventQueue, Vector2 _Size)
-        : ISystem(_Registry), m_LayoutEngine(m_Registry), m_EventQueue(_EventQueue), m_Size(_Size) {
+        : ISystem(_Registry), m_EventQueue(_EventQueue), m_LayoutEngine(m_Registry), m_Size(_Size) {
     }
 
     void Update(float _DeltaTime) override {

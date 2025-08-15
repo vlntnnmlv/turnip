@@ -1,23 +1,45 @@
-CC := clang++
-SRC := $(wildcard src/*.cpp) $(wildcard src/ecs/*.cpp) $(wildcard src/events/*.cpp)
+# --- Includes ---
+# Global include directory
+INCLUDEDIR := /usr/local/include
 
-LOCALINCLUDE := ./include/
+# Raylib include directories
+I_RAYLIB := /raylib
+I_RAYLIB_CPP := /raylib-cpp
 
+# Local include directory
+I := ./include/
+
+# Final include flags
+INCLUDE = -I$(INCLUDEDIR)$(I_RAYLIB) -I$(INCLUDEDIR)$(I_RAYLIB_CPP) -I$(I)
+
+# --- Libraries ---
+# Global lib directory
 LIBDIR := /usr/local/lib/
 
-LIBINCLUDEDIR := /usr/local/include
-INCLUDE_RAYLIB := /raylib
-INCLUDE_RAYLIB_CPP := /raylib-cpp
+LIB = -L $(LIBDIR) -lraylib
 
+# --- Frameworks ---
+FRAMEWORKS = -framework OpenGL -framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreAudio -framework CoreVideo -framework AudioToolbox
 
-LIB = -L ${LIBDIR} -lraylib -framework OpenGL -framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreAudio -framework CoreVideo -framework AudioToolbox
-INCLUDE = -I${LIBINCLUDEDIR}${INCLUDE_RAYLIB} -I${LIBINCLUDEDIR}${INCLUDE_RAYLIB_CPP} -I${LOCALINCLUDE}
+CXX = clang++
+CXXFLAGS = --std=c++20 -Wall -MMD -MP
+LDFLAGS = $(INCLUDE) $(LIB) $(FRAMEWORKS)
 
-all:
-	$(CC) --std=c++20 $(SRC) ${LIB} ${INCLUDE} -o turnip
+SRCS = $(wildcard src/*.cpp)
+OBJS = $(SRCS:.cpp=.o)
+DEPS = $(OBJS:.o=.d)
 
-debug:
-	$(CC) -g --std=c++20 $(SRC) ${LIB} ${INCLUDE} -o turnip
+TARGET = turnip
 
-run: all
-	./turnip
+all: $(TARGET)
+
+$(TARGET) : $(OBJS)
+	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
+
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
+
+-include $(DEPS)
+
+clean:
+	rm -f $(OBJS) $(DEPS) $(TARGET)

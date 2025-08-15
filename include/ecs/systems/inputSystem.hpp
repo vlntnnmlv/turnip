@@ -43,9 +43,11 @@ public:
         }
 
         if (isDragging) {
-            m_EventQueue.Push({ecs::NullEntity, events::InputEventType::DRAGGED, mousePosition});
+            m_EventQueue.Push({ecs::NullEntity, events::InputEventType::DRAGGED, mousePosition,
+                               MouseButton::MOUSE_LEFT_BUTTON});
         } else {
-            m_EventQueue.Push({ecs::NullEntity, events::InputEventType::MOVED, mousePosition});
+            m_EventQueue.Push({ecs::NullEntity, events::InputEventType::MOVED, mousePosition,
+                               MouseButton::MOUSE_LEFT_BUTTON});
         }
     }
 

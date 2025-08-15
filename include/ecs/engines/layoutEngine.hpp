@@ -142,9 +142,6 @@ private:
         int fillChildrenCount = 0;
 
         for (auto const &child : _ChildrenComponent->children) {
-            TransformComponent *childTransformComponent =
-                m_Registry.GetComponent<TransformComponent>(child);
-
             LayoutComponent *childLayoutComponent = m_Registry.GetComponent<LayoutComponent>(child);
 
             fillSpace -= AxisHelper::GetMargin(childLayoutComponent->margin, axis, true) +
