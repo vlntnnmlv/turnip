@@ -155,8 +155,10 @@ private:
 
         Axis orthogonalAxis = (axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
 
+        m_AlignedContentSizes[_EntityID] =
+            (_ChildrenComponent->children.size() - 1) * _StackComponent->spacing;
+
         for (auto const &child : _ChildrenComponent->children) {
-            m_AlignedSizes[_EntityID] = 0;
             TransformComponent *childTransformComponent =
                 m_Registry.GetComponent<TransformComponent>(child);
 
@@ -164,12 +166,12 @@ private:
 
             switch (AxisHelper::GetLayoutSizeType(childLayoutComponent->size, axis)) {
             case SizeType::FILL:
-                m_AlignedSizes[_EntityID] +=
+                m_AlignedContentSizes[_EntityID] +=
                     AxisHelper::GetRectSize(childTransformComponent->rect, axis) =
                         fillSpace / fillChildrenCount;
                 break;
             default:
-                m_AlignedSizes[_EntityID] +=
+                m_AlignedContentSizes[_EntityID] +=
                     AxisHelper::GetRectSize(childTransformComponent->rect, axis) =
                         AxisHelper::GetLayoutSize(childLayoutComponent->size, axis);
                 break;
@@ -202,7 +204,21 @@ private:
             (_StackComponent->type == StackType::HORIZONTAL) ? Axis::HORIZONTAL : Axis::VERTICAL;
         Axis orthogonalAxis = (axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
 
-        float currentOffset = AxisHelper::GetPadding(_LayoutComponent->padding, axis, true);
+        float currentOffset;
+        switch (_StackComponent->contentType) {
+        case StackContentType::START:
+            currentOffset = AxisHelper::GetPadding(_LayoutComponent->padding, axis, true);
+            break;
+        case StackContentType::CENTER:
+            currentOffset = AxisHelper::GetRectSize(_TransformComponent->rect, axis) / 2 -
+                            m_AlignedContentSizes[_EntityID] / 2;
+            break;
+        case StackContentType::END:
+            currentOffset = AxisHelper::GetRectSize(_TransformComponent->rect, axis) -
+                            AxisHelper::GetPadding(_LayoutComponent->padding, axis, false) -
+                            m_AlignedContentSizes[_EntityID];
+            break;
+        }
 
         for (size_t i = 0; i < _ChildrenComponent->children.size(); ++i) {
             EntityID child = _ChildrenComponent->children[i];
@@ -245,7 +261,7 @@ private:
         }
     }
 
-    std::unordered_map<EntityID, float> m_AlignedSizes;
+    std::unordered_map<EntityID, float> m_AlignedContentSizes;
     Registry &m_Registry;
 };
 } // namespace turnip::ecs

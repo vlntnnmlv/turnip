@@ -141,7 +141,7 @@ private:
     EntityID FindEventHit(EntityID _EntityID, const events::InputEvent &_Event) {
         auto *transform = m_Registry.GetComponent<TransformComponent>(_EntityID);
 
-        if (!transform || !transform->worldRect.CheckCollision(_Event.position))
+        if (!transform || !transform->worldRect.Rect().CheckCollision(_Event.position))
             return ecs::NullEntity;
 
         if (auto *children = m_Registry.GetComponent<ChildrenComponent>(_EntityID)) {
@@ -161,28 +161,6 @@ private:
             return m_Registry.GetComponent<TComponent>(_EntityID) ? _EntityID : ecs::NullEntity;
         }
     }
-
-    // EntityID FindEventHit(EntityID _EntityID, const events::InputEvent &_Event) {
-    //     TransformComponent *transformComponent =
-    //         m_Registry.GetComponent<TransformComponent>(_EntityID);
-
-    //     if (!transformComponent ||
-    //     !transformComponent->worldRect.CheckCollision(_Event.position))
-    //         return ecs::NullEntity;
-
-    //     ChildrenComponent *childrenComponent =
-    //         m_Registry.GetComponent<ChildrenComponent>(_EntityID);
-
-    //     if (childrenComponent) {
-    //         for (auto const &child : childrenComponent->children) {
-    //             EntityID hit = FindEventHit(child, _Event);
-    //             if (hit != ecs::NullEntity)
-    //                 return hit;
-    //         }
-    //     }
-
-    //     return _EntityID;
-    // }
 
     void ProcessLayout() {
         auto roots = FindRoots();
@@ -245,13 +223,13 @@ private:
             m_Registry.GetComponent<ChildrenComponent>(_EntityID);
 
         if (!parentComponent)
-            transformComponent->worldRect = transformComponent->rect;
+            transformComponent->worldRect.SetRect(transformComponent->rect);
         else {
             TransformComponent *parentTransformComponent =
                 m_Registry.GetComponent<TransformComponent>(parentComponent->parent);
-            transformComponent->worldRect = RectangleUtils::Move(
+            transformComponent->worldRect.SetRect(RectangleUtils::Move(
                 transformComponent->rect, Vector2{parentTransformComponent->worldRect.x,
-                                                  parentTransformComponent->worldRect.y});
+                                                  parentTransformComponent->worldRect.y}));
         }
 
         if (!childrenComponent)

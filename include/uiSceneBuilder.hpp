@@ -86,13 +86,12 @@ public:
                                LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0}) {
         ecs::EntityID node = CreateNode(_Parent, _Size, _Margin, _Padding);
 
-        ecs::EntityID img = CreateNode(_Parent, _Size, _Margin, _Padding);
+        ecs::EntityID img = CreateNode(node);
         m_Registry.AddComponent<ecs::SpriteComponent>(img, _Texture, _Patch);
         m_Registry.AddComponent<ecs::ColorComponent>(img, _Color);
         m_Registry.AddComponent<ecs::HoverComponent>(img);
 
         m_Registry.AddComponent<ecs::ButtonComponent>(node, _OnClick, img);
-
         return node;
     }
 

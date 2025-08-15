@@ -34,6 +34,8 @@ private:
         RenderSprites();
         RenderTexts();
 
+        // RenderDebug();
+
         // ---
         DrawText(std::to_string(GetFPS()).c_str(), 0, 0, 24, RED);
         // ---
@@ -43,6 +45,7 @@ private:
 
     void RenderSprites() {
         std::vector<EntityID> toRender = m_Registry.With<TransformComponent, SpriteComponent>();
+        std::sort(toRender.begin(), toRender.end());
 
         for (EntityID e : toRender) {
             TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(e);
@@ -60,10 +63,7 @@ private:
                            static_cast<int>(spriteComponent->patch.bottom),
                            NPATCH_NINE_PATCH};
 
-            // std::cout << "RENDER RECT BEFORE: " << e << "; " << transformComponent->worldRect.x
-            //           << "\n";
             Rectangle renderRect = GetRenderRect(e, transformComponent);
-            // std::cout << "RENDER RECT AFTER: " << e << "; " << renderRect.x << "\n";
 
             DrawTextureNPatch(spriteComponent->texture, patchInfo, renderRect, {0, 0}, 0, color);
         }
@@ -93,17 +93,23 @@ private:
         }
     }
 
+    void RenderDebug() {
+        std::vector<EntityID> toRender = m_Registry.With<TransformComponent>();
+        for (EntityID e : toRender) {
+            TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(e);
+
+            DrawRectangleLinesEx(GetRenderRect(e, transformComponent), 1, RED);
+        }
+    }
+
     Rectangle GetRenderRect(EntityID _EntityID, TransformComponent *_TransformComponent) {
         RenderTransformComponent *renderTransformComponent =
             m_Registry.GetComponent<RenderTransformComponent>(_EntityID);
 
         if (!renderTransformComponent)
-            return _TransformComponent->worldRect;
+            return _TransformComponent->worldRect.Rect();
 
-        // std::cout << "RENDER RECT: " << _EntityID << "; "
-        //           << renderTransformComponent->rectOffset.left << "\n";
-
-        Rectangle expandedRect = RectangleUtils::Expand(_TransformComponent->worldRect,
+        Rectangle expandedRect = RectangleUtils::Expand(_TransformComponent->worldRect.Rect(),
                                                         renderTransformComponent->rectOffset);
 
         Rectangle movedRect = RectangleUtils::Move(expandedRect, renderTransformComponent->offset);

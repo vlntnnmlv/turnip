@@ -28,28 +28,28 @@ int main() {
     };
 
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
-        sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 5);
+        sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::START, 5);
 
     turnip::ecs::EntityID panelLeft = createPanelWithBg(
         stackH, turnip::Size{turnip::SizeType::START, turnip::SizeType::FILL, 240}, {0, 0, 0, 0},
-        {4, 4, 4, 4}, {70, 84, 109, 126});
+        {4, 4, 4, 4}, {70, 84, 109});
 
     turnip::ecs::EntityID panelRight =
         createPanelWithBg(stackH, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL},
-                          {0, 0, 0, 0}, {4, 4, 4, 4}, {70, 84, 109, 126});
+                          {0, 0, 0, 0}, {4, 4, 4, 4}, {70, 84, 109});
 
     turnip::ecs::EntityID stockbookStack = sceneBuilder.CreateStack(
-        panelLeft, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 2);
+        panelLeft, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::START, 2);
 
     auto createStockBook = [&createPanelWithBg, &sceneBuilder, &resourcesManager](
                                turnip::ecs::EntityID _Parent) -> turnip::ecs::EntityID {
         turnip::ecs::EntityID stockbookRoot =
             createPanelWithBg(_Parent, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL},
-                              {0, 0, 0, 0}, {3, 3, 3, 3}, {87, 100, 122, 126});
+                              {0, 0, 0, 0}, {3, 3, 3, 3}, {87, 100, 122});
 
         turnip::ecs::EntityID stockbook = sceneBuilder.CreateStack(
-            stockbookRoot, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::START,
-            2, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL}, {0, 0, 0, 0},
+            stockbookRoot, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::END, 2,
+            turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL}, {0, 0, 0, 0},
             {2, 2, 2, 2});
 
         return stockbook;
@@ -67,17 +67,17 @@ int main() {
         return bid;
     };
 
-    addToStockBook(stockbookBuy, {0, 255, 0, 126});
-    addToStockBook(stockbookBuy, {0, 255, 0, 126});
-    addToStockBook(stockbookBuy, {0, 255, 0, 126});
-    addToStockBook(stockbookBuy, {0, 255, 0, 126});
+    turnip::ecs::EntityID addBuyBidButton = sceneBuilder.CreateButton(
+        stockbookBuy,
+        [&addToStockBook, &stockbookBuy]() { addToStockBook(stockbookBuy, {0, 255, 0}); },
+        resourcesManager.GetDefaultTexture(), {0, 0, 0, 0}, {185, 142, 167},
+        turnip::Size{turnip::SizeType::FILL, turnip::SizeType::CENTER, 0, 40});
 
-    addToStockBook(stockbookSell, {255, 0, 0, 126});
-    addToStockBook(stockbookSell, {255, 0, 0, 126});
-    addToStockBook(stockbookSell, {255, 0, 0, 126});
-    addToStockBook(stockbookSell, {255, 0, 0, 126});
-    addToStockBook(stockbookSell, {255, 0, 0, 126});
-    addToStockBook(stockbookSell, {255, 0, 0, 126});
+    turnip::ecs::EntityID addSellBidButton = sceneBuilder.CreateButton(
+        stockbookSell,
+        [&addToStockBook, &stockbookSell]() { addToStockBook(stockbookSell, {255, 0, 0}); },
+        resourcesManager.GetDefaultTexture(), {0, 0, 0, 0}, {185, 142, 167},
+        turnip::Size{turnip::SizeType::FILL, turnip::SizeType::CENTER, 0, 40});
 
     engine.Run();
 

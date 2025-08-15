@@ -17,7 +17,7 @@ template <typename T> struct Interpolated {
     /// The transition start timestamp
     float m_StartTime{};
     /// The animation's speed
-    float m_Speed{1.0f};
+    float m_Speed{50.0f};
     /// The transition function to use
     TransitionFunction m_Transition{TransitionFunction::Linear};
 
@@ -27,12 +27,13 @@ template <typename T> struct Interpolated {
     /// Returns stop watch time (should be better compared to UTC timestamps for float precision)
     [[nodiscard]]
     static float GetCurrentTime() {
+        return (float)GetTime();
         // Retrieve current time
-        auto const now = std::chrono::steady_clock::now();
-        auto const duration = now.time_since_epoch();
-        // Convert it to a decimal number of seconds
-        auto const seconds = std::chrono::duration_cast<std::chrono::duration<float>>(duration);
-        return seconds.count();
+        // auto const now = std::chrono::steady_clock::now();
+        // auto const duration = now.time_since_epoch();
+        // // Convert it to a decimal number of seconds
+        // auto const seconds = std::chrono::duration_cast<std::chrono::duration<float>>(duration);
+        // return seconds.count();
     }
 
     /// Returns the number of seconds since the last value change
