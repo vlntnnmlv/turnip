@@ -9,7 +9,7 @@
 #include <string>
 
 int main() {
-    turnip::Engine engine(620, 480, "Turnip");
+    turnip::Engine engine(640, 480, "Turnip");
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
     turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
@@ -18,32 +18,17 @@ int main() {
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
         sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::END, 5);
 
-    int dimension = 10;
-    for (int x = 0; x < dimension; ++x) {
-        turnip::ecs::EntityID stackV = sceneBuilder.CreateStack(
-            stackH, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::CENTER, 5);
+    turnip::ecs::EntityID panelLeft = sceneBuilder.CreateStack(
+        stackH, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 2,
+        turnip::Size{turnip::SizeType::START, turnip::SizeType::FILL, 160, 0});
 
-        for (int y = 0; y < dimension; ++y) {
-            turnip::ecs::EntityID panel = sceneBuilder.CreateNode(
-                stackV, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL}, {0, 0, 0, 0},
-                {0, 0, 0, 0});
+    turnip::ecs::EntityID img = sceneBuilder.CreateImage(
+        panelLeft, resourcesManager.GetDefaultTexture(), {0, 0, 0, 0}, RED);
 
-            turnip::ecs::EntityID text = sceneBuilder.CreateText(
-                panel, "0", resourcesManager.GetFont("PlayfairDisplay"), 32, 5, WHITE);
+    turnip::ecs::EntityID panelRight = sceneBuilder.CreateNode(stackH);
 
-            turnip::ecs::EntityID button = sceneBuilder.CreateButton(
-                panel,
-                [&engine, text]() {
-                    turnip::ecs::TextComponent *textComponent =
-                        engine.Registry().GetComponent<turnip::ecs::TextComponent>(text);
-
-                    textComponent->text =
-                        std::to_string(std::atoi(textComponent->text.c_str()) + 1);
-                },
-                resourcesManager.GetDefaultTexture(), {0, 0, 0, 0},
-                turnip::ColorUtils::GetColorShade(1 - (x + y) * (1.0f / (2 * dimension)), RED));
-        }
-    }
+    turnip::ecs::EntityID img2 = sceneBuilder.CreateImage(
+        panelRight, resourcesManager.GetDefaultTexture(), {0, 0, 0, 0}, BLUE);
 
     // turnip::ecs::EntityID text = sceneBuilder.CreateText(
     //     sceneRoot, "HELLO!", turnip::Resources::GetFont("PlayfairDisplay"), 64, 5, WHITE);
