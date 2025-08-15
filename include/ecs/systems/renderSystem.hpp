@@ -15,6 +15,8 @@
 #include <raylib-cpp.hpp>
 #include <string>
 
+// TODO: Add layering system (order of rendering)
+
 namespace turnip::ecs {
 class RenderSystem : protected ISystem {
 public:

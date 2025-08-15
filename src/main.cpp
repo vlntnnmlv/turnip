@@ -9,29 +9,75 @@
 #include <string>
 
 int main() {
-    turnip::Engine engine(640, 480, "Turnip");
+    turnip::Engine engine(860, 640, "Turnip");
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
     turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
-    turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene();
+    turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene({5, 5, 5, 5});
+
+    auto createPanelWithBg = [&sceneBuilder,
+                              &resourcesManager](turnip::ecs::EntityID _Parent, turnip::Size _Size,
+                                                 turnip::LRTB _Margin, turnip::LRTB _Padding,
+                                                 raylib::Color _Color) -> turnip::ecs::EntityID {
+        turnip::ecs::EntityID panel = sceneBuilder.CreateNode(_Parent, _Size, _Margin, _Padding);
+
+        turnip::ecs::EntityID img = sceneBuilder.CreateImage(
+            panel, resourcesManager.GetDefaultTexture(), {0, 0, 0, 0}, _Color);
+
+        return panel;
+    };
 
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
-        sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::END, 5);
+        sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 5);
 
-    turnip::ecs::EntityID panelLeft = sceneBuilder.CreateStack(
-        stackH, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 2,
-        turnip::Size{turnip::SizeType::START, turnip::SizeType::FILL, 160, 0});
+    turnip::ecs::EntityID panelLeft = createPanelWithBg(
+        stackH, turnip::Size{turnip::SizeType::START, turnip::SizeType::FILL, 240}, {0, 0, 0, 0},
+        {4, 4, 4, 4}, {70, 84, 109, 126});
 
-    turnip::ecs::EntityID img = sceneBuilder.CreateImage(
-        panelLeft, resourcesManager.GetDefaultTexture(), {0, 0, 0, 0}, RED);
+    turnip::ecs::EntityID panelRight =
+        createPanelWithBg(stackH, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL},
+                          {0, 0, 0, 0}, {4, 4, 4, 4}, {70, 84, 109, 126});
 
-    turnip::ecs::EntityID panelRight = sceneBuilder.CreateNode(stackH);
+    turnip::ecs::EntityID stockbookStack = sceneBuilder.CreateStack(
+        panelLeft, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 2);
 
-    turnip::ecs::EntityID img2 = sceneBuilder.CreateImage(
-        panelRight, resourcesManager.GetDefaultTexture(), {0, 0, 0, 0}, BLUE);
+    auto createStockBook = [&createPanelWithBg, &sceneBuilder, &resourcesManager](
+                               turnip::ecs::EntityID _Parent) -> turnip::ecs::EntityID {
+        turnip::ecs::EntityID stockbookRoot =
+            createPanelWithBg(_Parent, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL},
+                              {0, 0, 0, 0}, {3, 3, 3, 3}, {87, 100, 122, 126});
 
-    // turnip::ecs::EntityID text = sceneBuilder.CreateText(
-    //     sceneRoot, "HELLO!", turnip::Resources::GetFont("PlayfairDisplay"), 64, 5, WHITE);
+        turnip::ecs::EntityID stockbook = sceneBuilder.CreateStack(
+            stockbookRoot, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::START,
+            2, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL}, {0, 0, 0, 0},
+            {2, 2, 2, 2});
+
+        return stockbook;
+    };
+
+    turnip::ecs::EntityID stockbookBuy = createStockBook(stockbookStack);
+    turnip::ecs::EntityID stockbookSell = createStockBook(stockbookStack);
+
+    auto addToStockBook = [&createPanelWithBg, &sceneBuilder,
+                           &resourcesManager](turnip::ecs::EntityID _StockBook,
+                                              raylib::Color _Color) -> turnip::ecs::EntityID {
+        turnip::ecs::EntityID bid = createPanelWithBg(
+            _StockBook, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::CENTER, 0, 40},
+            {0, 0, 0, 0}, {3, 3, 3, 3}, _Color);
+        return bid;
+    };
+
+    addToStockBook(stockbookBuy, {0, 255, 0, 126});
+    addToStockBook(stockbookBuy, {0, 255, 0, 126});
+    addToStockBook(stockbookBuy, {0, 255, 0, 126});
+    addToStockBook(stockbookBuy, {0, 255, 0, 126});
+
+    addToStockBook(stockbookSell, {255, 0, 0, 126});
+    addToStockBook(stockbookSell, {255, 0, 0, 126});
+    addToStockBook(stockbookSell, {255, 0, 0, 126});
+    addToStockBook(stockbookSell, {255, 0, 0, 126});
+    addToStockBook(stockbookSell, {255, 0, 0, 126});
+    addToStockBook(stockbookSell, {255, 0, 0, 126});
 
     engine.Run();
 
