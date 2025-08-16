@@ -23,6 +23,16 @@ public:
         : ISystem(_Registry), m_EventQueue(_EventQueue) {}
     ~InputSystem() = default;
     void Update(float _DeltaTime) override {
+        FetchMouseEvents();
+        FetchKeyboardEvents();
+    }
+
+private:
+    raylib::Vector2 m_MousePreviousPosition;
+    events::EventQueue &m_EventQueue;
+    bool m_WasMouseDown;
+
+    void FetchMouseEvents() {
         raylib::Vector2 mousePosition = GetMousePosition();
         bool pressed = IsMouseButtonPressed(MouseButton::MOUSE_LEFT_BUTTON);
         bool released = IsMouseButtonReleased(MouseButton::MOUSE_LEFT_BUTTON);
@@ -51,9 +61,6 @@ public:
         }
     }
 
-private:
-    raylib::Vector2 m_MousePreviousPosition;
-    events::EventQueue &m_EventQueue;
-    bool m_WasMouseDown;
+    void FetchKeyboardEvents() {}
 };
 }

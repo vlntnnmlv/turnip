@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include <algorithm>
+#include <limits>
+
 #include "../../axis.hpp"
 #include "../components/childrenComponent.hpp"
 #include "../components/layoutComponent.hpp"
@@ -59,6 +62,18 @@ public:
     }
 
 private:
+    float GetRealSize(Size _Size, Axis _Axis) {
+        std::optional<float> minSize = AxisHelper::GetLayoutConstraintSize(_Size, _Axis, true);
+
+        std::optional<float> maxSize = AxisHelper::GetLayoutConstraintSize(_Size, _Axis, false);
+
+        float size = std::clamp(
+            AxisHelper::GetLayoutSize(_Size, _Axis), minSize.has_value() ? minSize.value() : 0,
+            maxSize.has_value() ? maxSize.value() : std::numeric_limits<float>::max());
+
+        return size;
+    }
+
     void MeasureNodeContent(EntityID _EntityID, ChildrenComponent *_ChildrenComponent,
                             TransformComponent *_TransformComponent,
                             LayoutComponent *_LayoutComponent) {
@@ -79,12 +94,9 @@ private:
                 case turnip::SizeType::FILL:
                     AxisHelper::GetRectSize(childTransformComponent->rect, axis) = availableSpace;
                     break;
-                case turnip::SizeType::START:
-                case turnip::SizeType::END:
-                case turnip::SizeType::CENTER:
-                case turnip::SizeType::ABSOLUTE:
+                default:
                     AxisHelper::GetRectSize(childTransformComponent->rect, axis) =
-                        AxisHelper::GetLayoutSize(childLayoutComponent->size, axis);
+                        GetRealSize(childLayoutComponent->size, axis);
                     break;
                 }
             }
@@ -173,7 +185,7 @@ private:
             default:
                 m_AlignedContentSizes[_EntityID] +=
                     AxisHelper::GetRectSize(childTransformComponent->rect, axis) =
-                        AxisHelper::GetLayoutSize(childLayoutComponent->size, axis);
+                        GetRealSize(childLayoutComponent->size, axis);
                 break;
             }
 

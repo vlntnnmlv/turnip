@@ -17,9 +17,9 @@ template <typename T> struct Interpolated {
     /// The transition start timestamp
     float m_StartTime{};
     /// The animation's speed
-    float m_Speed{50.0f};
+    float m_Speed{30.0f};
     /// The transition function to use
-    TransitionFunction m_Transition{TransitionFunction::Linear};
+    TransitionFunction m_Transition{TransitionFunction::EaseInBack};
 
     /// Initializes the value with @p initial_value
     explicit Interpolated(T const &_InitialValue = {}) : m_Start{_InitialValue}, m_End{m_Start} {}

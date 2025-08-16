@@ -62,8 +62,8 @@ int main() {
                            &resourcesManager](turnip::ecs::EntityID _StockBook,
                                               raylib::Color _Color) -> turnip::ecs::EntityID {
         turnip::ecs::EntityID bid = createPanelWithBg(
-            _StockBook, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::CENTER, 0, 40},
-            {0, 0, 0, 0}, {3, 3, 3, 3}, _Color);
+            _StockBook, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL}, {0, 0, 0, 0},
+            {0, 0, 0, 0}, _Color);
         return bid;
     };
 

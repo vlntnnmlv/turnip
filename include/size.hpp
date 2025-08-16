@@ -3,6 +3,7 @@
 #pragma once
 
 #include "./sizeType.hpp"
+#include <optional>
 
 namespace turnip {
 struct Size {
@@ -12,5 +13,9 @@ struct Size {
     float height;
     float x;
     float y;
+    std::optional<float> minWidth;
+    std::optional<float> minHeight;
+    std::optional<float> maxHeight;
+    std::optional<float> maxWidth;
 };
 } // namespace turnip
