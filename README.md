@@ -1,4 +1,4 @@
-![Turnip](Resources/Textures/turnip.png)
+![Turnip](resources/textures/turnip.png)
 
 # Turnip
 
