@@ -40,7 +40,7 @@ int main() {
                           {0, 0, 0, 0}, {4, 4, 4, 4}, {70, 84, 109});
 
     sceneBuilder.CreateText(panelRight, "Coming soon", resourcesManager.GetFont("martian_mono"), 48,
-                            5, {169, 177, 187});
+                            5, {218, 221, 226});
 
     turnip::ecs::EntityID stockbookStack = sceneBuilder.CreateStack(
         panelLeft, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::START, 2);
@@ -78,7 +78,7 @@ int main() {
     engine.AddUpdateStep([&addToStockBook, &stockbookSell](float _DeltaTime) {
         time += _DeltaTime;
         if (time > 2) {
-            addToStockBook(stockbookSell, {242, 84, 91}, {84, 242, 235});
+            addToStockBook(stockbookSell, {102, 114, 134}, {218, 221, 226});
             time = 0;
         }
     });
@@ -87,7 +87,7 @@ int main() {
     engine.AddUpdateStep([&addToStockBook, &stockbookBuy](float _DeltaTime) {
         time2 += _DeltaTime;
         if (time2 > 3) {
-            addToStockBook(stockbookBuy, {80, 114, 60}, {94, 60, 114});
+            addToStockBook(stockbookBuy, {102, 114, 134}, {218, 221, 226});
             time2 = 0;
         }
     });

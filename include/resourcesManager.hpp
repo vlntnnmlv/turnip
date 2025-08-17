@@ -53,6 +53,7 @@ public:
         if (!m_Fonts.contains(_Name)) {
             const std::string &pathToTTF = std::format("./resources/fonts/{}.ttf", _Name);
             m_Fonts[_Name] = std::make_unique<raylib::Font>(pathToTTF, 128);
+            SetTextureFilter(m_Fonts[_Name]->texture, TextureFilter::TEXTURE_FILTER_BILINEAR);
         }
 
         return *m_Fonts[_Name];
@@ -71,7 +72,7 @@ private:
         BeginTextureMode(t);
         DrawPixel(0, 0, WHITE);
         EndTextureMode();
-        SetTextureFilter(t.texture, TextureFilter::TEXTURE_FILTER_POINT);
+        SetTextureFilter(t.texture, TextureFilter::TEXTURE_FILTER_BILINEAR);
 
         // TODO:
         // Loading RednerTexture2D with raylib-cpp gives a Raylib warning:
@@ -140,7 +141,7 @@ private:
         }
         EndTextureMode();
 
-        SetTextureFilter(t.texture, TextureFilter::TEXTURE_FILTER_POINT);
+        SetTextureFilter(t.texture, TextureFilter::TEXTURE_FILTER_BILINEAR);
         m_FrameTextures[_Thickness] = std::make_unique<raylib::Texture2D>(t.texture);
     }
 };
