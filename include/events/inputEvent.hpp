@@ -7,7 +7,7 @@
 #include <Vector2.hpp>
 
 namespace turnip::events {
-enum InputEventType { PRESSED = 0, RELEASED = 1, MOVED = 2, DRAGGED = 3 };
+enum class InputEventType { PRESSED = 0, RELEASED = 1, MOVED = 2, DRAGGED = 3 };
 
 struct InputEvent {
     ecs::EntityID target;

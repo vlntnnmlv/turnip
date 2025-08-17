@@ -6,6 +6,7 @@
 #include "./ecs/entity.hpp"
 #include "./engine.hpp"
 
+#include <map>
 #include <string>
 
 int main() {
@@ -70,7 +71,7 @@ int main() {
     turnip::ecs::EntityID addBuyBidButton = sceneBuilder.CreateButton(
         stockbookBuy,
         [&addToStockBook, &stockbookBuy]() { addToStockBook(stockbookBuy, {0, 255, 0}); },
-        resourcesManager.GetDefaultTexture(), {0, 0, 0, 0}, {185, 142, 167},
+        resourcesManager.GetSmoothCornerTexture(8), {8, 8, 8, 8}, {185, 142, 167},
         turnip::Size{turnip::SizeType::FILL, turnip::SizeType::CENTER, 0, 40});
 
     turnip::ecs::EntityID addSellBidButton = sceneBuilder.CreateButton(

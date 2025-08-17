@@ -6,16 +6,17 @@
 
 namespace turnip::ecs {
 
-enum StackType { HORIZONTAL = 0, VERTICAL = 1 };
+enum class StackType { HORIZONTAL = 0, VERTICAL = 1 };
 
-enum StackContentType { START = 0, END = 1, CENTER = 2 };
+enum class StackContentType { START = 0, END = 1, CENTER = 2 };
 
 struct StackComponent : IComponent {
     StackType type;
     StackContentType contentType;
     float spacing;
 
-    StackComponent(StackType _Type, StackContentType _ContentType = CENTER, float _Spacing = 0)
+    StackComponent(StackType _Type, StackContentType _ContentType = StackContentType::CENTER,
+                   float _Spacing = 0)
         : type(_Type), contentType(_ContentType), spacing(_Spacing) {}
 };
 } // namespace turnip::ecs

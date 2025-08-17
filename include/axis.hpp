@@ -8,7 +8,7 @@
 #include "./size.hpp"
 
 namespace turnip {
-enum Axis { HORIZONTAL = 0, VERTICAL = 1 };
+enum class Axis { HORIZONTAL = 0, VERTICAL = 1 };
 
 struct AxisHelper {
     static float &GetRectPosition(Rectangle &_Rect, Axis _Axis) {
