@@ -2,6 +2,6 @@
 
 # Turnip
 
-C# Game engine built above Raylib!
+C++ Game engine built above Raylib!
 
 **WORK IN PROGRESS**
