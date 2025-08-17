@@ -12,13 +12,16 @@
 #include "./ecs/components/layoutComponent.hpp"
 #include "./ecs/components/spriteComponent.hpp"
 #include "./ecs/components/transformComponent.hpp"
+#include "./ecs/components/updateComponent.hpp"
 #include "./ecs/entity.hpp"
 #include "./ecs/registry.hpp"
 #include "./ecs/systems/inputSystem.hpp"
 #include "./ecs/systems/renderSystem.hpp"
 #include "./ecs/systems/uiSystem.hpp"
+#include "./ecs/systems/updateSystem.hpp"
 #include "./resourcesManager.hpp"
 #include "./uiSceneBuilder.hpp"
+
 // TODO: Add dirtyComponent, to not update every system every frame
 
 namespace turnip {
@@ -29,7 +32,8 @@ public:
           m_Window(
               std::make_unique<raylib::Window>(m_Size.x, m_Size.y, _WindowTitle, m_WindowFlags)),
           m_InputSystem(m_Registry, m_EventQueue), m_UISystem(m_Registry, m_EventQueue, m_Size),
-          m_RenderSystem(m_Registry, m_Window), m_UISceneBuilder(m_Registry) {
+          m_RenderSystem(m_Registry, m_Window), m_UpdateSystem(m_Registry),
+          m_UISceneBuilder(m_Registry) {
         InitUI();
     }
 
@@ -38,6 +42,11 @@ public:
     UISceneBuilder &UISceneBuilder() { return m_UISceneBuilder; }
     ResourcesManager &ResourcesManager() { return m_ResourcesManager; }
     ecs::Registry &Registry() { return m_Registry; }
+
+    void AddUpdateStep(std::function<void(float)> _UpdateStep) {
+        ecs::EntityID updateStep = m_Registry.CreateEntity();
+        m_Registry.AddComponent<ecs::UpdateComponent>(updateStep, _UpdateStep);
+    }
 
     ecs::Entity CreateEntity() { return ecs::Entity(m_Registry); }
 
@@ -52,17 +61,16 @@ public:
 private:
     unsigned int m_WindowFlags = FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE;
 
-    void InitUI() { CreateRootNode(); }
+    void InitUI() { m_RenderSystem.SetBackgroundColor({52, 67, 94}); }
 
     void Update() {
         float deltaTime = GetFrameTime();
 
+        m_UpdateSystem.Update(deltaTime);
         m_InputSystem.Update(deltaTime);
         m_UISystem.Update(deltaTime);
         m_RenderSystem.Update(deltaTime);
     }
-
-    void CreateRootNode() { m_RenderSystem.SetBackgroundColor({52, 67, 94}); }
 
 private:
     Vector2 m_Size;
@@ -73,6 +81,7 @@ private:
     ecs::UISystem m_UISystem;
     ecs::RenderSystem m_RenderSystem;
     ecs::InputSystem m_InputSystem;
+    ecs::UpdateSystem m_UpdateSystem;
 
     events::EventQueue m_EventQueue;
 
