@@ -4,6 +4,7 @@
 
 #include "../../rectangleUtils.hpp"
 #include "../components/colorComponent.hpp"
+#include "../components/graphComponent.hpp"
 #include "../components/renderTransformComponent.hpp"
 #include "../components/spriteComponent.hpp"
 #include "../components/textComponent.hpp"
@@ -11,6 +12,7 @@
 #include "../registry.hpp"
 #include "../system.hpp"
 
+#include <iterator>
 #include <memory>
 #include <raylib-cpp.hpp>
 #include <string>
@@ -33,6 +35,7 @@ private:
 
         RenderSprites();
         RenderTexts();
+        RenderGraphs();
 
         // RenderDebug();
 
@@ -90,6 +93,61 @@ private:
 
             textComponent->font.DrawText(textComponent->text.c_str(), textPosition,
                                          textComponent->fontSize, textComponent->spacing, color);
+        }
+    }
+
+    float map(float _V, float _MinFrom, float _MaxFrom, float _MinTo, float _MaxTo) {
+        return ((_V - _MinFrom) / (_MaxFrom - _MinFrom)) * (_MaxTo - _MinTo) + _MinTo;
+    }
+
+    Vector2 map(Vector2 _V, Vector2 _MinFrom, Vector2 _MaxFrom, Vector2 _MinTo, Vector2 _MaxTo) {
+        return Vector2{
+            map(_V.x, _MinFrom.x, _MaxFrom.x, _MinTo.x, _MaxTo.x),
+            map(_V.y, _MinFrom.y, _MaxFrom.y, _MinTo.y, _MaxTo.y),
+        };
+    }
+
+    void RenderGraphs() {
+        std::vector<EntityID> toRender = m_Registry.With<TransformComponent, GraphComponent>();
+
+        for (EntityID e : toRender) {
+            TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(e);
+            GraphComponent *graphComponent = m_Registry.GetComponent<GraphComponent>(e);
+
+            if (graphComponent->valuesInTime.size() < 2)
+                continue;
+
+            Rectangle renderRect = GetRenderRect(e, transformComponent);
+
+            ColorComponent *colorComponent = m_Registry.GetComponent<ColorComponent>(e);
+            raylib::Color color = colorComponent ? colorComponent->color : WHITE;
+
+            float minValue = graphComponent->minValue();
+            float maxValue = graphComponent->maxValue();
+            float minTime = graphComponent->valuesInTime.begin()->first;
+            float maxTime = std::prev(graphComponent->valuesInTime.end(), 1)->first;
+
+            float minX = renderRect.x;
+            float maxX = renderRect.x + renderRect.width;
+
+            float minY = renderRect.y + renderRect.height;
+            float maxY = renderRect.y;
+
+            Vector2 start;
+            Vector2 end;
+            for (int i = 0; i < graphComponent->valuesInTime.size() - 1; i++) {
+                start = map(Vector2{graphComponent->valuesInTime[i].first,
+                                    graphComponent->valuesInTime[i].second},
+                            Vector2{minTime, minValue}, Vector2{maxTime, maxValue},
+                            Vector2{minX, minY}, Vector2{maxX, maxY});
+                end = map(Vector2{graphComponent->valuesInTime[i + 1].first,
+                                  graphComponent->valuesInTime[i + 1].second},
+                          Vector2{minTime, minValue}, Vector2{maxTime, maxValue},
+                          Vector2{minX, minY}, Vector2{maxX, maxY});
+                DrawLineEx(start, end, 3, color);
+            }
+
+            DrawCircle(end.x, end.y, 5, color);
         }
     }
 

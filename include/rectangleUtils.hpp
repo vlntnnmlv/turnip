@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "./lrtb.hpp"
 #include <Rectangle.hpp>
 #include <Vector2.hpp>
 
