@@ -12,6 +12,6 @@ struct TransformComponent : IComponent {
     raylib::Rectangle rect;
     Rectlerp worldRect;
 
-    TransformComponent(Rectangle _Rect = Rectangle{0, 0, 0, 0}) : rect(_Rect) {}
+    TransformComponent(Rectangle _Rect = Rectangle{0, 0, 0, 0});
 };
 } // namespace turnip::ecs

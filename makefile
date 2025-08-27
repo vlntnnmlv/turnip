@@ -25,7 +25,7 @@ CXX = clang++
 CXXFLAGS = --std=c++20 -Wall -MMD -MP
 LDFLAGS = $(INCLUDE) $(LIB) $(FRAMEWORKS)
 
-SRCS = $(wildcard src/*.cpp)
+SRCS = $(wildcard src/*.cpp) $(wildcard src/ecs/components/*.cpp) $(wildcard src/ecs/engines/*.cpp) $(wildcard src/ecs/systems/*.cpp)
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(OBJS:.o=.d)
 

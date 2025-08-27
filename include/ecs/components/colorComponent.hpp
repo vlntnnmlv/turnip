@@ -9,6 +9,6 @@ namespace turnip::ecs {
 struct ColorComponent : IComponent {
     ::Color color;
 
-    ColorComponent(Color _Color = {255, 255, 255, 255}) : color(_Color) {}
+    ColorComponent(Color _Color = {255, 255, 255, 255});
 };
 } // namespace turnip::ecs

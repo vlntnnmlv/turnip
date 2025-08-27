@@ -3,7 +3,5 @@
 #pragma once
 
 namespace turnip::ecs {
-struct IComponent {
-    virtual ~IComponent() = default;
-};
+struct IComponent {};
 } // namespace turnip::ecs

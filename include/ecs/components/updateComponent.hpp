@@ -10,6 +10,6 @@ namespace turnip::ecs {
 struct UpdateComponent : IComponent {
     std::function<void(float)> onUpdate;
 
-    UpdateComponent(std::function<void(float)> _OnUpdate) : onUpdate(_OnUpdate) {}
+    UpdateComponent(std::function<void(float)> _OnUpdate);
 };
 } // namespace turnip::ecs

@@ -13,7 +13,6 @@ struct TextComponent : IComponent {
     float fontSize;
     float spacing;
 
-    TextComponent(const std::string &_Text, raylib::Font &_Font, float _FontSize, float _Spacing)
-        : text(_Text), font(_Font), fontSize(_FontSize), spacing(_Spacing) {}
+    TextComponent(const std::string &_Text, raylib::Font &_Font, float _FontSize, float _Spacing);
 };
 } // namespace turnip::ecs

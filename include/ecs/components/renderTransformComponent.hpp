@@ -12,7 +12,6 @@ struct RenderTransformComponent : IComponent {
     Vector2 offset;
     LRTB rectOffset;
 
-    RenderTransformComponent(Vector2 _Offset = {0, 0}, LRTB _RectOffset = {0, 0, 0, 0})
-        : offset(_Offset), rectOffset(_RectOffset) {}
+    RenderTransformComponent(Vector2 _Offset = {0, 0}, LRTB _RectOffset = {0, 0, 0, 0});
 };
 } // namespace turnip::ecs

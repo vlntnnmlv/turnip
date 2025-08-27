@@ -15,20 +15,8 @@ using ValueIntime = std::pair<Time, Value>;
 struct GraphComponent : IComponent {
     std::vector<ValueIntime> valuesInTime{};
 
-    float minValue() {
-        return std::min_element(valuesInTime.begin(), valuesInTime.end(),
-                                [](const ValueIntime &_A, const ValueIntime &_B) {
-                                    return _A.second < _B.second;
-                                })
-            ->second;
-    }
+    float minValue();
 
-    float maxValue() {
-        return std::max_element(valuesInTime.begin(), valuesInTime.end(),
-                                [](const ValueIntime &_A, const ValueIntime &_B) {
-                                    return _A.second < _B.second;
-                                })
-            ->second;
-    }
+    float maxValue();
 };
 } // namespace turnip::ecs

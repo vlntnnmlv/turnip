@@ -9,12 +9,8 @@
 namespace turnip::ecs {
 class UpdateSystem : protected ISystem {
 public:
-    UpdateSystem(Registry &_Registry) : ISystem(_Registry) {}
+    UpdateSystem(Registry &_Registry);
 
-    void Update(float _DeltaTime) override {
-        for (const auto &e : m_Registry.With<UpdateComponent>()) {
-            m_Registry.GetComponent<UpdateComponent>(e)->onUpdate(_DeltaTime);
-        }
-    };
+    void Update(float _DeltaTime) override;
 };
 } // namespace turnip::ecs

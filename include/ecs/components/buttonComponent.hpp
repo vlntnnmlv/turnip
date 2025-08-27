@@ -15,7 +15,6 @@ struct ButtonComponent : IComponent {
     bool hovered;
     bool pressed;
 
-    ButtonComponent(std::function<void()> _OnClick, EntityID _Image)
-        : onClick(_OnClick), image(_Image) {};
+    ButtonComponent(std::function<void()> _OnClick, EntityID _Image);
 };
 } // namespace turnip::ecs

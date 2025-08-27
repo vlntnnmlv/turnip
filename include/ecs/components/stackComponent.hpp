@@ -16,7 +16,6 @@ struct StackComponent : IComponent {
     float spacing;
 
     StackComponent(StackType _Type, StackContentType _ContentType = StackContentType::CENTER,
-                   float _Spacing = 0)
-        : type(_Type), contentType(_ContentType), spacing(_Spacing) {}
+                   float _Spacing = 0);
 };
 } // namespace turnip::ecs
