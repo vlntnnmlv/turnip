@@ -1,6 +1,6 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./ecs/components/layoutComponent.hpp"
+#include "./turnip/ecs/components/layoutComponent.hpp"
 
 namespace turnip::ecs {
 LayoutComponent::LayoutComponent(Size _Size, LRTB _Margin, LRTB _Padding)

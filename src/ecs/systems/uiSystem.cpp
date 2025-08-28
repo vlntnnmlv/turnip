@@ -1,13 +1,13 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./ecs/systems/uiSystem.hpp"
-#include "./ecs/components/renderTransformComponent.hpp"
+#include "./turnip/ecs/systems/uiSystem.hpp"
+#include "./turnip/ecs/components/renderTransformComponent.hpp"
 
 namespace turnip::ecs {
 UISystem::UISystem(Registry &_Registry, events::EventQueue &_EventQueue, Vector2 _Size)
     : ISystem(_Registry), m_EventQueue(_EventQueue), m_LayoutEngine(m_Registry), m_Size(_Size) {}
 
-void UISystem::Update(float _DeltaTime) {
+void UISystem::Update([[maybe_unused]] float _DeltaTime) {
     ProcessLayout();
     PollEvents();
 }

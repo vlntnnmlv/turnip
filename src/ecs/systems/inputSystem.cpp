@@ -1,12 +1,12 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./ecs/systems/inputSystem.hpp"
+#include "./turnip/ecs/systems/inputSystem.hpp"
 
 namespace turnip::ecs {
 InputSystem::InputSystem(Registry &_Registry, events::EventQueue &_EventQueue)
     : ISystem(_Registry), m_EventQueue(_EventQueue) {}
 
-void InputSystem::Update(float _DeltaTime) {
+void InputSystem::Update([[maybe_unused]] float _DeltaTime) {
     FetchMouseEvents();
     FetchKeyboardEvents();
 }

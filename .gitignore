@@ -4,5 +4,5 @@
 .clang-format
 .DS_Store
 .cache
-turnip
-turnip.dSYM
+/turnip
+/turnip.dSYM

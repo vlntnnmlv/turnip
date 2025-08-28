@@ -1,6 +1,6 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./ecs/engines/layoutEngine.hpp"
+#include "./turnip/ecs/engines/layoutEngine.hpp"
 
 namespace turnip::ecs {
 LayoutEngine::LayoutEngine(Registry &_Registry) : m_Registry(_Registry) {}
@@ -17,7 +17,7 @@ bool LayoutEngine::TryMeasureEntityContent(EntityID _EntityID) {
     StackComponent *stackComponent = m_Registry.GetComponent<StackComponent>(_EntityID);
 
     if (!stackComponent)
-        MeasureNodeContent(_EntityID, childrenComponent, transformComponent, layoutComponent);
+        MeasureNodeContent(childrenComponent, transformComponent, layoutComponent);
     else
         MeasureStackContent(_EntityID, childrenComponent, transformComponent, layoutComponent,
                             stackComponent);
@@ -37,7 +37,7 @@ bool LayoutEngine::TryArrangeEntityContent(EntityID _EntityID) {
     StackComponent *stackComponent = m_Registry.GetComponent<StackComponent>(_EntityID);
 
     if (!stackComponent)
-        ArrangeNodeContent(_EntityID, childrenComponent, transformComponent, layoutComponent);
+        ArrangeNodeContent(childrenComponent, transformComponent, layoutComponent);
     else
         ArrangeStackContent(_EntityID, childrenComponent, transformComponent, layoutComponent,
                             stackComponent);
@@ -57,7 +57,7 @@ float LayoutEngine::GetRealSize(Size _Size, Axis _Axis) {
     return size;
 }
 
-void LayoutEngine::MeasureNodeContent(EntityID _EntityID, ChildrenComponent *_ChildrenComponent,
+void LayoutEngine::MeasureNodeContent(ChildrenComponent *_ChildrenComponent,
                                       TransformComponent *_TransformComponent,
                                       LayoutComponent *_LayoutComponent) {
     for (const auto &child : _ChildrenComponent->children) {
@@ -86,7 +86,7 @@ void LayoutEngine::MeasureNodeContent(EntityID _EntityID, ChildrenComponent *_Ch
     }
 }
 
-void LayoutEngine::ArrangeNodeContent(EntityID _EntityID, ChildrenComponent *_ChildrenComponent,
+void LayoutEngine::ArrangeNodeContent(ChildrenComponent *_ChildrenComponent,
                                       TransformComponent *_TransformComponent,
                                       LayoutComponent *_LayoutComponent) {
     for (const auto &child : _ChildrenComponent->children) {

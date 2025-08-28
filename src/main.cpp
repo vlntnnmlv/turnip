@@ -1,13 +1,13 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./colorUtils.hpp"
-#include "./ecs/components/childrenComponent.hpp"
-#include "./ecs/components/colorComponent.hpp"
-#include "./ecs/components/graphComponent.hpp"
-#include "./ecs/components/textComponent.hpp"
-#include "./ecs/components/transformComponent.hpp"
-#include "./ecs/entity.hpp"
-#include "./engine.hpp"
+#include "./turnip/colorUtils.hpp"
+#include "./turnip/ecs/components/childrenComponent.hpp"
+#include "./turnip/ecs/components/colorComponent.hpp"
+#include "./turnip/ecs/components/graphComponent.hpp"
+#include "./turnip/ecs/components/textComponent.hpp"
+#include "./turnip/ecs/components/transformComponent.hpp"
+#include "./turnip/ecs/entity.hpp"
+#include "./turnip/engine.hpp"
 
 #include <map>
 #include <random>
@@ -30,8 +30,8 @@ int main() {
                                                  raylib::Color _Color) -> turnip::ecs::EntityID {
         turnip::ecs::EntityID panel = sceneBuilder.CreateNode(_Parent, _Size, _Margin, _Padding);
 
-        turnip::ecs::EntityID img = sceneBuilder.CreateImage(
-            panel, resourcesManager.GetSmoothCornerTexture(5), {5, 5, 5, 5}, _Color);
+        sceneBuilder.CreateImage(panel, resourcesManager.GetSmoothCornerTexture(5), {5, 5, 5, 5},
+                                 _Color);
 
         return panel;
     };
@@ -39,9 +39,8 @@ int main() {
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
         sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::START, 2);
 
-    turnip::ecs::EntityID panelLeft = createPanelWithBg(
-        stackH, turnip::Size{turnip::SizeType::START, turnip::SizeType::FILL, 240}, {0, 0, 0, 0},
-        {4, 4, 4, 4}, {70, 84, 109});
+    turnip::ecs::EntityID panelLeft = createPanelWithBg(stackH, turnip::Size{.width = 240},
+                                                        {0, 0, 0, 0}, {4, 4, 4, 4}, {70, 84, 109});
 
     turnip::ecs::EntityID panelRight =
         createPanelWithBg(stackH, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL},
@@ -60,8 +59,8 @@ int main() {
     turnip::ecs::EntityID stockbookStack = sceneBuilder.CreateStack(
         panelLeft, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::START, 2);
 
-    auto createStockBook = [&createPanelWithBg, &sceneBuilder, &resourcesManager](
-                               turnip::ecs::EntityID _Parent) -> turnip::ecs::EntityID {
+    auto createStockBook = [&createPanelWithBg,
+                            &sceneBuilder](turnip::ecs::EntityID _Parent) -> turnip::ecs::EntityID {
         turnip::ecs::EntityID stockbookRoot =
             createPanelWithBg(_Parent, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL},
                               {0, 0, 0, 0}, {3, 3, 3, 3}, {87, 100, 122});
@@ -78,10 +77,7 @@ int main() {
     turnip::ecs::EntityID stockbookSell = createStockBook(stockbookStack);
 
     static int bidsAndAsksCount = 0;
-    auto onBidAdded = [&graph, &createPanelWithBg, &engine]() {
-        auto childrenComponent =
-            engine.Registry().GetComponent<turnip::ecs::ChildrenComponent>(graph);
-
+    auto onBidAdded = [&graph, &engine]() {
         engine.Registry().GetComponent<turnip::ecs::GraphComponent>(graph)->valuesInTime.push_back(
             std::pair<float, float>(static_cast<float>(GetTime()),
                                     static_cast<float>(bidsAndAsksCount)));
@@ -91,8 +87,9 @@ int main() {
                               turnip::ecs::EntityID _StockBook, raylib::Color _Color,
                               raylib::Color _TextColor) -> turnip::ecs::EntityID {
         turnip::ecs::EntityID bid = createPanelWithBg(
-            _StockBook, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL}, {0, 0, 0, 0},
-            {0, 0, 0, 0}, _Color);
+            _StockBook,
+            turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL, 0, 0, 0, 0, 10, 0, 30, 0},
+            {0, 0, 0, 0}, {0, 0, 0, 0}, _Color);
 
         sceneBuilder.CreateText(bid, "BID", resourcesManager.GetFont("martian_mono"), 14, 5,
                                 _TextColor);
@@ -101,9 +98,9 @@ int main() {
     };
 
     static float time = 0;
-    engine.AddUpdateStep([&addToStockBook, &stockbookSell, &dist10, &rng](float _DeltaTime) {
+    engine.AddUpdateStep([&addToStockBook, &stockbookSell](float _DeltaTime) {
         time += _DeltaTime;
-        if (time > dist10(rng)) {
+        if (time > 4.5f) {
             addToStockBook(stockbookSell, {102, 114, 134}, {218, 221, 226});
             time = 0;
             bidsAndAsksCount++;

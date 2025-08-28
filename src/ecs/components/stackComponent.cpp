@@ -1,6 +1,6 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./ecs/components/stackComponent.hpp"
+#include "./turnip/ecs/components/stackComponent.hpp"
 
 namespace turnip::ecs {
 StackComponent::StackComponent(StackType _Type, StackContentType _ContentType, float _Spacing)

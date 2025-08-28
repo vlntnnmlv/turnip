@@ -1,6 +1,6 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./ecs/components/textComponent.hpp"
+#include "./turnip/ecs/components/textComponent.hpp"
 
 namespace turnip::ecs {
 TextComponent::TextComponent(const std::string &_Text, raylib::Font &_Font, float _FontSize,

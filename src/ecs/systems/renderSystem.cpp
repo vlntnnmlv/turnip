@@ -1,12 +1,13 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./ecs/systems/renderSystem.hpp"
+#include "./turnip/ecs/systems/renderSystem.hpp"
 
 namespace turnip::ecs {
 RenderSystem::RenderSystem(Registry &_Registry, std::unique_ptr<raylib::Window> &_Window)
     : ISystem(_Registry), m_Window(_Window) {}
 
-void RenderSystem::Update(float _DeltaTime) { Render(); }
+void RenderSystem::Update([[maybe_unused]] float _DeltaTime) { Render(); }
+
 void RenderSystem::SetBackgroundColor(Color _Color) { m_BackgroundColor = _Color; }
 
 void RenderSystem::Render() {
@@ -114,7 +115,7 @@ void RenderSystem::RenderGraphs() {
 
         Vector2 start;
         Vector2 end;
-        for (int i = 0; i < graphComponent->valuesInTime.size() - 1; i++) {
+        for (size_t i = 0; i < graphComponent->valuesInTime.size() - 1; i++) {
             start = map(Vector2{graphComponent->valuesInTime[i].first,
                                 graphComponent->valuesInTime[i].second},
                         Vector2{minTime, minValue}, Vector2{maxTime, maxValue}, Vector2{minX, minY},

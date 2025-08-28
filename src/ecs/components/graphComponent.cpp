@@ -1,6 +1,6 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./ecs/components/graphComponent.hpp"
+#include "./turnip/ecs/components/graphComponent.hpp"
 
 namespace turnip::ecs {
 float GraphComponent::minValue() {
