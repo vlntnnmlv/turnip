@@ -100,7 +100,7 @@ int main() {
     static float time = 0;
     engine.AddUpdateStep([&addToStockBook, &stockbookSell](float _DeltaTime) {
         time += _DeltaTime;
-        if (time > 4.5f) {
+        if (time > 4.0f) {
             addToStockBook(stockbookSell, {102, 114, 134}, {218, 221, 226});
             time = 0;
             bidsAndAsksCount++;

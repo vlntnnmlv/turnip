@@ -29,12 +29,19 @@ SRCS = $(wildcard src/*.cpp) $(wildcard src/interpolated/*.cpp) $(wildcard src/e
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(OBJS:.o=.d)
 
-TARGET = turnip
+LIB_TARGET = turnip.a
+TARGET = turnipEngine
 
-all: $(TARGET)
+all: $(LIB_TARGET) $(TARGET)
 
-$(TARGET) : $(OBJS)
-	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
+# build static library
+$(LIB_TARGET) : $(OBJS)
+	ar rvs turnip.a $(OBJS)
+# 	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
+
+# build app
+$(TARGET):
+	$(CXX) $(CXXFLAGS) main.cpp $(LIB_TARGET) $(LDFLAGS) -o $(TARGET)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
@@ -42,4 +49,4 @@ $(TARGET) : $(OBJS)
 -include $(DEPS)
 
 clean:
-	rm -f $(OBJS) $(DEPS) $(TARGET)
+	rm -f $(OBJS) $(DEPS) $(TARGET) $(LIB_TARGET)
