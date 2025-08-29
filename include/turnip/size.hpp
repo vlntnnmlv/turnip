@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "./sizeType.hpp"
+#include "./turnip/sizeType.hpp"
 #include <optional>
 
 namespace turnip {

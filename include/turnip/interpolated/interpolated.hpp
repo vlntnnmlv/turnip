@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../rectangleUtils.hpp"
-#include "./functions.hpp"
+#include "./turnip/interpolated/functions.hpp"
+#include "./turnip/rectangleUtils.hpp"
 
 #include <chrono>
 

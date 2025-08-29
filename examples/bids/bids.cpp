@@ -92,7 +92,8 @@ int main() {
         turnip::ecs::EntityID bid = createPanelWithBg(_StockBook,
                                                       turnip::Size{.axisX = turnip::SizeType::FILL,
                                                                    .axisY = turnip::SizeType::START,
-                                                                   .minHeight = 30,
+                                                                   .height = 30,
+                                                                   .minHeight = 10,
                                                                    .maxHeight = 50},
                                                       turnip::LRTB{}, turnip::LRTB{}, _Color);
 
@@ -105,7 +106,7 @@ int main() {
     static float time = 0;
     engine.AddUpdateStep([&addToStockBook, &stockbookSell](float _DeltaTime) {
         time += _DeltaTime;
-        if (time > 4.0f) {
+        if (time > 0.2f) {
             addToStockBook(stockbookSell, {102, 114, 134}, {218, 221, 226});
             time = 0;
             bidsAndAsksCount++;

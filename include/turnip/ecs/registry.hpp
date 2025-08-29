@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "./component.hpp"
+#include "./turnip/ecs/component.hpp"
 
 namespace turnip::ecs {
 

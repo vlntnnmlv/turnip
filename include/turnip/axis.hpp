@@ -4,8 +4,8 @@
 
 #include <Rectangle.hpp>
 
-#include "./lrtb.hpp"
-#include "./size.hpp"
+#include "./turnip/lrtb.hpp"
+#include "./turnip/size.hpp"
 
 namespace turnip {
 enum class Axis { HORIZONTAL = 0, VERTICAL = 1 };

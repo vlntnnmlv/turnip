@@ -8,19 +8,19 @@
 #include <Vector2.hpp>
 #include <Window.hpp>
 
-#include "./ecs/components/childrenComponent.hpp"
-#include "./ecs/components/layoutComponent.hpp"
-#include "./ecs/components/spriteComponent.hpp"
-#include "./ecs/components/transformComponent.hpp"
-#include "./ecs/components/updateComponent.hpp"
-#include "./ecs/entity.hpp"
-#include "./ecs/registry.hpp"
-#include "./ecs/systems/inputSystem.hpp"
-#include "./ecs/systems/renderSystem.hpp"
-#include "./ecs/systems/uiSystem.hpp"
-#include "./ecs/systems/updateSystem.hpp"
-#include "./resourcesManager.hpp"
-#include "./uiSceneBuilder.hpp"
+#include "./turnip/ecs/components/childrenComponent.hpp"
+#include "./turnip/ecs/components/layoutComponent.hpp"
+#include "./turnip/ecs/components/spriteComponent.hpp"
+#include "./turnip/ecs/components/transformComponent.hpp"
+#include "./turnip/ecs/components/updateComponent.hpp"
+#include "./turnip/ecs/entity.hpp"
+#include "./turnip/ecs/registry.hpp"
+#include "./turnip/ecs/systems/inputSystem.hpp"
+#include "./turnip/ecs/systems/renderSystem.hpp"
+#include "./turnip/ecs/systems/uiSystem.hpp"
+#include "./turnip/ecs/systems/updateSystem.hpp"
+#include "./turnip/resourcesManager.hpp"
+#include "./turnip/uiSceneBuilder.hpp"
 
 // TODO: Add dirtyComponent, to not update every system every frame
 

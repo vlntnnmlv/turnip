@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "./registry.hpp"
+#include "./turnip/ecs/registry.hpp"
 
 namespace turnip::ecs {
 class Entity {

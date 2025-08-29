@@ -5,12 +5,12 @@
 #include <algorithm>
 #include <limits>
 
-#include "../../axis.hpp"
-#include "../components/childrenComponent.hpp"
-#include "../components/layoutComponent.hpp"
-#include "../components/stackComponent.hpp"
-#include "../components/transformComponent.hpp"
-#include "../registry.hpp"
+#include "./turnip/axis.hpp"
+#include "./turnip/ecs/components/childrenComponent.hpp"
+#include "./turnip/ecs/components/layoutComponent.hpp"
+#include "./turnip/ecs/components/stackComponent.hpp"
+#include "./turnip/ecs/components/transformComponent.hpp"
+#include "./turnip/ecs/registry.hpp"
 
 namespace turnip::ecs {
 class LayoutEngine {
@@ -21,7 +21,7 @@ public:
     bool TryArrangeEntityContent(EntityID _EntityID);
 
 private:
-    float GetRealSize(float _Value, Size _Size, Axis _Axis);
+    float GetRealSize(float _Value, Size _Size, Axis _Axis, float _MaxAvailableValue);
 
     void MeasureNodeContent(ChildrenComponent *_ChildrenComponent,
                             TransformComponent *_TransformComponent,

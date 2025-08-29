@@ -13,7 +13,6 @@
 #include "./turnip/ecs/components/spriteComponent.hpp"
 #include "./turnip/ecs/components/stackComponent.hpp"
 #include "./turnip/ecs/components/transformComponent.hpp"
-
 #include "./turnip/ecs/registry.hpp"
 
 namespace turnip {

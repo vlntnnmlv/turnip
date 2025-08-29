@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "../components/updateComponent.hpp"
-#include "../registry.hpp"
-#include "../system.hpp"
+#include "./turnip/ecs/components/updateComponent.hpp"
+#include "./turnip/ecs/registry.hpp"
+#include "./turnip/ecs/system.hpp"
 
 namespace turnip::ecs {
 class UpdateSystem : protected ISystem {

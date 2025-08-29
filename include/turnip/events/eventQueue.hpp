@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "./inputEvent.hpp"
+#include "./turnip/events/inputEvent.hpp"
 
 #include <optional>
 #include <vector>

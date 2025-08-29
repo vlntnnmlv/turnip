@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "../../events/eventQueue.hpp"
-#include "../../events/inputEvent.hpp"
-#include "../components/layoutComponent.hpp"
-#include "../components/renderTransformComponent.hpp"
-#include "../components/transformComponent.hpp"
-#include "../registry.hpp"
-#include "../system.hpp"
+#include "./turnip/ecs/components/layoutComponent.hpp"
+#include "./turnip/ecs/components/renderTransformComponent.hpp"
+#include "./turnip/ecs/components/transformComponent.hpp"
+#include "./turnip/ecs/registry.hpp"
+#include "./turnip/ecs/system.hpp"
+#include "./turnip/events/eventQueue.hpp"
+#include "./turnip/events/inputEvent.hpp"
 
 #include <Rectangle.hpp>
 #include <Vector2.hpp>

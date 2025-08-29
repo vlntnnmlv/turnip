@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../ecs/registry.hpp"
+#include "./turnip/ecs/registry.hpp"
 
 #include <Vector2.hpp>
 
