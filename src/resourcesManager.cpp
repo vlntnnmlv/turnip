@@ -1,11 +1,17 @@
 // Copyright 2025 Valentin Namleev
 
+#include <filesystem>
+
 #include "./turnip/resourcesManager.hpp"
 
 namespace turnip {
+ResourcesManager::ResourcesManager(const std::string &_ResourcesDirectory)
+    : m_ResourcesDirectory(_ResourcesDirectory) {}
+
 raylib::Texture2D &ResourcesManager::GetTexture(const std::string &_Name) {
     if (!m_Textures.contains(_Name)) {
-        const std::string &pathToPNG = std::format("./resources/textures/{}.png", _Name);
+        const std::string &pathToPNG =
+            std::format("{}/textures/{}.png", m_ResourcesDirectory, _Name);
         m_Textures[_Name] = std::make_unique<raylib::Texture2D>(pathToPNG);
     }
 
@@ -38,7 +44,9 @@ raylib::Texture2D &ResourcesManager::GetSmoothCornerTexture(size_t _BorderRadius
 
 raylib::Font &ResourcesManager::GetFont(const std::string &_Name) {
     if (!m_Fonts.contains(_Name)) {
-        const std::string &pathToTTF = std::format("./resources/fonts/{}.ttf", _Name);
+        const std::string &pathToTTF =
+            std::filesystem::absolute(std::format("{}/fonts/{}.ttf", m_ResourcesDirectory, _Name));
+
         m_Fonts[_Name] = std::make_unique<raylib::Font>(pathToTTF, 128);
         SetTextureFilter(m_Fonts[_Name]->texture, TextureFilter::TEXTURE_FILTER_BILINEAR);
     }

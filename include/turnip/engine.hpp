@@ -27,7 +27,8 @@
 namespace turnip {
 class Engine {
 public:
-    Engine(float _WindowWidth, float _WindowHeight, const std::string &_WindowTitle);
+    Engine(float _WindowWidth, float _WindowHeight, const std::string &_WindowTitle,
+           const std::string &_ResourcesFolder);
 
     ~Engine() = default;
 

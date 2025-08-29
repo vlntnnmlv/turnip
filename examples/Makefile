@@ -7,7 +7,7 @@ I_RAYLIB := /raylib
 I_RAYLIB_CPP := /raylib-cpp
 
 # Local include directory
-I := ./include/
+I := ../include/
 
 # Final include flags
 INCLUDE = -I$(INCLUDEDIR)$(I_RAYLIB) -I$(INCLUDEDIR)$(I_RAYLIB_CPP) -I$(I)
@@ -22,28 +22,22 @@ LIB = -L $(LIBDIR) -lraylib
 FRAMEWORKS = -framework OpenGL -framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreAudio -framework CoreVideo -framework AudioToolbox
 
 CXX = clang++
-CXXFLAGS = --std=c++20 -Wall -Wextra -Werror -MMD -MP
+CXXFLAGS = --std=c++20 -Wall -Wextra -Werror
 LDFLAGS = $(INCLUDE) $(LIB) $(FRAMEWORKS)
 
-SRCS = $(wildcard src/*.cpp) $(wildcard src/interpolated/*.cpp) $(wildcard src/events/*.cpp) $(wildcard src/ecs/*.cpp) $(wildcard src/ecs/components/*.cpp) $(wildcard src/ecs/engines/*.cpp) $(wildcard src/ecs/systems/*.cpp)
-# SRCS_JUMBO = src/unity.cpp
-
+# SRCS = $(wildcard src/*.cpp) $(wildcard src/interpolated/*.cpp) $(wildcard src/events/*.cpp) $(wildcard src/ecs/*.cpp) $(wildcard src/ecs/components/*.cpp) $(wildcard src/ecs/engines/*.cpp) $(wildcard src/ecs/systems/*.cpp)
+SRCS = $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)
-DEPS = $(OBJS:.o=.d)
 
-TARGET = turnip.a
+TARGET = bids
 
 all: $(TARGET)
 
-# build static library
 $(TARGET) : $(OBJS)
-	ar rvs turnip.a $(OBJS)
-# 	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
+	$(CXX) $(OBJS) ../turnip.a -o $(TARGET) $(LDFLAGS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
 
--include $(DEPS)
-
 clean:
-	rm -f $(OBJS) $(DEPS) $(TARGET)
+	rm -f $(OBJS) $(TARGET)

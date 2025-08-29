@@ -9,6 +9,7 @@
 #include "./turnip/ecs/entity.hpp"
 #include "./turnip/engine.hpp"
 
+#include <filesystem>
 #include <map>
 #include <random>
 #include <string>
@@ -18,7 +19,7 @@ int main() {
     std::mt19937 rng(dev());
     std::uniform_real_distribution<std::mt19937::result_type> dist10(1.0, 3.0);
 
-    turnip::Engine engine(860, 640, "Turnip");
+    turnip::Engine engine(860, 640, "Turnip", std::filesystem::absolute("../resources"));
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
     turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
