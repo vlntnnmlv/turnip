@@ -7,7 +7,8 @@
 namespace turnip {
 class ColorUtils {
 public:
-    static Color GetColorShade(float _Gradient, Color _Color = WHITE);
+    static raylib::Color GetColorShade(float _Gradient, raylib::Color _Color = WHITE);
+    static raylib::Color OKLCH2RGB(raylib::Color _OKLCH);
 };
 
 } // namespace turnip

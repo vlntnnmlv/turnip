@@ -6,3 +6,4 @@
 .cache
 /turnip
 /turnip.dSYM
+__pycache__
