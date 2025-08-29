@@ -41,18 +41,19 @@ int main() {
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
         sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::START, 2);
 
-    turnip::ecs::EntityID panelLeft = createPanelWithBg(stackH, turnip::Size{.width = 240},
-                                                        {0, 0, 0, 0}, {4, 4, 4, 4}, {70, 84, 109});
+    turnip::ecs::EntityID panelLeft = createPanelWithBg(
+        stackH, turnip::Size{.axisX = turnip::SizeType::START, .width = 240}, turnip::LRTB{},
+        turnip::LRTB{4, 4, 4, 4}, raylib::Color{70, 84, 109, 255});
 
-    turnip::ecs::EntityID panelRight =
-        createPanelWithBg(stackH, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL},
-                          {0, 0, 0, 0}, {4, 4, 4, 4}, {70, 84, 109});
+    turnip::ecs::EntityID panelRight = createPanelWithBg(
+        stackH, turnip::Size{.axisX = turnip::SizeType::FILL, .axisY = turnip::SizeType::FILL},
+        turnip::LRTB{}, turnip::LRTB{4, 4, 4, 4}, raylib::Color{70, 84, 109, 255});
 
     turnip::ecs::EntityID graph = turnip::ecs::NullEntity;
     {
         graph = sceneBuilder.CreateNode(
             panelRight, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL},
-            {10, 10, 10, 10});
+            turnip::LRTB{10, 10, 10, 10});
         engine.Registry().AddComponent<turnip::ecs::GraphComponent>(graph);
         engine.Registry().AddComponent<turnip::ecs::ColorComponent>(
             graph, raylib::Color{186, 10, 10, 255});
@@ -63,14 +64,14 @@ int main() {
 
     auto createStockBook = [&createPanelWithBg,
                             &sceneBuilder](turnip::ecs::EntityID _Parent) -> turnip::ecs::EntityID {
-        turnip::ecs::EntityID stockbookRoot =
-            createPanelWithBg(_Parent, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL},
-                              {0, 0, 0, 0}, {3, 3, 3, 3}, {87, 100, 122});
+        turnip::ecs::EntityID stockbookRoot = createPanelWithBg(
+            _Parent, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL}, turnip::LRTB{},
+            turnip::LRTB{3, 3, 3, 3}, raylib::Color{87, 100, 122, 255});
 
         turnip::ecs::EntityID stockbook = sceneBuilder.CreateStack(
             stockbookRoot, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::END, 2,
-            turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL}, {0, 0, 0, 0},
-            {2, 2, 2, 2});
+            turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL}, turnip::LRTB{},
+            turnip::LRTB{2, 2, 2, 2});
 
         return stockbook;
     };
@@ -88,10 +89,12 @@ int main() {
     auto addToStockBook = [&createPanelWithBg, &onBidAdded, &sceneBuilder, &resourcesManager](
                               turnip::ecs::EntityID _StockBook, raylib::Color _Color,
                               raylib::Color _TextColor) -> turnip::ecs::EntityID {
-        turnip::ecs::EntityID bid = createPanelWithBg(
-            _StockBook,
-            turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL, 0, 0, 0, 0, 10, 0, 30, 0},
-            {0, 0, 0, 0}, {0, 0, 0, 0}, _Color);
+        turnip::ecs::EntityID bid = createPanelWithBg(_StockBook,
+                                                      turnip::Size{.axisX = turnip::SizeType::FILL,
+                                                                   .axisY = turnip::SizeType::START,
+                                                                   .minHeight = 30,
+                                                                   .maxHeight = 50},
+                                                      turnip::LRTB{}, turnip::LRTB{}, _Color);
 
         sceneBuilder.CreateText(bid, "BID", resourcesManager.GetFont("martian_mono"), 24, 5,
                                 _TextColor);

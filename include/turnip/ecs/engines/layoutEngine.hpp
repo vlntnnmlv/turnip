@@ -21,7 +21,7 @@ public:
     bool TryArrangeEntityContent(EntityID _EntityID);
 
 private:
-    float GetRealSize(Size _Size, Axis _Axis);
+    float GetRealSize(float _Value, Size _Size, Axis _Axis);
 
     void MeasureNodeContent(ChildrenComponent *_ChildrenComponent,
                             TransformComponent *_TransformComponent,

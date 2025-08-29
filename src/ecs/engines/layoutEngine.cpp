@@ -45,14 +45,15 @@ bool LayoutEngine::TryArrangeEntityContent(EntityID _EntityID) {
     return true;
 }
 
-float LayoutEngine::GetRealSize(Size _Size, Axis _Axis) {
+// TODO: Add parameter to clamp between maxAvailable size (stack fitting) and layout maxSize
+float LayoutEngine::GetRealSize(float _Value, Size _Size, Axis _Axis) {
     std::optional<float> minSize = AxisHelper::GetLayoutConstraintSize(_Size, _Axis, true);
 
     std::optional<float> maxSize = AxisHelper::GetLayoutConstraintSize(_Size, _Axis, false);
 
-    float size = std::clamp(
-        AxisHelper::GetLayoutSize(_Size, _Axis), minSize.has_value() ? minSize.value() : 0,
-        maxSize.has_value() ? maxSize.value() : std::numeric_limits<float>::max());
+    float size =
+        std::clamp(_Value, minSize.has_value() ? minSize.value() : 0,
+                   maxSize.has_value() ? maxSize.value() : std::numeric_limits<float>::max());
 
     return size;
 }
@@ -79,7 +80,8 @@ void LayoutEngine::MeasureNodeContent(ChildrenComponent *_ChildrenComponent,
                 break;
             default:
                 AxisHelper::GetRectSize(childTransformComponent->rect, axis) =
-                    GetRealSize(childLayoutComponent->size, axis);
+                    GetRealSize(AxisHelper::GetLayoutSize(childLayoutComponent->size, axis),
+                                childLayoutComponent->size, axis);
                 break;
             }
         }
@@ -163,12 +165,14 @@ void LayoutEngine::MeasureStackContent(EntityID _EntityID, ChildrenComponent *_C
         case SizeType::FILL:
             m_AlignedContentSizes[_EntityID] +=
                 AxisHelper::GetRectSize(childTransformComponent->rect, axis) =
-                    fillSpace / fillChildrenCount;
+                    GetRealSize(fillSpace / fillChildrenCount, childLayoutComponent->size, axis);
+
             break;
         default:
             m_AlignedContentSizes[_EntityID] +=
                 AxisHelper::GetRectSize(childTransformComponent->rect, axis) =
-                    GetRealSize(childLayoutComponent->size, axis);
+                    GetRealSize(AxisHelper::GetLayoutSize(childLayoutComponent->size, axis),
+                                childLayoutComponent->size, axis);
             break;
         }
 
