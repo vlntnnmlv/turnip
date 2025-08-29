@@ -4,13 +4,12 @@
 // TODO: Add dirtyComponent, to not update every system every frame
 
 namespace turnip {
-Engine::Engine(float _WindowWidth, float _WindowHeight, const std::string &_WindowTitle,
-               const std::string &_ResourcesFolder)
+Engine::Engine(float _WindowWidth, float _WindowHeight, const std::string &_WindowTitle)
     : m_Size{_WindowWidth, _WindowHeight},
       m_Window(std::make_unique<raylib::Window>(m_Size.x, m_Size.y, _WindowTitle, m_WindowFlags)),
       m_UISystem(m_Registry, m_EventQueue, m_Size), m_RenderSystem(m_Registry, m_Window),
       m_InputSystem(m_Registry, m_EventQueue), m_UpdateSystem(m_Registry),
-      m_ResourcesManager(_ResourcesFolder), m_UISceneBuilder(m_Registry) {
+      m_UISceneBuilder(m_Registry) {
     InitUI();
 }
 

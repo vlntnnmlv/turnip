@@ -14,10 +14,10 @@
 namespace turnip {
 class ResourcesManager {
 public:
-    ResourcesManager(const std::string &_ResourcesDirectory);
+    ResourcesManager() = default;
     ~ResourcesManager() = default;
 
-    void SetResourcesDirectory(const std::string &_Path) const;
+    void SetResourcesDirectory(const std::string &_ResourcesDirectory);
     raylib::Texture2D &GetTexture(const std::string &_Name);
     raylib::Texture2D &GetDefaultTexture();
     raylib::Texture2D &GetFrameTexture(size_t _Thickness);
@@ -27,7 +27,7 @@ public:
 private:
     static constexpr const char *DEFAULT_TEXTURE_NAME = "__default_texture";
 
-    const std::string &m_ResourcesDirectory;
+    std::string m_ResourcesDirectory;
 
     std::unordered_map<std::string, std::unique_ptr<raylib::Texture2D>> m_Textures;
     std::unordered_map<size_t, std::unique_ptr<raylib::Texture2D>> m_FrameTextures;

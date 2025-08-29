@@ -1,13 +1,13 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./turnip/colorUtils.hpp"
-#include "./turnip/ecs/components/childrenComponent.hpp"
-#include "./turnip/ecs/components/colorComponent.hpp"
-#include "./turnip/ecs/components/graphComponent.hpp"
-#include "./turnip/ecs/components/textComponent.hpp"
-#include "./turnip/ecs/components/transformComponent.hpp"
-#include "./turnip/ecs/entity.hpp"
-#include "./turnip/engine.hpp"
+#include <turnip/colorUtils.hpp>
+#include <turnip/ecs/components/childrenComponent.hpp>
+#include <turnip/ecs/components/colorComponent.hpp>
+#include <turnip/ecs/components/graphComponent.hpp>
+#include <turnip/ecs/components/textComponent.hpp>
+#include <turnip/ecs/components/transformComponent.hpp>
+#include <turnip/ecs/entity.hpp>
+#include <turnip/engine.hpp>
 
 #include <filesystem>
 #include <map>
@@ -19,7 +19,8 @@ int main() {
     std::mt19937 rng(dev());
     std::uniform_real_distribution<std::mt19937::result_type> dist10(1.0, 3.0);
 
-    turnip::Engine engine(860, 640, "Turnip", std::filesystem::absolute("../resources"));
+    turnip::Engine engine(860, 640, "Turnip");
+    engine.ResourcesManager().SetResourcesDirectory(std::filesystem::absolute("../../resources"));
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
     turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
@@ -92,7 +93,7 @@ int main() {
             turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL, 0, 0, 0, 0, 10, 0, 30, 0},
             {0, 0, 0, 0}, {0, 0, 0, 0}, _Color);
 
-        sceneBuilder.CreateText(bid, "BID", resourcesManager.GetFont("martian_mono"), 14, 5,
+        sceneBuilder.CreateText(bid, "BID", resourcesManager.GetFont("martian_mono"), 24, 5,
                                 _TextColor);
         onBidAdded();
         return bid;

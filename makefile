@@ -1,4 +1,3 @@
-# --- Includes ---
 # Global include directory
 INCLUDEDIR := /usr/local/include
 
@@ -12,38 +11,38 @@ I := ./include/
 # Final include flags
 INCLUDE = -I$(INCLUDEDIR)$(I_RAYLIB) -I$(INCLUDEDIR)$(I_RAYLIB_CPP) -I$(I)
 
-# --- Libraries ---
-# Global lib directory
-LIBDIR := /usr/local/lib/
-
-LIB = -L $(LIBDIR) -lraylib
-
-# --- Frameworks ---
-FRAMEWORKS = -framework OpenGL -framework Cocoa -framework IOKit -framework CoreFoundation -framework CoreAudio -framework CoreVideo -framework AudioToolbox
-
 CXX = clang++
 CXXFLAGS = --std=c++20 -Wall -Wextra -Werror -MMD -MP
-LDFLAGS = $(INCLUDE) $(LIB) $(FRAMEWORKS)
 
-SRCS = $(wildcard src/*.cpp) $(wildcard src/interpolated/*.cpp) $(wildcard src/events/*.cpp) $(wildcard src/ecs/*.cpp) $(wildcard src/ecs/components/*.cpp) $(wildcard src/ecs/engines/*.cpp) $(wildcard src/ecs/systems/*.cpp)
-# SRCS_JUMBO = src/unity.cpp
+BUILDDIR := build
 
-OBJS = $(SRCS:.cpp=.o)
-DEPS = $(OBJS:.o=.d)
+SRC_DIRS := \
+src \
+src/interpolated \
+src/events \
+src/ecs \
+src/ecs/components \
+src/ecs/engines \
+src/ecs/systems
 
-TARGET = turnip.a
+SRCS := $(foreach D,$(SRC_DIRS),$(wildcard $(D)/*.cpp))
+OBJS := $(patsubst src/%.cpp,$(BUILDDIR)/%.o,$(SRCS))
+
+DEPS := $(OBJS:.o=.d)
+
+TARGET := turnip.a
 
 all: $(TARGET)
 
-# build static library
 $(TARGET) : $(OBJS)
-	ar rvs turnip.a $(OBJS)
-# 	$(CXX) $(OBJS) -o $(TARGET) $(LDFLAGS)
+	ar rvs $@ $^
 
-%.o: %.cpp
+$(BUILDDIR)/%.o: src/%.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@
 
 -include $(DEPS)
 
 clean:
-	rm -f $(OBJS) $(DEPS) $(TARGET)
+	@rm -rf $(BUILDDIR)
+	@echo Successfully cleaned build!

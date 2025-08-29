@@ -7,7 +7,7 @@ I_RAYLIB := /raylib
 I_RAYLIB_CPP := /raylib-cpp
 
 # Local include directory
-I := ../include/
+I := ../../include/
 
 # Final include flags
 INCLUDE = -I$(INCLUDEDIR)$(I_RAYLIB) -I$(INCLUDEDIR)$(I_RAYLIB_CPP) -I$(I)
@@ -34,7 +34,7 @@ TARGET = bids
 all: $(TARGET)
 
 $(TARGET) : $(OBJS)
-	$(CXX) $(OBJS) ../turnip.a -o $(TARGET) $(LDFLAGS)
+	$(CXX) $(OBJS) ../../turnip.a -o $(TARGET) $(LDFLAGS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -o $@

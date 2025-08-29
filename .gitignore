@@ -1,6 +1,9 @@
 *.o
 *.d
 
+/build
+turnip.a
+
 .vscode
 .config
 .editorconfig

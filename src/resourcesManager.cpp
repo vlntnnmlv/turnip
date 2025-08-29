@@ -5,8 +5,9 @@
 #include "./turnip/resourcesManager.hpp"
 
 namespace turnip {
-ResourcesManager::ResourcesManager(const std::string &_ResourcesDirectory)
-    : m_ResourcesDirectory(_ResourcesDirectory) {}
+void ResourcesManager::SetResourcesDirectory(const std::string &_ResourcesDirectory) {
+    m_ResourcesDirectory = _ResourcesDirectory;
+}
 
 raylib::Texture2D &ResourcesManager::GetTexture(const std::string &_Name) {
     if (!m_Textures.contains(_Name)) {
