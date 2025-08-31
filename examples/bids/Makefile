@@ -33,6 +33,8 @@ TARGET = bids
 
 all: $(TARGET)
 
+re: clean all
+
 $(TARGET) : $(OBJS)
 	$(CXX) $(OBJS) ../../turnip.a -o $(TARGET) $(LDFLAGS)
 

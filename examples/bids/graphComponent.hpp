@@ -1,3 +1,5 @@
+// Copyright 2025 Valentin Namleev
+
 #include <turnip/ecs/component.hpp>
 
 #include <utility>

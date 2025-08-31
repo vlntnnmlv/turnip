@@ -34,6 +34,8 @@ TARGET := turnip.a
 
 all: $(TARGET)
 
+re: clean all
+
 $(TARGET) : $(OBJS)
 	ar rvs $@ $^
 

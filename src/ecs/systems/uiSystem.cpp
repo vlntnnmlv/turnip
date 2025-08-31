@@ -107,31 +107,6 @@ void UISystem::TryUseButton(EntityID _EntityID) {
     SetPressedEntity(ecs::NullEntity);
 }
 
-// template <typename TComponent = void>
-// EntityID FindEventHit(EntityID _EntityID, const events::InputEvent &_Event) {
-//     auto *transform = m_Registry.GetComponent<TransformComponent>(_EntityID);
-
-//     if (!transform || !transform->worldRect.Rect().CheckCollision(_Event.position))
-//         return ecs::NullEntity;
-
-//     if (auto *children = m_Registry.GetComponent<ChildrenComponent>(_EntityID)) {
-//         // Reverse order so the *last* child wins.
-//         for (auto it = children->children.rbegin(); it != children->children.rend(); ++it) {
-//             if (EntityID hit = FindEventHit<TComponent>(*it, _Event); hit != ecs::NullEntity)
-//                 return hit;
-//         }
-//     }
-
-//     if constexpr (std::is_void_v<TComponent>) {
-//         // No filter requested → any entity counts.
-//         std::cout << "is void!\n";
-//         return _EntityID;
-//     } else {
-//         // Filtered mode → only entities that have TComponent.
-//         return m_Registry.GetComponent<TComponent>(_EntityID) ? _EntityID : ecs::NullEntity;
-//     }
-// }
-
 void UISystem::ProcessLayout() {
     auto roots = FindRoots();
     m_WasResized |= IsWindowResized();
@@ -165,7 +140,6 @@ std::vector<EntityID> UISystem::FindRoots() {
     return roots;
 }
 
-// TODO: Add text fitting
 void UISystem::MeasureEntityContent(EntityID _EntityID) {
     if (!m_LayoutEngine.TryMeasureEntityContent(_EntityID))
         return;

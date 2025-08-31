@@ -1,6 +1,8 @@
 // Copyright 2025 Valentin Namleev
 
 #include "./turnip/ecs/engines/layoutEngine.hpp"
+#include "./turnip/ecs/components/textComponent.hpp"
+#include <iostream>
 
 namespace turnip::ecs {
 LayoutEngine::LayoutEngine(Registry &_Registry) : m_Registry(_Registry) {}
@@ -89,6 +91,31 @@ void LayoutEngine::MeasureNodeContent(ChildrenComponent *_ChildrenComponent,
                 break;
             }
         }
+
+        // TODO: Add text fitting
+
+        // TextComponent *childTextComponent = m_Registry.GetComponent<TextComponent>(child);
+        // if (!childTextComponent)
+        //     continue;
+
+        // Vector2 textSize = childTextComponent->font.MeasureText(
+        //     childTextComponent->text, childTextComponent->fontSize, childTextComponent->spacing);
+
+        // Vector2 childSize = RectangleUtils::Size(childTransformComponent->worldRect.Rect());
+
+        // std::cout << textSize.x << "; " << textSize.y << " | " << childSize.x << "; " <<
+        // childSize.y << "\n";
+        // while (textSize.x < childSize.x && textSize.y < childSize.y) {
+        //     childTextComponent->fontSize += 0.1f;
+        //     textSize = childTextComponent->font.MeasureText(childTextComponent->text,
+        //                                                     childTextComponent->fontSize,
+        //                                                     childTextComponent->spacing);
+        // }
+
+        // while (textSize.x > childSize.x && textSize.y > childSize.y) {
+        //     childTextComponent->fontSize -= 0.1f;
+        //     textSize = MeasureTextEx(childTextComponent->font, childTextComponent->text.c_str(),
+        //                              childTextComponent->fontSize, childTextComponent->spacing);
     }
 }
 
