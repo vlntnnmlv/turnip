@@ -7,8 +7,6 @@ Vector2 RectangleUtils::Center(const Rectangle &_Rect) {
     return Vector2{_Rect.x + _Rect.width / 2, _Rect.y + _Rect.height / 2};
 }
 
-Vector2 RectangleUtils::Size(const Rectangle &_Rect) { return Vector2{_Rect.x, _Rect.y}; }
-
 Rectangle RectangleUtils::Move(Rectangle &_Rect, Vector2 _Offset) {
     _Rect.x += _Offset.x;
     _Rect.y += _Offset.y;

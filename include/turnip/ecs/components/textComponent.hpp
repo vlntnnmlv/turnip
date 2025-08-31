@@ -12,6 +12,7 @@ struct TextComponent : IComponent {
     std::string text;
     raylib::Font &font;
     float fontSize;
+    float fontSizeOriginal;
     float spacing;
 
     TextComponent(const std::string &_Text, raylib::Font &_Font, float _FontSize, float _Spacing);
