@@ -12,6 +12,7 @@
 #include <map>
 #include <random>
 #include <string>
+#include <raylib.h>
 
 #include "./graphComponent.hpp"
 
@@ -26,7 +27,13 @@ static Vector2 map(Vector2 _V, Vector2 _MinFrom, Vector2 _MaxFrom, Vector2 _MinT
     };
 }
 
+static Shader graphShader;
+static int timeLoc = 0;
+
 void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Registry &_Registry) {
+    BeginShaderMode(graphShader);
+    float t = GetTime();
+    SetShaderValue(graphShader, timeLoc, &t, SHADER_UNIFORM_FLOAT);
     for (turnip::ecs::EntityID e : _ToRender) {
         turnip::ecs::TransformComponent *transformComponent =
             _Registry.GetComponent<turnip::ecs::TransformComponent>(e);
@@ -73,6 +80,7 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
 
         DrawCircle(end.x, end.y, 5, color);
     }
+    EndShaderMode();
 }
 
 int main() {
@@ -81,7 +89,10 @@ int main() {
     std::uniform_real_distribution<std::mt19937::result_type> dist10(1.0, 3.0);
 
     turnip::Engine engine(860, 640, "Turnip");
-    engine.ResourcesManager().SetResourcesDirectory(std::filesystem::absolute("../../resources"));
+    std::filesystem::path resourcesDir = std::filesystem::absolute("../../resources");
+    engine.ResourcesManager().SetResourcesDirectory(resourcesDir.string());
+    graphShader = LoadShader(nullptr, (resourcesDir / "shaders/graph.glsl").string().c_str());
+    timeLoc = GetShaderLocation(graphShader, "time");
 
     engine.RenderSystem().RegisterRenderer(
         {typeid(turnip::ecs::TransformComponent), typeid(GraphComponent)},
@@ -191,6 +202,8 @@ int main() {
     });
 
     engine.Run();
+
+    UnloadShader(graphShader);
 
     return 0;
 }
