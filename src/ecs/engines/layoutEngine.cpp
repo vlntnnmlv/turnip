@@ -8,6 +8,9 @@ namespace turnip::ecs {
 LayoutEngine::LayoutEngine(Registry &_Registry) : m_Registry(_Registry) {}
 
 // TODO: Add max available size everywhere, not only to stack contents && test layouting
+// TODO: Check jittering on stack height increase
+// TODO: Make TransformComponent.worldRect a normal rect, and move rectlerp logic to
+// renderTransformComponent
 bool LayoutEngine::TryMeasureEntityContent(EntityID _EntityID) {
     ChildrenComponent *childrenComponent = m_Registry.GetComponent<ChildrenComponent>(_EntityID);
     TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(_EntityID);
