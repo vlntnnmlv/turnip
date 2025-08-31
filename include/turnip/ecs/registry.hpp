@@ -4,6 +4,7 @@
 
 #include <any>
 #include <cstddef>
+#include <set>
 #include <typeindex>
 #include <unordered_map>
 #include <vector>
@@ -13,6 +14,8 @@
 namespace turnip::ecs {
 
 using EntityID = std::size_t;
+using ComponentTypeSet = std::set<std::type_index>;
+
 static constexpr EntityID NullEntity = 0;
 
 class Registry {
@@ -44,6 +47,50 @@ public:
         for (auto const &[id, _] : GetComponentMap<T>()) {
             result.push_back(id);
         }
+        return result;
+    }
+
+    std::vector<EntityID> With(const ComponentTypeSet &_ComponentTypeSet) {
+        if (_ComponentTypeSet.empty())
+            return {};
+
+        const std::type_index *driverType = nullptr;
+        size_t minSize = std::numeric_limits<size_t>::max();
+        for (const std::type_index &componentType : _ComponentTypeSet) {
+            auto it = m_Components.find(componentType);
+            if (it == m_Components.end())
+                return {};
+
+            size_t size = it->second.size();
+            if (size < minSize) {
+                minSize = size;
+                driverType = &componentType;
+            }
+        }
+
+        if (!driverType)
+            return {};
+
+        const auto &driverMap = m_Components.at(*driverType);
+
+        std::vector<EntityID> result;
+        result.reserve(driverMap.size());
+        for (const auto &[id, _] : driverMap) {
+            bool hasAll = true;
+            for (const auto &type : _ComponentTypeSet) {
+                if (type == *driverType)
+                    continue;
+
+                if (!HasComponentByType(id, type)) {
+                    hasAll = false;
+                    break;
+                }
+            }
+
+            if (hasAll)
+                result.push_back(id);
+        }
+
         return result;
     }
 

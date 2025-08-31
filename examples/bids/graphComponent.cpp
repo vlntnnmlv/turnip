@@ -1,8 +1,7 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./turnip/ecs/components/graphComponent.hpp"
+#include "./graphComponent.hpp"
 
-namespace turnip::ecs {
 float GraphComponent::minValue() {
     return std::min_element(
                valuesInTime.begin(), valuesInTime.end(),
@@ -16,4 +15,3 @@ float GraphComponent::maxValue() {
                [](const ValueIntime &_A, const ValueIntime &_B) { return _A.second < _B.second; })
         ->second;
 }
-} // namespace turnip::ecs

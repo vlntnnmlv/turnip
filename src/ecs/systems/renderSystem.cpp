@@ -2,23 +2,49 @@
 
 #include "./turnip/ecs/systems/renderSystem.hpp"
 
+// TODO: Option to add custom renderers!
+
 namespace turnip::ecs {
 RenderSystem::RenderSystem(Registry &_Registry, std::unique_ptr<raylib::Window> &_Window)
-    : ISystem(_Registry), m_Window(_Window) {}
+    : ISystem(_Registry), m_Window(_Window) {
+    RegisterRenderer(
+        {typeid(ecs::TransformComponent), typeid(ecs::SpriteComponent)},
+        [this](std::vector<EntityID> &_ToRender, [[maybe_unused]] ecs::Registry &_Registry) {
+            RenderSprites(_ToRender);
+        });
+
+    RegisterRenderer({typeid(ecs::TransformComponent), typeid(ecs::TextComponent)},
+                     [this](std::vector<EntityID> &_ToRender,
+                            [[maybe_unused]] ecs::Registry &_Registry) { RenderTexts(_ToRender); });
+
+    // RegisterRenderer({typeid(ecs::TransformComponent)},
+    //                  [this](std::vector<EntityID> &_ToRender,
+    //                         [[maybe_unused]] ecs::Registry &_Registry) { RenderDebug(_ToRender);
+    //                         });
+}
 
 void RenderSystem::Update([[maybe_unused]] float _DeltaTime) { Render(); }
 
 void RenderSystem::SetBackgroundColor(Color _Color) { m_BackgroundColor = _Color; }
 
+void RenderSystem::RegisterRenderer(const ComponentTypeSet &_ComponentTypeSet,
+                                    RenderCallback _RenderCallback) {
+    m_ComponentRenderers.emplace_back(_ComponentTypeSet, std::move(_RenderCallback));
+}
+
 void RenderSystem::Render() {
     BeginDrawing();
     m_Window->ClearBackground(m_BackgroundColor);
 
-    RenderSprites();
-    RenderTexts();
-    RenderGraphs();
+    for (const auto &[componentTypeSet, renderCallback] : m_ComponentRenderers) {
+        std::vector<EntityID> toRender = m_Registry.With(componentTypeSet);
+        if (toRender.empty())
+            continue;
 
-    // RenderDebug();
+        renderCallback(toRender, m_Registry);
+    }
+
+    // RenderGraphs();
 
     // ---
     DrawText(std::to_string(GetFPS()).c_str(), 0, 0, 24, RED);
@@ -27,12 +53,13 @@ void RenderSystem::Render() {
     EndDrawing();
 }
 
-void RenderSystem::RenderSprites() {
-    std::vector<EntityID> toRender = m_Registry.With<TransformComponent, SpriteComponent>();
-    std::sort(toRender.begin(), toRender.end());
+void RenderSystem::RenderSprites(std::vector<EntityID> &_ToRender) {
+    std::sort(_ToRender.begin(), _ToRender.end());
 
-    for (EntityID e : toRender) {
+    for (EntityID e : _ToRender) {
         TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(e);
+        RenderTransformComponent *renderTransformComponent =
+            m_Registry.GetComponent<RenderTransformComponent>(e);
         SpriteComponent *spriteComponent = m_Registry.GetComponent<SpriteComponent>(e);
         ColorComponent *colorComponent = m_Registry.GetComponent<ColorComponent>(e);
 
@@ -47,16 +74,14 @@ void RenderSystem::RenderSprites() {
                        static_cast<int>(spriteComponent->patch.bottom),
                        NPATCH_NINE_PATCH};
 
-        Rectangle renderRect = GetRenderRect(e, transformComponent);
+        Rectangle renderRect = GetRenderRect(transformComponent, renderTransformComponent);
 
         DrawTextureNPatch(spriteComponent->texture, patchInfo, renderRect, {0, 0}, 0, color);
     }
 }
 
-void RenderSystem::RenderTexts() {
-    std::vector<EntityID> toRender = m_Registry.With<TransformComponent, TextComponent>();
-
-    for (EntityID e : toRender) {
+void RenderSystem::RenderTexts(std::vector<EntityID> &_ToRender) {
+    for (EntityID e : _ToRender) {
         TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(e);
         TextComponent *textComponent = m_Registry.GetComponent<TextComponent>(e);
         ColorComponent *colorComponent = m_Registry.GetComponent<ColorComponent>(e);
@@ -66,7 +91,10 @@ void RenderSystem::RenderTexts() {
         Vector2 textSize = textComponent->font.MeasureText(
             textComponent->text.c_str(), textComponent->fontSize, textComponent->spacing);
 
-        Rectangle renderRect = GetRenderRect(e, transformComponent);
+        RenderTransformComponent *renderTransformComponent =
+            m_Registry.GetComponent<RenderTransformComponent>(e);
+
+        Rectangle renderRect = GetRenderRect(transformComponent, renderTransformComponent);
         Vector2 center = RectangleUtils::Center(renderRect);
 
         Vector2 textPosition = Vector2{center.x - textSize.x * 0.5f, center.y - textSize.y * 0.5f};
@@ -76,81 +104,25 @@ void RenderSystem::RenderTexts() {
     }
 }
 
-static float map(float _V, float _MinFrom, float _MaxFrom, float _MinTo, float _MaxTo) {
-    return ((_V - _MinFrom) / (_MaxFrom - _MinFrom)) * (_MaxTo - _MinTo) + _MinTo;
-}
-
-static Vector2 map(Vector2 _V, Vector2 _MinFrom, Vector2 _MaxFrom, Vector2 _MinTo, Vector2 _MaxTo) {
-    return Vector2{
-        map(_V.x, _MinFrom.x, _MaxFrom.x, _MinTo.x, _MaxTo.x),
-        map(_V.y, _MinFrom.y, _MaxFrom.y, _MinTo.y, _MaxTo.y),
-    };
-}
-
-void RenderSystem::RenderGraphs() {
-    std::vector<EntityID> toRender = m_Registry.With<TransformComponent, GraphComponent>();
-
-    for (EntityID e : toRender) {
+void RenderSystem::RenderDebug(std::vector<EntityID> &_ToRender) {
+    for (EntityID e : _ToRender) {
         TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(e);
-        GraphComponent *graphComponent = m_Registry.GetComponent<GraphComponent>(e);
+        RenderTransformComponent *renderTransformComponent =
+            m_Registry.GetComponent<RenderTransformComponent>(e);
 
-        if (graphComponent->valuesInTime.size() < 2)
-            continue;
-
-        Rectangle renderRect = GetRenderRect(e, transformComponent);
-
-        ColorComponent *colorComponent = m_Registry.GetComponent<ColorComponent>(e);
-        raylib::Color color = colorComponent ? colorComponent->color : WHITE;
-
-        float minValue = graphComponent->minValue();
-        float maxValue = graphComponent->maxValue();
-        float minTime = graphComponent->valuesInTime.begin()->first;
-        float maxTime = std::prev(graphComponent->valuesInTime.end(), 1)->first;
-
-        float minX = renderRect.x;
-        float maxX = renderRect.x + renderRect.width;
-
-        float minY = renderRect.y + renderRect.height;
-        float maxY = renderRect.y;
-
-        Vector2 start;
-        Vector2 end;
-        for (size_t i = 0; i < graphComponent->valuesInTime.size() - 1; i++) {
-            start = map(Vector2{graphComponent->valuesInTime[i].first,
-                                graphComponent->valuesInTime[i].second},
-                        Vector2{minTime, minValue}, Vector2{maxTime, maxValue}, Vector2{minX, minY},
-                        Vector2{maxX, maxY});
-            end = map(Vector2{graphComponent->valuesInTime[i + 1].first,
-                              graphComponent->valuesInTime[i + 1].second},
-                      Vector2{minTime, minValue}, Vector2{maxTime, maxValue}, Vector2{minX, minY},
-                      Vector2{maxX, maxY});
-            DrawLineEx(start, end, 3, color);
-        }
-
-        DrawCircle(end.x, end.y, 5, color);
+        DrawRectangleLinesEx(GetRenderRect(transformComponent, renderTransformComponent), 1, RED);
     }
 }
 
-void RenderSystem::RenderDebug() {
-    std::vector<EntityID> toRender = m_Registry.With<TransformComponent>();
-    for (EntityID e : toRender) {
-        TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(e);
-
-        DrawRectangleLinesEx(GetRenderRect(e, transformComponent), 1, RED);
-    }
-}
-
-Rectangle RenderSystem::GetRenderRect(EntityID _EntityID, TransformComponent *_TransformComponent) {
-    RenderTransformComponent *renderTransformComponent =
-        m_Registry.GetComponent<RenderTransformComponent>(_EntityID);
-
-    if (!renderTransformComponent)
+Rectangle RenderSystem::GetRenderRect(TransformComponent *_TransformComponent,
+                                      RenderTransformComponent *_RenderTransformComponent) {
+    if (!_RenderTransformComponent)
         return _TransformComponent->worldRect.Rect();
 
     Rectangle expandedRect = RectangleUtils::Expand(_TransformComponent->worldRect.Rect(),
-                                                    renderTransformComponent->rectOffset);
+                                                    _RenderTransformComponent->rectOffset);
 
-    Rectangle movedRect = RectangleUtils::Move(expandedRect, renderTransformComponent->offset);
+    Rectangle movedRect = RectangleUtils::Move(expandedRect, _RenderTransformComponent->offset);
     return movedRect;
 }
 } // namespace turnip::ecs

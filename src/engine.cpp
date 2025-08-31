@@ -15,7 +15,9 @@ Engine::Engine(float _WindowWidth, float _WindowHeight, const std::string &_Wind
 
 UISceneBuilder &Engine::UISceneBuilder() { return m_UISceneBuilder; }
 ResourcesManager &Engine::ResourcesManager() { return m_ResourcesManager; }
+
 ecs::Registry &Engine::Registry() { return m_Registry; }
+ecs::RenderSystem &Engine::RenderSystem() { return m_RenderSystem; }
 
 void Engine::AddUpdateStep(std::function<void(float)> _UpdateStep) {
     ecs::EntityID updateStep = m_Registry.CreateEntity();

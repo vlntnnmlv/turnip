@@ -165,6 +165,7 @@ std::vector<EntityID> UISystem::FindRoots() {
     return roots;
 }
 
+// TODO: Add text fitting
 void UISystem::MeasureEntityContent(EntityID _EntityID) {
     if (!m_LayoutEngine.TryMeasureEntityContent(_EntityID))
         return;

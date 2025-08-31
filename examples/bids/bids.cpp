@@ -3,7 +3,6 @@
 #include <turnip/colorUtils.hpp>
 #include <turnip/ecs/components/childrenComponent.hpp>
 #include <turnip/ecs/components/colorComponent.hpp>
-#include <turnip/ecs/components/graphComponent.hpp>
 #include <turnip/ecs/components/textComponent.hpp>
 #include <turnip/ecs/components/transformComponent.hpp>
 #include <turnip/ecs/entity.hpp>
@@ -14,6 +13,68 @@
 #include <random>
 #include <string>
 
+#include "./graphComponent.hpp"
+
+static float map(float _V, float _MinFrom, float _MaxFrom, float _MinTo, float _MaxTo) {
+    return ((_V - _MinFrom) / (_MaxFrom - _MinFrom)) * (_MaxTo - _MinTo) + _MinTo;
+}
+
+static Vector2 map(Vector2 _V, Vector2 _MinFrom, Vector2 _MaxFrom, Vector2 _MinTo, Vector2 _MaxTo) {
+    return Vector2{
+        map(_V.x, _MinFrom.x, _MaxFrom.x, _MinTo.x, _MaxTo.x),
+        map(_V.y, _MinFrom.y, _MaxFrom.y, _MinTo.y, _MaxTo.y),
+    };
+}
+
+void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Registry &_Registry) {
+    for (turnip::ecs::EntityID e : _ToRender) {
+        turnip::ecs::TransformComponent *transformComponent =
+            _Registry.GetComponent<turnip::ecs::TransformComponent>(e);
+
+        turnip::ecs::RenderTransformComponent *renderTransformComponent =
+            _Registry.GetComponent<turnip::ecs::RenderTransformComponent>(e);
+
+        GraphComponent *graphComponent = _Registry.GetComponent<GraphComponent>(e);
+
+        if (graphComponent->valuesInTime.size() < 2)
+            continue;
+
+        Rectangle renderRect =
+            turnip::ecs::RenderSystem::GetRenderRect(transformComponent, renderTransformComponent);
+
+        turnip::ecs::ColorComponent *colorComponent =
+            _Registry.GetComponent<turnip::ecs::ColorComponent>(e);
+        raylib::Color color = colorComponent ? colorComponent->color : WHITE;
+
+        float minValue = graphComponent->minValue();
+        float maxValue = graphComponent->maxValue();
+        float minTime = graphComponent->valuesInTime.begin()->first;
+        float maxTime = std::prev(graphComponent->valuesInTime.end(), 1)->first;
+
+        float minX = renderRect.x;
+        float maxX = renderRect.x + renderRect.width;
+
+        float minY = renderRect.y + renderRect.height;
+        float maxY = renderRect.y;
+
+        Vector2 start;
+        Vector2 end;
+        for (size_t i = 0; i < graphComponent->valuesInTime.size() - 1; i++) {
+            start = map(Vector2{graphComponent->valuesInTime[i].first,
+                                graphComponent->valuesInTime[i].second},
+                        Vector2{minTime, minValue}, Vector2{maxTime, maxValue}, Vector2{minX, minY},
+                        Vector2{maxX, maxY});
+            end = map(Vector2{graphComponent->valuesInTime[i + 1].first,
+                              graphComponent->valuesInTime[i + 1].second},
+                      Vector2{minTime, minValue}, Vector2{maxTime, maxValue}, Vector2{minX, minY},
+                      Vector2{maxX, maxY});
+            DrawLineEx(start, end, 3, color);
+        }
+
+        DrawCircle(end.x, end.y, 5, color);
+    }
+}
+
 int main() {
     std::random_device dev;
     std::mt19937 rng(dev());
@@ -21,6 +82,12 @@ int main() {
 
     turnip::Engine engine(860, 640, "Turnip");
     engine.ResourcesManager().SetResourcesDirectory(std::filesystem::absolute("../../resources"));
+
+    engine.RenderSystem().RegisterRenderer(
+        {typeid(turnip::ecs::TransformComponent), typeid(GraphComponent)},
+        [](std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Registry &_Registry) {
+            RenderGraphs(_ToRender, _Registry);
+        });
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
     turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
@@ -54,7 +121,7 @@ int main() {
         graph = sceneBuilder.CreateNode(
             panelRight, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL},
             turnip::LRTB{10, 10, 10, 10});
-        engine.Registry().AddComponent<turnip::ecs::GraphComponent>(graph);
+        engine.Registry().AddComponent<GraphComponent>(graph);
         engine.Registry().AddComponent<turnip::ecs::ColorComponent>(
             graph, raylib::Color{186, 10, 10, 255});
     }
@@ -81,7 +148,7 @@ int main() {
 
     static int bidsAndAsksCount = 0;
     auto onBidAdded = [&graph, &engine]() {
-        engine.Registry().GetComponent<turnip::ecs::GraphComponent>(graph)->valuesInTime.push_back(
+        engine.Registry().GetComponent<GraphComponent>(graph)->valuesInTime.push_back(
             std::pair<float, float>(static_cast<float>(GetTime()),
                                     static_cast<float>(bidsAndAsksCount)));
     };

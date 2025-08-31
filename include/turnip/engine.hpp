@@ -32,7 +32,9 @@ public:
 
     UISceneBuilder &UISceneBuilder();
     ResourcesManager &ResourcesManager();
+
     ecs::Registry &Registry();
+    ecs::RenderSystem &RenderSystem();
 
     void AddUpdateStep(std::function<void(float)> _UpdateStep);
 
