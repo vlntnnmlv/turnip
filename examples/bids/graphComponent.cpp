@@ -2,16 +2,16 @@
 
 #include "./graphComponent.hpp"
 
-float GraphComponent::minValue() {
+Value GraphComponent::minValue() {
     return std::min_element(
                valuesInTime.begin(), valuesInTime.end(),
-               [](const ValueIntime &_A, const ValueIntime &_B) { return _A.second < _B.second; })
+               [](const ValueInTime &_A, const ValueInTime &_B) { return _A.second < _B.second; })
         ->second;
 }
 
-float GraphComponent::maxValue() {
+Value GraphComponent::maxValue() {
     return std::max_element(
                valuesInTime.begin(), valuesInTime.end(),
-               [](const ValueIntime &_A, const ValueIntime &_B) { return _A.second < _B.second; })
+               [](const ValueInTime &_A, const ValueInTime &_B) { return _A.second < _B.second; })
         ->second;
 }

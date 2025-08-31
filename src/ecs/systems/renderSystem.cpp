@@ -15,9 +15,10 @@ RenderSystem::RenderSystem(Registry &_Registry, std::unique_ptr<raylib::Window> 
                      [this](std::vector<EntityID> &_ToRender,
                             [[maybe_unused]] ecs::Registry &_Registry) { RenderTexts(_ToRender); });
 
-    RegisterRenderer({typeid(ecs::TransformComponent)},
-                     [this](std::vector<EntityID> &_ToRender,
-                            [[maybe_unused]] ecs::Registry &_Registry) { RenderDebug(_ToRender); });
+    // RegisterRenderer({typeid(ecs::TransformComponent)},
+    //                  [this](std::vector<EntityID> &_ToRender,
+    //                         [[maybe_unused]] ecs::Registry &_Registry) { RenderDebug(_ToRender);
+    //                         });
 }
 
 void RenderSystem::Update([[maybe_unused]] float _DeltaTime) { Render(); }

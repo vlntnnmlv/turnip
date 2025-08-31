@@ -46,10 +46,10 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
             _Registry.GetComponent<turnip::ecs::ColorComponent>(e);
         raylib::Color color = colorComponent ? colorComponent->color : WHITE;
 
-        float minValue = graphComponent->minValue();
-        float maxValue = graphComponent->maxValue();
-        float minTime = graphComponent->valuesInTime.begin()->first;
-        float maxTime = std::prev(graphComponent->valuesInTime.end(), 1)->first;
+        Value minValue = graphComponent->minValue();
+        Value maxValue = graphComponent->maxValue();
+        Time minTime = graphComponent->valuesInTime.begin()->first;
+        Time maxTime = std::prev(graphComponent->valuesInTime.end(), 1)->first;
 
         float minX = renderRect.x;
         float maxX = renderRect.x + renderRect.width;
