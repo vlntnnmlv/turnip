@@ -15,30 +15,7 @@ bool LayoutEngine::TryMeasureEntityContent(EntityID _EntityID) {
     ChildrenComponent *childrenComponent = m_Registry.GetComponent<ChildrenComponent>(_EntityID);
     TransformComponent *transformComponent = m_Registry.GetComponent<TransformComponent>(_EntityID);
 
-    // TODO: Make this better!
-    TextComponent *textComponent = m_Registry.GetComponent<TextComponent>(_EntityID);
-    if (textComponent) {
-        Vector2 panelSize = transformComponent->worldRect.Rect().GetSize();
-        float fontSize = textComponent->fontSize;
-        Vector2 textSize =
-            textComponent->font.MeasureText(textComponent->text, fontSize, textComponent->spacing);
-
-        if (textSize.x > panelSize.x || textSize.y > panelSize.y) {
-            while (textSize.x > panelSize.x || textSize.y > panelSize.y) {
-                fontSize -= 0.1f;
-                textSize = textComponent->font.MeasureText(textComponent->text, fontSize,
-                                                           textComponent->spacing);
-            }
-        } else if (textSize.x < panelSize.x && textSize.y < panelSize.y) {
-            while (textSize.x < panelSize.x && textSize.y < panelSize.y) {
-                fontSize += 0.1f;
-                textSize = textComponent->font.MeasureText(textComponent->text, fontSize,
-                                                           textComponent->spacing);
-            }
-        }
-
-        textComponent->fontSize = std::clamp(fontSize, fontSize, textComponent->fontSizeOriginal);
-    }
+    MeasureText(m_Registry.GetComponent<TextComponent>(_EntityID), transformComponent);
 
     if (!childrenComponent)
         return false;
@@ -52,6 +29,34 @@ bool LayoutEngine::TryMeasureEntityContent(EntityID _EntityID) {
         MeasureStackContent(_EntityID, childrenComponent, transformComponent, layoutComponent,
                             stackComponent);
     return true;
+}
+
+void LayoutEngine::MeasureText(TextComponent *_TextComponent,
+                               TransformComponent *_TransformComponent) {
+    // TODO: Make this better!
+    if (!_TextComponent)
+        return;
+
+    Vector2 panelSize = _TransformComponent->worldRect.GetSize();
+    float fontSize = _TextComponent->fontSize;
+    Vector2 textSize =
+        _TextComponent->font.MeasureText(_TextComponent->text, fontSize, _TextComponent->spacing);
+
+    if (textSize.x > panelSize.x || textSize.y > panelSize.y) {
+        while (textSize.x > panelSize.x || textSize.y > panelSize.y) {
+            fontSize -= 0.1f;
+            textSize = _TextComponent->font.MeasureText(_TextComponent->text, fontSize,
+                                                        _TextComponent->spacing);
+        }
+    } else if (textSize.x < panelSize.x && textSize.y < panelSize.y) {
+        while (textSize.x < panelSize.x && textSize.y < panelSize.y) {
+            fontSize += 0.1f;
+            textSize = _TextComponent->font.MeasureText(_TextComponent->text, fontSize,
+                                                        _TextComponent->spacing);
+        }
+    }
+
+    _TextComponent->fontSize = std::clamp(fontSize, fontSize, _TextComponent->fontSizeOriginal);
 }
 
 bool LayoutEngine::TryArrangeEntityContent(EntityID _EntityID) {

@@ -51,7 +51,7 @@ private:
     EntityID FindEventHit(EntityID _EntityID, const events::InputEvent &_Event) {
         auto *transform = m_Registry.GetComponent<TransformComponent>(_EntityID);
 
-        if (!transform || !transform->worldRect.Rect().CheckCollision(_Event.position))
+        if (!transform || !transform->worldRect.CheckCollision(_Event.position))
             return ecs::NullEntity;
 
         if (auto *children = m_Registry.GetComponent<ChildrenComponent>(_EntityID)) {

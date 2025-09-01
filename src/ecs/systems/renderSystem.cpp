@@ -115,9 +115,9 @@ void RenderSystem::RenderDebug(std::vector<EntityID> &_ToRender) {
 Rectangle RenderSystem::GetRenderRect(TransformComponent *_TransformComponent,
                                       RenderTransformComponent *_RenderTransformComponent) {
     if (!_RenderTransformComponent)
-        return _TransformComponent->worldRect.Rect();
+        return _TransformComponent->worldRect;
 
-    Rectangle expandedRect = RectangleUtils::Expand(_TransformComponent->worldRect.Rect(),
+    Rectangle expandedRect = RectangleUtils::Expand(_TransformComponent->worldRect,
                                                     _RenderTransformComponent->rectOffset);
 
     Rectangle movedRect = RectangleUtils::Move(expandedRect, _RenderTransformComponent->offset);

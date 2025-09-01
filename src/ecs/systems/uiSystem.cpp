@@ -166,13 +166,13 @@ void UISystem::PlaceInWorld(EntityID _EntityID) {
     ChildrenComponent *childrenComponent = m_Registry.GetComponent<ChildrenComponent>(_EntityID);
 
     if (!parentComponent)
-        transformComponent->worldRect.SetRect(transformComponent->rect);
+        transformComponent->worldRect = transformComponent->rect;
     else {
         TransformComponent *parentTransformComponent =
             m_Registry.GetComponent<TransformComponent>(parentComponent->parent);
-        transformComponent->worldRect.SetRect(RectangleUtils::Move(
+        transformComponent->worldRect = RectangleUtils::Move(
             transformComponent->rect,
-            Vector2{parentTransformComponent->worldRect.x, parentTransformComponent->worldRect.y}));
+            Vector2{parentTransformComponent->worldRect.x, parentTransformComponent->worldRect.y});
     }
 
     if (!childrenComponent)
