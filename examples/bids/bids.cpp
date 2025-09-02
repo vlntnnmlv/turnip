@@ -14,6 +14,7 @@
 #include <string>
 
 #include "./graphComponent.hpp"
+#include "./orderBook.hpp"
 
 static float map(float _V, float _MinFrom, float _MaxFrom, float _MinTo, float _MaxTo) {
     return ((_V - _MinFrom) / (_MaxFrom - _MinFrom)) * (_MaxTo - _MinTo) + _MinTo;
@@ -76,9 +77,10 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
 }
 
 int main() {
+
     std::random_device dev;
     std::mt19937 rng(dev());
-    std::uniform_real_distribution<float> dist10(1.0, 20.0);
+    std::uniform_real_distribution<float> dist01(0.0, 1.0);
 
     turnip::Engine engine(860, 640, "Turnip");
     engine.ResourcesManager().SetResourcesDirectory(std::filesystem::absolute("../../resources"));
@@ -108,120 +110,8 @@ int main() {
     turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
         sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::START, 2);
 
-    turnip::ecs::EntityID panelLeft = createPanelWithBg(
-        stackH, turnip::Size{.axisX = turnip::SizeType::START, .width = 240}, turnip::LRTB{},
-        turnip::LRTB{4, 4, 4, 4}, raylib::Color{70, 84, 109, 255});
-
-    turnip::ecs::EntityID panelRight = createPanelWithBg(
-        stackH, turnip::Size{.axisX = turnip::SizeType::FILL, .axisY = turnip::SizeType::FILL},
-        turnip::LRTB{}, turnip::LRTB{4, 4, 4, 4}, raylib::Color{70, 84, 109, 255});
-
-    turnip::ecs::EntityID panelRightRight = createPanelWithBg(
-        stackH, turnip::Size{.axisX = turnip::SizeType::FILL, .axisY = turnip::SizeType::FILL},
-        turnip::LRTB{}, turnip::LRTB{4, 4, 4, 4}, raylib::Color{70, 84, 109, 255});
-
-    turnip::ecs::EntityID rightRightHStack = sceneBuilder.CreateStack(
-        panelRightRight, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER,
-        4, turnip::Size{}, turnip::LRTB{}, turnip::LRTB{4, 4, 4, 4});
-
-    auto red = createPanelWithBg(rightRightHStack,
-                                 turnip::Size{.axisY = turnip::SizeType::END, .height = 0},
-                                 turnip::LRTB{}, turnip::LRTB{}, RED);
-
-    auto green = createPanelWithBg(rightRightHStack,
-                                   turnip::Size{.axisY = turnip::SizeType::END, .height = 0},
-                                   turnip::LRTB{}, turnip::LRTB{}, GREEN);
-
-    turnip::ecs::EntityID graph = turnip::ecs::NullEntity;
-    {
-        graph = sceneBuilder.CreateNode(
-            panelRight, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL},
-            turnip::LRTB{10, 10, 10, 10});
-        engine.Registry().AddComponent<GraphComponent>(graph);
-        engine.Registry().AddComponent<turnip::ecs::ColorComponent>(
-            graph, raylib::Color{186, 10, 10, 255});
-    }
-
-    turnip::ecs::EntityID stockbookStack = sceneBuilder.CreateStack(
-        panelLeft, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::START, 2);
-
-    auto createStockBook = [&createPanelWithBg,
-                            &sceneBuilder](turnip::ecs::EntityID _Parent) -> turnip::ecs::EntityID {
-        turnip::ecs::EntityID stockbookRoot = createPanelWithBg(
-            _Parent, turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL}, turnip::LRTB{},
-            turnip::LRTB{3, 3, 3, 3}, raylib::Color{87, 100, 122, 255});
-
-        turnip::ecs::EntityID stockbook = sceneBuilder.CreateStack(
-            stockbookRoot, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::END, 2,
-            turnip::Size{turnip::SizeType::FILL, turnip::SizeType::FILL}, turnip::LRTB{},
-            turnip::LRTB{2, 2, 2, 2});
-
-        return stockbook;
-    };
-
-    turnip::ecs::EntityID stockbookBuy = createStockBook(stockbookStack);
-    turnip::ecs::EntityID stockbookSell = createStockBook(stockbookStack);
-
-    static int bidsAndAsksCount = 0;
-    auto onBidAdded = [&graph, &engine]() {
-        engine.Registry().GetComponent<GraphComponent>(graph)->valuesInTime.push_back(
-            std::pair<float, float>(static_cast<float>(GetTime()),
-                                    static_cast<float>(bidsAndAsksCount)));
-    };
-
-    auto onSellBidAdded = [&red, &engine]() {
-        engine.Registry().GetComponent<turnip::ecs::LayoutComponent>(red)->size.height += 10;
-    };
-
-    auto onBuyBidAdded = [&green, &engine]() {
-        engine.Registry().GetComponent<turnip::ecs::LayoutComponent>(green)->size.height += 10;
-    };
-
-    auto addToStockBook =
-        [&createPanelWithBg, &onBidAdded, &sceneBuilder, &resourcesManager, &onSellBidAdded,
-         &onBuyBidAdded](turnip::ecs::EntityID _StockBook, raylib::Color _Color,
-                         raylib::Color _TextColor, bool _Buy) -> turnip::ecs::EntityID {
-        turnip::ecs::EntityID bid = createPanelWithBg(_StockBook,
-                                                      turnip::Size{.axisX = turnip::SizeType::FILL,
-                                                                   .axisY = turnip::SizeType::START,
-                                                                   .height = 30,
-                                                                   .minHeight = 10,
-                                                                   .maxHeight = 50},
-                                                      turnip::LRTB{}, turnip::LRTB{}, _Color);
-
-        sceneBuilder.CreateText(bid, "BID", resourcesManager.GetFont("martian_mono"), 24, 5,
-                                _TextColor);
-        onBidAdded();
-        if (_Buy)
-            onBuyBidAdded();
-        else
-            onSellBidAdded();
-
-        return bid;
-    };
-
-    static float time = 0;
-    engine.AddUpdateStep([&addToStockBook, &stockbookSell](float _DeltaTime) {
-        time += _DeltaTime;
-        if (time > 0.2f) {
-            addToStockBook(stockbookSell, {102, 114, 134}, {218, 221, 226}, false);
-            time = 0;
-            bidsAndAsksCount++;
-        }
-    });
-
-    float time2 = 0;
-    float target = dist10(rng);
-    engine.AddUpdateStep(
-        [&addToStockBook, &stockbookBuy, &dist10, &rng, &time2, &target](float _DeltaTime) {
-            time2 += _DeltaTime;
-            if (time2 > target) {
-                addToStockBook(stockbookBuy, {102, 114, 134}, {218, 221, 226}, true);
-                time2 = 0;
-                target = dist10(rng);
-                bidsAndAsksCount++;
-            }
-        });
+    createPanelWithBg(stackH, turnip::Size{.axisX = turnip::SizeType::START, .width = 240},
+                      turnip::LRTB{}, turnip::LRTB{4, 4, 4, 4}, raylib::Color{70, 84, 109, 255});
 
     engine.Run();
 

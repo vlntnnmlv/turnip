@@ -7,9 +7,10 @@
 #include "./turnip/ecs/component.hpp"
 
 namespace turnip::ecs {
-struct UpdateComponent : IComponent {
-    std::function<void(float)> onUpdate;
+using UpdateCallback = std::function<void(float, float)>;
 
-    UpdateComponent(std::function<void(float)> _OnUpdate);
+struct UpdateComponent : IComponent {
+    UpdateCallback onUpdate;
+    UpdateComponent(UpdateCallback _OnUpdate);
 };
 } // namespace turnip::ecs

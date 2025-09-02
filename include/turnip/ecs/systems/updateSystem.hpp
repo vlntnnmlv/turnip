@@ -12,5 +12,8 @@ public:
     UpdateSystem(Registry &_Registry);
 
     void Update(float _DeltaTime) override;
+
+private:
+    float m_Time{0.0f};
 };
 } // namespace turnip::ecs

@@ -3,5 +3,5 @@
 #include "./turnip/ecs/components/updateComponent.hpp"
 
 namespace turnip::ecs {
-UpdateComponent::UpdateComponent(std::function<void(float)> _OnUpdate) : onUpdate(_OnUpdate) {}
+UpdateComponent::UpdateComponent(UpdateCallback _OnUpdate) : onUpdate(_OnUpdate) {}
 } // namespace turnip::ecs

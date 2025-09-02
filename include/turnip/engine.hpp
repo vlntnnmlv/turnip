@@ -36,7 +36,7 @@ public:
     ecs::Registry &Registry();
     ecs::RenderSystem &RenderSystem();
 
-    void AddUpdateStep(std::function<void(float)> _UpdateStep);
+    void AddUpdateStep(ecs::UpdateCallback _UpdateStep);
 
     ecs::Entity CreateEntity();
 

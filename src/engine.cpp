@@ -19,7 +19,7 @@ ResourcesManager &Engine::ResourcesManager() { return m_ResourcesManager; }
 ecs::Registry &Engine::Registry() { return m_Registry; }
 ecs::RenderSystem &Engine::RenderSystem() { return m_RenderSystem; }
 
-void Engine::AddUpdateStep(std::function<void(float)> _UpdateStep) {
+void Engine::AddUpdateStep(ecs::UpdateCallback _UpdateStep) {
     ecs::EntityID updateStep = m_Registry.CreateEntity();
     m_Registry.AddComponent<ecs::UpdateComponent>(updateStep, _UpdateStep);
 }
