@@ -17,7 +17,6 @@
 #include "./turnip/rectangleUtils.hpp"
 
 namespace turnip::ecs {
-
 using RenderCallback = std::function<void(std::vector<EntityID> &, ecs::Registry &)>;
 using ComponentRenderers = std::vector<std::pair<ComponentTypeSet, RenderCallback>>;
 
@@ -40,7 +39,6 @@ private:
     void RenderSprites(std::vector<EntityID> &_ToRender);
     void RenderTexts(std::vector<EntityID> &_ToRender);
     void RenderDebug(std::vector<EntityID> &_ToRender);
-    // void RenderGraphs();
 
     Color m_BackgroundColor;
     std::unique_ptr<raylib::Window> &m_Window;

@@ -36,16 +36,14 @@ public:
     ecs::Registry &Registry();
     ecs::RenderSystem &RenderSystem();
 
-    void AddUpdateStep(ecs::UpdateCallback _UpdateStep);
-
     ecs::Entity CreateEntity();
+    void AddUpdateStep(ecs::UpdateCallback _UpdateStep);
 
     void Run();
 
 private:
     unsigned int m_WindowFlags = FLAG_VSYNC_HINT | FLAG_WINDOW_HIGHDPI | FLAG_WINDOW_RESIZABLE;
 
-    void InitUI();
     void Update();
 
 private:

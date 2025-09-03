@@ -49,8 +49,8 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
 
         Value minValue = graphComponent->minValue();
         Value maxValue = graphComponent->maxValue();
-        Time minTime = graphComponent->valuesInTime.begin()->first;
-        Time maxTime = std::prev(graphComponent->valuesInTime.end(), 1)->first;
+        Time minTime = graphComponent->minTime();
+        Time maxTime = graphComponent->maxTime();
 
         float minX = renderRect.x;
         float maxX = renderRect.x + renderRect.width;
@@ -58,9 +58,18 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
         float minY = renderRect.y + renderRect.height;
         float maxY = renderRect.y;
 
+        DrawLineEx(Vector2{renderRect.x, renderRect.y},
+                   Vector2{renderRect.x, renderRect.y + renderRect.height},
+                   graphComponent->settings.lineThickness, color);
+
+        DrawLineEx(Vector2{renderRect.x, renderRect.y + renderRect.height},
+                   Vector2{renderRect.x + renderRect.width, renderRect.y + renderRect.height},
+                   graphComponent->settings.lineThickness, color);
+
         Vector2 start;
         Vector2 end;
-        for (size_t i = 0; i < graphComponent->valuesInTime.size() - 1; i++) {
+        for (size_t i = graphComponent->firstIndexInTimeSpan();
+             i < graphComponent->valuesInTime.size() - 1; i++) {
             start = map(Vector2{graphComponent->valuesInTime[i].first,
                                 graphComponent->valuesInTime[i].second},
                         Vector2{minTime, minValue}, Vector2{maxTime, maxValue}, Vector2{minX, minY},
@@ -77,7 +86,6 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
 }
 
 int main() {
-
     std::random_device dev;
     std::mt19937 rng(dev());
     std::uniform_real_distribution<float> dist01(0.0, 1.0);
@@ -96,8 +104,10 @@ int main() {
     // turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
     turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene({5, 5, 5, 5});
 
-    auto e = sceneBuilder.CreateNode(sceneRoot);
-    engine.Registry().AddComponent<GraphComponent>(e);
+    auto e = sceneBuilder.CreateNode(sceneRoot, turnip::Size{}, turnip::LRTB{4, 4, 4, 4},
+                                     turnip::LRTB{4, 4, 4, 4});
+    engine.Registry().AddComponent<GraphComponent>(
+        e, GraphSettings{.lineThickness = 2, .timeSpan = 5.0f});
     auto g = engine.Registry().GetComponent<GraphComponent>(e);
 
     engine.AddUpdateStep([&g](float _Time, [[maybe_unused]] float _DeltaTime) {
