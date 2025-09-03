@@ -54,6 +54,9 @@ private:
 
     ecs::Registry m_Registry;
 
+    // TODO:
+    // std::unordered_map<std::type_index, ecs::ISystem> m_Systems;
+
     ecs::UISystem m_UISystem;
     ecs::RenderSystem m_RenderSystem;
     ecs::InputSystem m_InputSystem;

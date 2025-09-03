@@ -9,9 +9,7 @@ Engine::Engine(float _WindowWidth, float _WindowHeight, const std::string &_Wind
       m_Window(std::make_unique<raylib::Window>(m_Size.x, m_Size.y, _WindowTitle, m_WindowFlags)),
       m_UISystem(m_Registry, m_EventQueue, m_Size), m_RenderSystem(m_Registry, m_Window),
       m_InputSystem(m_Registry, m_EventQueue), m_UpdateSystem(m_Registry),
-      m_UISceneBuilder(m_Registry) {
-    InitUI();
-}
+      m_UISceneBuilder(m_Registry) {}
 
 UISceneBuilder &Engine::UISceneBuilder() { return m_UISceneBuilder; }
 ResourcesManager &Engine::ResourcesManager() { return m_ResourcesManager; }
@@ -33,8 +31,6 @@ void Engine::Run() {
         Update();
     }
 }
-
-void Engine::InitUI() { m_RenderSystem.SetBackgroundColor({52, 67, 94, 255}); }
 
 void Engine::Update() {
     float deltaTime = GetFrameTime();

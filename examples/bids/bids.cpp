@@ -69,7 +69,7 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
                               graphComponent->valuesInTime[i + 1].second},
                       Vector2{minTime, minValue}, Vector2{maxTime, maxValue}, Vector2{minX, minY},
                       Vector2{maxX, maxY});
-            DrawLineEx(start, end, 3, color);
+            DrawLineEx(start, end, graphComponent->settings.lineThickness, color);
         }
 
         DrawCircle(end.x, end.y, 5, color);
@@ -85,6 +85,7 @@ int main() {
     turnip::Engine engine(860, 640, "Turnip");
     engine.ResourcesManager().SetResourcesDirectory(std::filesystem::absolute("../../resources"));
 
+    engine.RenderSystem().SetBackgroundColor({52, 67, 94, 255});
     engine.RenderSystem().RegisterRenderer(
         {typeid(turnip::ecs::TransformComponent), typeid(GraphComponent)},
         [](std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Registry &_Registry) {
@@ -92,26 +93,40 @@ int main() {
         });
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
-    turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
+    // turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
     turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene({5, 5, 5, 5});
 
-    auto createPanelWithBg = [&sceneBuilder,
-                              &resourcesManager](turnip::ecs::EntityID _Parent, turnip::Size _Size,
-                                                 turnip::LRTB _Margin, turnip::LRTB _Padding,
-                                                 raylib::Color _Color) -> turnip::ecs::EntityID {
-        turnip::ecs::EntityID panel = sceneBuilder.CreateNode(_Parent, _Size, _Margin, _Padding);
+    auto e = sceneBuilder.CreateNode(sceneRoot);
+    engine.Registry().AddComponent<GraphComponent>(e);
+    auto g = engine.Registry().GetComponent<GraphComponent>(e);
 
-        sceneBuilder.CreateImage(panel, resourcesManager.GetSmoothCornerTexture(5), {5, 5, 5, 5},
-                                 _Color);
+    engine.AddUpdateStep([&g](float _Time, [[maybe_unused]] float _DeltaTime) {
+        g->valuesInTime.emplace_back(_Time, std::sin(_Time * 2) / 2);
+    });
 
-        return panel;
-    };
+    // auto createPanelWithBg = [&sceneBuilder,
+    //                           &resourcesManager](turnip::ecs::EntityID _Parent, turnip::Size
+    //                           _Size,
+    //                                              turnip::LRTB _Margin, turnip::LRTB _Padding,
+    //                                              raylib::Color _Color) ->
+    //                                              turnip::ecs::EntityID {
+    //     turnip::ecs::EntityID panel = sceneBuilder.CreateNode(_Parent, _Size, _Margin,
+    //     _Padding);
 
-    turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
-        sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::START, 2);
+    //     sceneBuilder.CreateImage(panel, resourcesManager.GetSmoothCornerTexture(5), {5, 5, 5,
+    //     5},
+    //                              _Color);
 
-    createPanelWithBg(stackH, turnip::Size{.axisX = turnip::SizeType::START, .width = 240},
-                      turnip::LRTB{}, turnip::LRTB{4, 4, 4, 4}, raylib::Color{70, 84, 109, 255});
+    //     return panel;
+    // };
+
+    // turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
+    //     sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::START,
+    //     2);
+
+    // createPanelWithBg(stackH, turnip::Size{.axisX = turnip::SizeType::START, .width = 240},
+    //                   turnip::LRTB{}, turnip::LRTB{4, 4, 4, 4}, raylib::Color{70, 84, 109,
+    //                   255});
 
     engine.Run();
 
