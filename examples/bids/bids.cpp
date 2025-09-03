@@ -40,7 +40,7 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
         if (graphComponent->valuesInTime.size() < 2)
             continue;
 
-        Rectangle renderRect =
+        raylib::Rectangle renderRect =
             turnip::ecs::RenderSystem::GetRenderRect(transformComponent, renderTransformComponent);
 
         turnip::ecs::ColorComponent *colorComponent =
@@ -58,16 +58,15 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
         float minY = renderRect.y + renderRect.height;
         float maxY = renderRect.y;
 
-        DrawLineEx(Vector2{renderRect.x, renderRect.y},
-                   Vector2{renderRect.x, renderRect.y + renderRect.height},
-                   graphComponent->settings.lineThickness, color);
-
-        DrawLineEx(Vector2{renderRect.x, renderRect.y + renderRect.height},
-                   Vector2{renderRect.x + renderRect.width, renderRect.y + renderRect.height},
-                   graphComponent->settings.lineThickness, color);
-
         Vector2 start;
         Vector2 end;
+
+        // TODO: Add to render system
+        // TODO: Use Vulkan/OpenGL instead of raylib
+        static raylib::Shader shader =
+            raylib::Shader("../../resources/shaders/base.vs", "../../resources/shaders/base.fs");
+        shader.BeginMode();
+
         for (size_t i = graphComponent->firstIndexInTimeSpan();
              i < graphComponent->valuesInTime.size() - 1; i++) {
             start = map(Vector2{graphComponent->valuesInTime[i].first,
@@ -80,8 +79,17 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
                       Vector2{maxX, maxY});
             DrawLineEx(start, end, graphComponent->settings.lineThickness, color);
         }
-
         DrawCircle(end.x, end.y, 5, color);
+
+        shader.EndMode();
+
+        DrawLineEx(Vector2{renderRect.x, renderRect.y},
+                   Vector2{renderRect.x, renderRect.y + renderRect.height},
+                   graphComponent->settings.lineThickness, color);
+
+        DrawLineEx(Vector2{renderRect.x, renderRect.y + renderRect.height},
+                   Vector2{renderRect.x + renderRect.width, renderRect.y + renderRect.height},
+                   graphComponent->settings.lineThickness, color);
     }
 }
 
@@ -108,6 +116,8 @@ int main() {
                                      turnip::LRTB{4, 4, 4, 4});
     engine.Registry().AddComponent<GraphComponent>(
         e, GraphSettings{.lineThickness = 2, .timeSpan = 5.0f});
+    engine.Registry().AddComponent<turnip::ecs::ColorComponent>(e, raylib::Color{0, 255, 0, 255});
+
     auto g = engine.Registry().GetComponent<GraphComponent>(e);
 
     engine.AddUpdateStep([&g](float _Time, [[maybe_unused]] float _DeltaTime) {

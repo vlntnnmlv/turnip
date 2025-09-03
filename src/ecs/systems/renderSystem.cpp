@@ -15,10 +15,11 @@ RenderSystem::RenderSystem(Registry &_Registry, std::unique_ptr<raylib::Window> 
                      [this](std::vector<EntityID> &_ToRender,
                             [[maybe_unused]] ecs::Registry &_Registry) { RenderTexts(_ToRender); });
 
-    // RegisterRenderer({typeid(ecs::TransformComponent)},
-    //                  [this](std::vector<EntityID> &_ToRender,
-    //                         [[maybe_unused]] ecs::Registry &_Registry) { RenderDebug(_ToRender);
-    //                         });
+#if DEBUG
+    RegisterRenderer({typeid(ecs::TransformComponent)},
+                     [this](std::vector<EntityID> &_ToRender,
+                            [[maybe_unused]] ecs::Registry &_Registry) { RenderDebug(_ToRender); });
+#endif
 }
 
 void RenderSystem::Update([[maybe_unused]] float _DeltaTime) { Render(); }
@@ -29,7 +30,7 @@ void RenderSystem::RegisterRenderer(const ComponentTypeSet &_ComponentTypeSet,
                                     RenderCallback _RenderCallback) {
     m_ComponentRenderers.emplace_back(_ComponentTypeSet, std::move(_RenderCallback));
 }
-
+#define FPS
 void RenderSystem::Render() {
     BeginDrawing();
     m_Window->ClearBackground(m_BackgroundColor);
@@ -42,11 +43,9 @@ void RenderSystem::Render() {
         renderCallback(toRender, m_Registry);
     }
 
-    // RenderGraphs();
-
-    // ---
+#ifdef FPS
     DrawText(std::to_string(GetFPS()).c_str(), 0, 0, 24, RED);
-    // ---
+#endif
 
     EndDrawing();
 }
