@@ -27,8 +27,12 @@ Value GraphComponent::minValue() {
 }
 
 Value GraphComponent::maxValue() {
+    auto start = std::ranges::find_if(valuesInTime, [this](ValueInTime &_Pair) -> bool {
+        return _Pair.first > (*(valuesInTime.end() - 2)).first - settings.timeSpan;
+    });
+
     return std::max_element(
-               valuesInTime.begin(), valuesInTime.end(),
+               start, valuesInTime.end(),
                [](const ValueInTime &_A, const ValueInTime &_B) { return _A.second < _B.second; })
         ->second;
 }

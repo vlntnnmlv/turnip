@@ -30,7 +30,7 @@ void RenderSystem::RegisterRenderer(const ComponentTypeSet &_ComponentTypeSet,
                                     RenderCallback _RenderCallback) {
     m_ComponentRenderers.emplace_back(_ComponentTypeSet, std::move(_RenderCallback));
 }
-#define FPS
+
 void RenderSystem::Render() {
     BeginDrawing();
     m_Window->ClearBackground(m_BackgroundColor);
@@ -42,7 +42,6 @@ void RenderSystem::Render() {
 
         renderCallback(toRender, m_Registry);
     }
-
 #ifdef FPS
     DrawText(std::to_string(GetFPS()).c_str(), 0, 0, 24, RED);
 #endif

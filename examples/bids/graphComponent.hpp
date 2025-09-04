@@ -12,11 +12,14 @@ using ValueInTime = std::pair<Time, Value>;
 struct GraphSettings {
     float lineThickness = 1.0f;
     float timeSpan = std::numeric_limits<float>::max();
+    bool showAxis = false;
+    bool invertX = false;
+    bool invertY = false;
 };
 
 struct GraphComponent : turnip::ecs::IComponent {
     std::vector<ValueInTime> valuesInTime{};
-    GraphSettings settings{};
+    GraphSettings settings;
 
     GraphComponent(GraphSettings _Settings = GraphSettings{});
     Value minTime();

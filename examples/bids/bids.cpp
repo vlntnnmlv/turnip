@@ -63,40 +63,52 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
 
         // TODO: Add to render system
         // TODO: Use Vulkan/OpenGL instead of raylib
-        static raylib::Shader shader =
-            raylib::Shader("../../resources/shaders/base.vs", "../../resources/shaders/base.fs");
-        shader.BeginMode();
 
-        for (size_t i = graphComponent->firstIndexInTimeSpan();
-             i < graphComponent->valuesInTime.size() - 1; i++) {
+        bool invertX = graphComponent->settings.invertX;
+        auto startI = invertX ? graphComponent->valuesInTime.size() - 2
+                              : graphComponent->firstIndexInTimeSpan();
+        auto endI = invertX ? graphComponent->firstIndexInTimeSpan()
+                            : graphComponent->valuesInTime.size() - 1;
+        auto step = invertX ? -1 : 1;
+
+        bool drawnInvert = false;
+        for (size_t i = startI; i != endI; i += step) {
             start = map(Vector2{graphComponent->valuesInTime[i].first,
                                 graphComponent->valuesInTime[i].second},
-                        Vector2{minTime, minValue}, Vector2{maxTime, maxValue}, Vector2{minX, minY},
+                        Vector2{invertX ? maxTime : minTime, minValue},
+                        Vector2{invertX ? minTime : maxTime, maxValue}, Vector2{minX, minY},
                         Vector2{maxX, maxY});
+            if (invertX && !drawnInvert) {
+                DrawCircle(start.x, start.y, 5, color);
+                drawnInvert = true;
+            }
             end = map(Vector2{graphComponent->valuesInTime[i + 1].first,
                               graphComponent->valuesInTime[i + 1].second},
-                      Vector2{minTime, minValue}, Vector2{maxTime, maxValue}, Vector2{minX, minY},
+                      Vector2{invertX ? maxTime : minTime, minValue},
+                      Vector2{invertX ? minTime : maxTime, maxValue}, Vector2{minX, minY},
                       Vector2{maxX, maxY});
             DrawLineEx(start, end, graphComponent->settings.lineThickness, color);
         }
-        DrawCircle(end.x, end.y, 5, color);
 
-        shader.EndMode();
+        if (!invertX)
+            DrawCircle(end.x, end.y, 5, color);
 
-        DrawLineEx(Vector2{renderRect.x, renderRect.y},
-                   Vector2{renderRect.x, renderRect.y + renderRect.height},
-                   graphComponent->settings.lineThickness, color);
+        if (graphComponent->settings.showAxis) {
+            DrawLineEx(Vector2{renderRect.x, renderRect.y},
+                       Vector2{renderRect.x, renderRect.y + renderRect.height},
+                       graphComponent->settings.lineThickness, color);
 
-        DrawLineEx(Vector2{renderRect.x, renderRect.y + renderRect.height},
-                   Vector2{renderRect.x + renderRect.width, renderRect.y + renderRect.height},
-                   graphComponent->settings.lineThickness, color);
+            DrawLineEx(Vector2{renderRect.x, renderRect.y + renderRect.height},
+                       Vector2{renderRect.x + renderRect.width, renderRect.y + renderRect.height},
+                       graphComponent->settings.lineThickness, color);
+        }
     }
 }
 
 int main() {
     std::random_device dev;
     std::mt19937 rng(dev());
-    std::uniform_real_distribution<float> dist01(0.0, 1.0);
+    std::normal_distribution<float> dist01(0.0, 1.0);
 
     turnip::Engine engine(860, 640, "Turnip");
     engine.ResourcesManager().SetResourcesDirectory(std::filesystem::absolute("../../resources"));
@@ -109,44 +121,109 @@ int main() {
         });
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
-    // turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
+    turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
     turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene({5, 5, 5, 5});
+    auto stack = sceneBuilder.CreateStack(sceneRoot, turnip::ecs::StackType::HORIZONTAL,
+                                          turnip::ecs::StackContentType::CENTER, 4);
 
-    auto e = sceneBuilder.CreateNode(sceneRoot, turnip::Size{}, turnip::LRTB{4, 4, 4, 4},
-                                     turnip::LRTB{4, 4, 4, 4});
-    engine.Registry().AddComponent<GraphComponent>(
-        e, GraphSettings{.lineThickness = 2, .timeSpan = 5.0f});
-    engine.Registry().AddComponent<turnip::ecs::ColorComponent>(e, raylib::Color{0, 255, 0, 255});
+    GraphComponent *sellGraph;
+    GraphComponent *buyGraph;
+    {
+        auto root = sceneBuilder.CreateNode(stack);
+        sceneBuilder.CreateImage(root, resourcesManager.GetSmoothCornerTexture(4),
+                                 turnip::LRTB{4, 4, 4, 4}, raylib::Color{70, 84, 109, 255});
 
-    auto g = engine.Registry().GetComponent<GraphComponent>(e);
+        sceneBuilder.CreateText(root, "SELL", resourcesManager.GetFont("martian_mono"), 24, 5,
+                                WHITE,
+                                turnip::Size{.axisY = turnip::SizeType::START, .height = 50});
 
-    engine.AddUpdateStep([&g](float _Time, [[maybe_unused]] float _DeltaTime) {
-        g->valuesInTime.emplace_back(_Time, std::sin(_Time * 2) / 2);
-    });
+        auto sellGraphNode = sceneBuilder.CreateNode(root, turnip::Size{}, turnip::LRTB{4, 4, 4, 4},
+                                                     turnip::LRTB{4, 4, 4, 4});
+        engine.Registry().AddComponent<GraphComponent>(sellGraphNode,
+                                                       GraphSettings{.lineThickness = 2});
+        engine.Registry().AddComponent<turnip::ecs::ColorComponent>(
+            sellGraphNode, raylib::Color{201, 255, 213, 255});
+
+        sellGraph = engine.Registry().GetComponent<GraphComponent>(sellGraphNode);
+    }
+
+    {
+        auto root = sceneBuilder.CreateNode(stack);
+        sceneBuilder.CreateImage(root, resourcesManager.GetSmoothCornerTexture(4),
+                                 turnip::LRTB{4, 4, 4, 4}, raylib::Color{70, 84, 109, 255});
+
+        sceneBuilder.CreateText(root, "BUY", resourcesManager.GetFont("martian_mono"), 24, 5, WHITE,
+                                turnip::Size{.axisY = turnip::SizeType::START, .height = 50});
+
+        auto buyGraphNode = sceneBuilder.CreateNode(root, turnip::Size{}, turnip::LRTB{4, 4, 4, 4},
+                                                    turnip::LRTB{4, 4, 4, 4});
+        engine.Registry().AddComponent<GraphComponent>(
+            buyGraphNode, GraphSettings{.lineThickness = 2, .invertX = true});
+        engine.Registry().AddComponent<turnip::ecs::ColorComponent>(
+            buyGraphNode, raylib::Color{255, 206, 213, 255});
+
+        buyGraph = engine.Registry().GetComponent<GraphComponent>(buyGraphNode);
+    }
+
+    static float sellValue = 0;
+    static float buyValue = 0;
+    static bool sellButtonPressed = false;
+    static bool buyButtonPressed = false;
+
+    {
+        auto buttonsStack = sceneBuilder.CreateStack(
+            stack, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::CENTER, 4,
+            turnip::Size{.axisX = turnip::SizeType::END, .width = 100});
+
+        sceneBuilder.CreateButton(
+            buttonsStack, []() { sellButtonPressed = true; },
+            resourcesManager.GetSmoothCornerTexture(4), turnip::LRTB{4, 4, 4, 4},
+            raylib::Color{201, 255, 213, 255});
+
+        sceneBuilder.CreateButton(
+            buttonsStack, []() { buyButtonPressed = true; },
+            resourcesManager.GetSmoothCornerTexture(4), turnip::LRTB{4, 4, 4, 4},
+            raylib::Color{255, 206, 213, 255});
+    }
+
+    engine.AddUpdateStep(
+        [&sellGraph, &buyGraph, &dist01, &rng](float _Time, [[maybe_unused]] float _DeltaTime) {
+            if (sellButtonPressed)
+                sellValue += dist01(rng);
+
+            if (buyButtonPressed)
+                buyValue += dist01(rng);
+
+            sellGraph->valuesInTime.emplace_back(_Time, sellValue);
+            buyGraph->valuesInTime.emplace_back(_Time, buyValue);
+            sellButtonPressed = false;
+            buyButtonPressed = false;
+        });
 
     // auto createPanelWithBg = [&sceneBuilder,
-    //                           &resourcesManager](turnip::ecs::EntityID _Parent, turnip::Size
-    //                           _Size,
-    //                                              turnip::LRTB _Margin, turnip::LRTB _Padding,
-    //                                              raylib::Color _Color) ->
+    //                           &resourcesManager](turnip::ecs::EntityID _Parent,
+    //                           turnip::Size _Size,
+    //                                              turnip::LRTB _Margin, turnip::LRTB
+    //                                              _Padding, raylib::Color _Color) ->
     //                                              turnip::ecs::EntityID {
     //     turnip::ecs::EntityID panel = sceneBuilder.CreateNode(_Parent, _Size, _Margin,
     //     _Padding);
 
-    //     sceneBuilder.CreateImage(panel, resourcesManager.GetSmoothCornerTexture(5), {5, 5, 5,
-    //     5},
+    //     sceneBuilder.CreateImage(panel, resourcesManager.GetSmoothCornerTexture(5),
+    //     {5, 5, 5, 5},
     //                              _Color);
 
     //     return panel;
     // };
 
     // turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
-    //     sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::START,
-    //     2);
+    //     sceneRoot, turnip::ecs::StackType::HORIZONTAL,
+    //     turnip::ecs::StackContentType::START, 2);
 
-    // createPanelWithBg(stackH, turnip::Size{.axisX = turnip::SizeType::START, .width = 240},
-    //                   turnip::LRTB{}, turnip::LRTB{4, 4, 4, 4}, raylib::Color{70, 84, 109,
-    //                   255});
+    // createPanelWithBg(stackH, turnip::Size{.axisX = turnip::SizeType::START,
+    // .width = 240},
+    //                   turnip::LRTB{}, turnip::LRTB{4, 4, 4, 4},
+    //                   raylib::Color{70, 84, 109, 255});
 
     engine.Run();
 
