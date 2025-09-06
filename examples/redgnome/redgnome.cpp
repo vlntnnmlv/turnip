@@ -14,16 +14,9 @@
 #include <string>
 
 int main() {
-    turnip::Engine engine(64, 64, "Turnip");
+    turnip::Engine engine(640, 480, "Turnip");
     engine.ResourcesManager().SetResourcesDirectory(std::filesystem::absolute("../../resources"));
-
     engine.RenderSystem().SetBackgroundColor({52, 67, 94, 255});
-    turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
-    turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
-    turnip::ecs::Entity sceneRoot = sceneBuilder.CreateScene({5, 5, 5, 5});
-
-    sceneBuilder.CreateImage(sceneRoot, resourcesManager.GetSmoothCornerTexture(8),
-                             turnip::LRTB{8, 8, 8, 8});
 
     engine.Run();
 

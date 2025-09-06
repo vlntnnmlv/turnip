@@ -52,14 +52,16 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
         Time minTime = graphComponent->minTime();
         Time maxTime = graphComponent->maxTime();
 
-        float minX = renderRect.x;
-        float maxX = renderRect.x + renderRect.width;
+        float constexpr ballSize = 5;
 
-        float minY = renderRect.y + renderRect.height;
-        float maxY = renderRect.y;
+        float minX = renderRect.x - ballSize;
+        float maxX = renderRect.x + renderRect.width - ballSize;
 
-        Vector2 start;
-        Vector2 end;
+        float minY = renderRect.y + renderRect.height + ballSize;
+        float maxY = renderRect.y + ballSize;
+
+        raylib::Vector2 start;
+        raylib::Vector2 end;
 
         // TODO: Add shaders to render system
         // TODO: Use Vulkan/OpenGL instead of raylib
@@ -71,37 +73,62 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
                             : graphComponent->valuesInTime.size() - 1;
         auto step = invertX ? -1 : 1;
 
-        bool drawnInvert = false;
-        for (size_t i = startI; i != endI; i += step) {
-            start = map(Vector2{graphComponent->valuesInTime[i].first,
-                                graphComponent->valuesInTime[i].second},
-                        Vector2{invertX ? maxTime : minTime, minValue},
-                        Vector2{invertX ? minTime : maxTime, maxValue}, Vector2{minX, minY},
-                        Vector2{maxX, maxY});
-            if (invertX && !drawnInvert) {
-                DrawCircle(start.x, start.y, 5, color);
-                drawnInvert = true;
+        raylib::Vector2 dpiScale = GetWindowScaleDPI();
+        raylib::RenderTexture2D t =
+            LoadRenderTexture(renderRect.width * dpiScale.x, renderRect.height * dpiScale.y);
+
+        BeginTextureMode(t);
+        ClearBackground({0, 0, 0, 0});
+        {
+
+            bool drawnInvert = false;
+            for (size_t i = startI; i != endI; i += step) {
+                start = map(Vector2{graphComponent->valuesInTime[i].first,
+                                    graphComponent->valuesInTime[i].second},
+                            Vector2{invertX ? maxTime : minTime, minValue},
+                            Vector2{invertX ? minTime : maxTime, maxValue}, Vector2{minX, minY},
+                            Vector2{maxX, maxY});
+                if (invertX && !drawnInvert) {
+                    DrawCircle(dpiScale.x * (start.x - renderRect.x),
+                               dpiScale.y * (start.y - renderRect.y), 5, color);
+                    drawnInvert = true;
+                }
+                end = map(Vector2{graphComponent->valuesInTime[i + 1].first,
+                                  graphComponent->valuesInTime[i + 1].second},
+                          Vector2{invertX ? maxTime : minTime, minValue},
+                          Vector2{invertX ? minTime : maxTime, maxValue}, Vector2{minX, minY},
+                          Vector2{maxX, maxY});
+                DrawLineEx(dpiScale * (start - renderRect.GetPosition()),
+                           dpiScale * (end - renderRect.GetPosition()),
+                           graphComponent->settings.lineThickness, color);
             }
-            end = map(Vector2{graphComponent->valuesInTime[i + 1].first,
-                              graphComponent->valuesInTime[i + 1].second},
-                      Vector2{invertX ? maxTime : minTime, minValue},
-                      Vector2{invertX ? minTime : maxTime, maxValue}, Vector2{minX, minY},
-                      Vector2{maxX, maxY});
-            DrawLineEx(start, end, graphComponent->settings.lineThickness, color);
+
+            if (!invertX)
+                DrawCircle(dpiScale.x * (end.x - renderRect.x), dpiScale.y * (end.y - renderRect.y),
+                           ballSize, color);
+
+            if (graphComponent->settings.showAxis) {
+                DrawLineEx(Vector2{0, 0}, Vector2{0, dpiScale.y * renderRect.height},
+                           graphComponent->settings.lineThickness, color);
+
+                DrawLineEx(Vector2{0, dpiScale.y * renderRect.height},
+                           Vector2{dpiScale.x * renderRect.width, dpiScale.y * renderRect.height},
+                           graphComponent->settings.lineThickness, color);
+            }
         }
+        EndTextureMode();
 
-        if (!invertX)
-            DrawCircle(end.x, end.y, 5, color);
+        BeginBlendMode(BLEND_ALPHA_PREMULTIPLY);
+        raylib::Shader s =
+            LoadShader("../../resources/shaders/base.vs", "../../resources/shaders/base.fs");
 
-        if (graphComponent->settings.showAxis) {
-            DrawLineEx(Vector2{renderRect.x, renderRect.y},
-                       Vector2{renderRect.x, renderRect.y + renderRect.height},
-                       graphComponent->settings.lineThickness, color);
+        s.BeginMode();
+        DrawTexturePro(t.texture, Rectangle{0, 0, (float)t.texture.width, (float)t.texture.height},
+                       renderRect, {0, 0}, 0, {255, 255, 255, 255});
 
-            DrawLineEx(Vector2{renderRect.x, renderRect.y + renderRect.height},
-                       Vector2{renderRect.x + renderRect.width, renderRect.y + renderRect.height},
-                       graphComponent->settings.lineThickness, color);
-        }
+        s.EndMode();
+        EndBlendMode();
+        UnloadRenderTexture(t);
     }
 }
 
@@ -189,12 +216,12 @@ int main() {
     engine.AddUpdateStep(
         [&sellGraph, &buyGraph, &dist01, &rng](float _Time, [[maybe_unused]] float _DeltaTime) {
             if (sellButtonPressed)
-                sellValue += 2;
+                sellValue += 20;
             else
                 sellValue += dist01(rng);
 
             if (buyButtonPressed)
-                buyValue += 2;
+                buyValue += 20;
             else
                 buyValue += dist01(rng);
 
