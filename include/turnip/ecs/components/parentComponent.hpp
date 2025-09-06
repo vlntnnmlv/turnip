@@ -9,6 +9,6 @@ namespace turnip::ecs {
 struct ParentComponent : IComponent {
     EntityID parent;
 
-    ParentComponent(EntityID _Parent = NullEntity);
+    ParentComponent(EntityID _Parent = NullEntityID);
 };
 } // namespace turnip::ecs

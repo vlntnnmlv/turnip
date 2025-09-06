@@ -49,40 +49,40 @@ void UISystem::OnMouseEvent(events::InputEvent &_Event, EntityID _UIRootEntityID
 }
 
 void UISystem::SetHoveredEntity(EntityID _EntityID) {
-    if (m_HoveredEntity == _EntityID)
+    if (m_HoveredEntityID == _EntityID)
         return;
 
-    if (m_HoveredEntity != ecs::NullEntity)
+    if (m_HoveredEntityID != ecs::NullEntityID)
         HoverdEffect(false);
 
-    if (m_PressedEntity != _EntityID)
-        SetPressedEntity(ecs::NullEntity);
+    if (m_PressedEntityID != _EntityID)
+        SetPressedEntity(ecs::NullEntityID);
 
-    m_HoveredEntity = _EntityID;
+    m_HoveredEntityID = _EntityID;
     HoverdEffect(true);
 }
 
 void UISystem::HoverdEffect(bool _Enable) {
     RenderTransformComponent *rtc =
-        m_Registry.GetComponent<RenderTransformComponent>(m_HoveredEntity);
+        m_Registry.GetComponent<RenderTransformComponent>(m_HoveredEntityID);
 
     if (rtc)
         rtc->rectOffset = _Enable ? LRTB{5, 5, 5, 5} : LRTB{0, 0, 0, 0};
 }
 
 void UISystem::SetPressedEntity(EntityID _EntityID) {
-    if (m_PressedEntity == _EntityID)
+    if (m_PressedEntityID == _EntityID)
         return;
 
-    if (m_PressedEntity != ecs::NullEntity)
+    if (m_PressedEntityID != ecs::NullEntityID)
         PressedEffect(false);
 
-    m_PressedEntity = _EntityID;
+    m_PressedEntityID = _EntityID;
     PressedEffect(true);
 }
 
 void UISystem::PressedEffect(bool _Enable) {
-    ButtonComponent *buttonComponent = m_Registry.GetComponent<ButtonComponent>(m_PressedEntity);
+    ButtonComponent *buttonComponent = m_Registry.GetComponent<ButtonComponent>(m_PressedEntityID);
 
     if (!buttonComponent)
         return;
@@ -95,7 +95,7 @@ void UISystem::PressedEffect(bool _Enable) {
 }
 
 void UISystem::TryUseButton(EntityID _EntityID) {
-    if (_EntityID != m_PressedEntity)
+    if (_EntityID != m_PressedEntityID)
         return;
 
     ButtonComponent *buttonComponent = m_Registry.GetComponent<ButtonComponent>(_EntityID);
@@ -104,7 +104,7 @@ void UISystem::TryUseButton(EntityID _EntityID) {
         buttonComponent->onClick();
     }
 
-    SetPressedEntity(ecs::NullEntity);
+    SetPressedEntity(ecs::NullEntityID);
 }
 
 void UISystem::ProcessLayout() {

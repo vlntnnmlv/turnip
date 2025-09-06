@@ -1,7 +1,6 @@
 // Copyright 2025 Valentin Namleev
 
 #include "./turnip/engine.hpp"
-// TODO: Add dirtyComponent, to not update every system every frame
 
 namespace turnip {
 Engine::Engine(float _WindowWidth, float _WindowHeight, const std::string &_WindowTitle)
@@ -17,12 +16,10 @@ ResourcesManager &Engine::ResourcesManager() { return m_ResourcesManager; }
 ecs::Registry &Engine::Registry() { return m_Registry; }
 ecs::RenderSystem &Engine::RenderSystem() { return m_RenderSystem; }
 
-void Engine::AddUpdateStep(ecs::UpdateCallback _UpdateStep) {
-    ecs::EntityID updateStep = m_Registry.CreateEntity();
-    m_Registry.AddComponent<ecs::UpdateComponent>(updateStep, _UpdateStep);
+void Engine::AddUpdateStep(ecs::UpdateCallback _UpdateCallback) {
+    ecs::Entity updateStep = m_Registry.CreateEntity();
+    updateStep.AddComponent<ecs::UpdateComponent>(_UpdateCallback);
 }
-
-ecs::Entity Engine::CreateEntity() { return ecs::Entity(m_Registry); }
 
 void Engine::Run() {
     SetTargetFPS(120);

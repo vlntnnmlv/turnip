@@ -3,7 +3,6 @@
 #pragma once
 
 #include <any>
-#include <cstddef>
 #include <set>
 #include <typeindex>
 #include <unordered_map>
@@ -12,17 +11,17 @@
 #include "./turnip/ecs/component.hpp"
 
 namespace turnip::ecs {
-
-using EntityID = std::size_t;
 using ComponentTypeSet = std::set<std::type_index>;
+using EntityID = std::size_t;
+static constexpr EntityID NullEntityID = 0;
 
-static constexpr EntityID NullEntity = 0;
+class Entity;
 
 class Registry {
 public:
     Registry() = default;
 
-    EntityID CreateEntity();
+    Entity CreateEntity();
 
     void RemoveEntity(EntityID _EntityID);
 

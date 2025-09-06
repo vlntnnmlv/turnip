@@ -1,12 +1,14 @@
 // Copyright 2025 Valentin Namleev
 
 #include "./turnip/ecs/registry.hpp"
+#include "./turnip/ecs/entity.hpp"
 
 namespace turnip::ecs {
-EntityID Registry::CreateEntity() {
+
+Entity Registry::CreateEntity() {
     EntityID entityID = m_NextEntityID++;
     m_Alive.push_back(entityID);
-    return entityID;
+    return Entity(entityID, this);
 }
 
 void Registry::RemoveEntity(EntityID _EntityID) {

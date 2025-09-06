@@ -34,8 +34,8 @@ private:
     Vector2 m_Size;
     bool m_WasResized;
 
-    EntityID m_HoveredEntity = ecs::NullEntity;
-    EntityID m_PressedEntity = ecs::NullEntity;
+    EntityID m_HoveredEntityID = ecs::NullEntityID;
+    EntityID m_PressedEntityID = ecs::NullEntityID;
 
     void PollEvents();
     void OnMouseEvent(events::InputEvent &_Event, EntityID _UIRootEntityID);
@@ -52,12 +52,12 @@ private:
         auto *transform = m_Registry.GetComponent<TransformComponent>(_EntityID);
 
         if (!transform || !transform->worldRect.CheckCollision(_Event.position))
-            return ecs::NullEntity;
+            return ecs::NullEntityID;
 
         if (auto *children = m_Registry.GetComponent<ChildrenComponent>(_EntityID)) {
             // Reverse order so the *last* child wins.
             for (auto it = children->children.rbegin(); it != children->children.rend(); ++it) {
-                if (EntityID hit = FindEventHit<TComponent>(*it, _Event); hit != ecs::NullEntity)
+                if (EntityID hit = FindEventHit<TComponent>(*it, _Event); hit != ecs::NullEntityID)
                     return hit;
             }
         }
@@ -68,7 +68,7 @@ private:
             return _EntityID;
         } else {
             // Filtered mode → only entities that have TComponent.
-            return m_Registry.GetComponent<TComponent>(_EntityID) ? _EntityID : ecs::NullEntity;
+            return m_Registry.GetComponent<TComponent>(_EntityID) ? _EntityID : ecs::NullEntityID;
         }
     }
 

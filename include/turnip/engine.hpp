@@ -22,7 +22,9 @@
 #include "./turnip/resourcesManager.hpp"
 #include "./turnip/uiSceneBuilder.hpp"
 
-// TODO: Add dirtyComponent, to not update every system every frame
+// TODO: Update systems only when data changes (dirtyComponent)
+// TODO: Add audio system
+// TODO: Add a build flow for Linux, MacOS and Windows
 
 namespace turnip {
 class Engine {
@@ -36,8 +38,7 @@ public:
     ecs::Registry &Registry();
     ecs::RenderSystem &RenderSystem();
 
-    ecs::Entity CreateEntity();
-    void AddUpdateStep(ecs::UpdateCallback _UpdateStep);
+    void AddUpdateStep(ecs::UpdateCallback _UpdateCallback);
 
     void Run();
 

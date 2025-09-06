@@ -61,7 +61,7 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
         Vector2 start;
         Vector2 end;
 
-        // TODO: Add to render system
+        // TODO: Add shaders to render system
         // TODO: Use Vulkan/OpenGL instead of raylib
 
         bool invertX = graphComponent->settings.invertX;
@@ -122,7 +122,7 @@ int main() {
 
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
     turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
-    turnip::ecs::EntityID sceneRoot = sceneBuilder.CreateScene({5, 5, 5, 5});
+    turnip::ecs::Entity sceneRoot = sceneBuilder.CreateScene({5, 5, 5, 5});
     auto stack = sceneBuilder.CreateStack(sceneRoot, turnip::ecs::StackType::HORIZONTAL,
                                           turnip::ecs::StackContentType::CENTER, 4);
 
@@ -139,12 +139,13 @@ int main() {
 
         auto sellGraphNode = sceneBuilder.CreateNode(root, turnip::Size{}, turnip::LRTB{4, 4, 4, 4},
                                                      turnip::LRTB{4, 4, 4, 4});
-        engine.Registry().AddComponent<GraphComponent>(sellGraphNode,
-                                                       GraphSettings{.lineThickness = 2});
-        engine.Registry().AddComponent<turnip::ecs::ColorComponent>(
-            sellGraphNode, raylib::Color{201, 255, 213, 255});
+        sellGraphNode.AddComponent<GraphComponent>(GraphSettings{
+            .lineThickness = 2,
+            .timeSpan = 5,
+        });
+        sellGraphNode.AddComponent<turnip::ecs::ColorComponent>(raylib::Color{201, 255, 213, 255});
 
-        sellGraph = engine.Registry().GetComponent<GraphComponent>(sellGraphNode);
+        sellGraph = sellGraphNode.GetComponent<GraphComponent>();
     }
 
     {
@@ -157,12 +158,11 @@ int main() {
 
         auto buyGraphNode = sceneBuilder.CreateNode(root, turnip::Size{}, turnip::LRTB{4, 4, 4, 4},
                                                     turnip::LRTB{4, 4, 4, 4});
-        engine.Registry().AddComponent<GraphComponent>(
-            buyGraphNode, GraphSettings{.lineThickness = 2, .invertX = true});
-        engine.Registry().AddComponent<turnip::ecs::ColorComponent>(
-            buyGraphNode, raylib::Color{255, 206, 213, 255});
+        buyGraphNode.AddComponent<GraphComponent>(
+            GraphSettings{.lineThickness = 2, .timeSpan = 5, .invertX = true});
+        buyGraphNode.AddComponent<turnip::ecs::ColorComponent>(raylib::Color{255, 206, 213, 255});
 
-        buyGraph = engine.Registry().GetComponent<GraphComponent>(buyGraphNode);
+        buyGraph = buyGraphNode.GetComponent<GraphComponent>();
     }
 
     static float sellValue = 0;
@@ -189,9 +189,13 @@ int main() {
     engine.AddUpdateStep(
         [&sellGraph, &buyGraph, &dist01, &rng](float _Time, [[maybe_unused]] float _DeltaTime) {
             if (sellButtonPressed)
+                sellValue += 2;
+            else
                 sellValue += dist01(rng);
 
             if (buyButtonPressed)
+                buyValue += 2;
+            else
                 buyValue += dist01(rng);
 
             sellGraph->valuesInTime.emplace_back(_Time, sellValue);
@@ -199,31 +203,6 @@ int main() {
             sellButtonPressed = false;
             buyButtonPressed = false;
         });
-
-    // auto createPanelWithBg = [&sceneBuilder,
-    //                           &resourcesManager](turnip::ecs::EntityID _Parent,
-    //                           turnip::Size _Size,
-    //                                              turnip::LRTB _Margin, turnip::LRTB
-    //                                              _Padding, raylib::Color _Color) ->
-    //                                              turnip::ecs::EntityID {
-    //     turnip::ecs::EntityID panel = sceneBuilder.CreateNode(_Parent, _Size, _Margin,
-    //     _Padding);
-
-    //     sceneBuilder.CreateImage(panel, resourcesManager.GetSmoothCornerTexture(5),
-    //     {5, 5, 5, 5},
-    //                              _Color);
-
-    //     return panel;
-    // };
-
-    // turnip::ecs::EntityID stackH = sceneBuilder.CreateStack(
-    //     sceneRoot, turnip::ecs::StackType::HORIZONTAL,
-    //     turnip::ecs::StackContentType::START, 2);
-
-    // createPanelWithBg(stackH, turnip::Size{.axisX = turnip::SizeType::START,
-    // .width = 240},
-    //                   turnip::LRTB{}, turnip::LRTB{4, 4, 4, 4},
-    //                   raylib::Color{70, 84, 109, 255});
 
     engine.Run();
 
