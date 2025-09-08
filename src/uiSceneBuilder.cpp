@@ -83,6 +83,6 @@ void UISceneBuilder::SetParent(ecs::Entity _Child, ecs::Entity _Parent) {
         _Parent.AddComponent<ecs::ChildrenComponent>();
 
     childrenComponent = _Parent.GetComponent<ecs::ChildrenComponent>();
-    childrenComponent->children.push_back(_Child);
+    childrenComponent->children.push_back(_Child.ID());
 }
 } // namespace turnip

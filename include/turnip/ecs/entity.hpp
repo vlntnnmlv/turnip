@@ -7,7 +7,6 @@
 #include "./turnip/ecs/registry.hpp"
 
 namespace turnip::ecs {
-
 class Entity {
 public:
     Entity();
@@ -31,7 +30,6 @@ public:
     inline bool operator!=(const Entity &_Other) { return !(*this == _Other); }
     inline bool operator==(const EntityID &_OtherID) { return ID() == _OtherID; }
     inline bool operator!=(const EntityID &_OtherID) { return !(*this == _OtherID); }
-    inline operator EntityID() const { return ID(); }
 
 private:
     EntityID m_ID;

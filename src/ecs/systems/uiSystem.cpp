@@ -88,7 +88,7 @@ void UISystem::PressedEffect(bool _Enable) {
         return;
 
     RenderTransformComponent *rtc =
-        m_Registry.GetComponent<RenderTransformComponent>(buttonComponent->image);
+        m_Registry.GetComponent<RenderTransformComponent>(buttonComponent->image.ID());
 
     if (rtc)
         rtc->rectOffset = _Enable ? LRTB{-5, -5, -5, -5} : LRTB{0, 0, 0, 0};
@@ -169,7 +169,7 @@ void UISystem::PlaceInWorld(EntityID _EntityID) {
         transformComponent->worldRect = transformComponent->rect;
     else {
         TransformComponent *parentTransformComponent =
-            m_Registry.GetComponent<TransformComponent>(parentComponent->parent);
+            m_Registry.GetComponent<TransformComponent>(parentComponent->parent.ID());
         transformComponent->worldRect = RectangleUtils::Move(
             transformComponent->rect,
             Vector2{parentTransformComponent->worldRect.x, parentTransformComponent->worldRect.y});

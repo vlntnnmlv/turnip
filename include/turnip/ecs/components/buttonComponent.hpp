@@ -4,18 +4,19 @@
 
 #include <functional>
 
-#include "./turnip/ecs/component.hpp"
-#include "./turnip/ecs/registry.hpp"
+#include "turnip/ecs/component.hpp"
+#include "turnip/ecs/entity.hpp"
+#include "turnip/ecs/registry.hpp"
 
 namespace turnip::ecs {
 struct ButtonComponent : IComponent {
     std::function<void()> onClick;
 
-    EntityID image;
+    Entity image;
 
     bool hovered;
     bool pressed;
 
-    ButtonComponent(std::function<void()> _OnClick, EntityID _Image);
+    ButtonComponent(std::function<void()> _OnClick, Entity _Image);
 };
 } // namespace turnip::ecs

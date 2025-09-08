@@ -2,13 +2,14 @@
 
 #pragma once
 
-#include "./turnip/ecs/component.hpp"
-#include "./turnip/ecs/registry.hpp"
+#include "turnip/ecs/component.hpp"
+#include "turnip/ecs/entity.hpp"
+#include "turnip/ecs/registry.hpp"
 
 namespace turnip::ecs {
 struct ParentComponent : IComponent {
-    EntityID parent;
+    Entity parent;
 
-    ParentComponent(EntityID _Parent = NullEntityID);
+    ParentComponent(Entity _Parent = Entity{});
 };
 } // namespace turnip::ecs
