@@ -3,5 +3,5 @@
 #include "./turnip/ecs/components/transformComponent.hpp"
 
 namespace turnip::ecs {
-TransformComponent::TransformComponent(Rectangle _Rect) : rect(_Rect) {}
+TransformComponent::TransformComponent(Rectangle _Rect) : rect(_Rect), worldRect(_Rect) {}
 } // namespace turnip::ecs

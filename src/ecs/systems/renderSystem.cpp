@@ -42,9 +42,9 @@ void RenderSystem::Render() {
 
         renderCallback(toRender, m_Registry);
     }
-#ifdef FPS
-    DrawText(std::to_string(GetFPS()).c_str(), 0, 0, 24, RED);
-#endif
+
+    if (m_ShowFPS)
+        DrawText(std::to_string(GetFPS()).c_str(), 0, 0, 24, RED);
 
     EndDrawing();
 }
@@ -121,4 +121,6 @@ Rectangle RenderSystem::GetRenderRect(TransformComponent *_TransformComponent,
     Rectangle movedRect = RectangleUtils::Move(expandedRect, _RenderTransformComponent->offset);
     return movedRect;
 }
+
+void RenderSystem::ShowFPS(bool _Value) { m_ShowFPS = _Value; }
 } // namespace turnip::ecs

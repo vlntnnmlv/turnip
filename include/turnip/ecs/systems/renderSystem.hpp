@@ -32,6 +32,8 @@ public:
     static Rectangle GetRenderRect(TransformComponent *_TransformComponent,
                                    RenderTransformComponent *_RenderTransformComponent);
 
+    void ShowFPS(bool _Value);
+
 private:
     ComponentRenderers m_ComponentRenderers{};
 
@@ -42,5 +44,6 @@ private:
 
     Color m_BackgroundColor;
     std::unique_ptr<raylib::Window> &m_Window;
+    bool m_ShowFPS;
 };
 } // namespace turnip::ecs

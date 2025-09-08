@@ -112,14 +112,14 @@ void UISystem::ProcessLayout() {
     m_WasResized |= IsWindowResized();
 
     for (auto root : roots) {
-        auto transform = m_Registry.GetComponent<TransformComponent>(root);
+        auto transformComponent = m_Registry.GetComponent<TransformComponent>(root);
 
         if (!m_WasResized) {
-            transform->rect.width = m_Size.x;
-            transform->rect.height = m_Size.y;
+            transformComponent->rect.width = m_Size.x;
+            transformComponent->rect.height = m_Size.y;
         } else {
-            transform->rect.width = GetRenderWidth();
-            transform->rect.height = GetRenderHeight();
+            transformComponent->rect.width = GetRenderWidth();
+            transformComponent->rect.height = GetRenderHeight();
         }
 
         MeasureEntityContent(root);
@@ -131,7 +131,7 @@ void UISystem::ProcessLayout() {
 std::vector<EntityID> UISystem::FindRoots() {
     std::vector<EntityID> roots;
 
-    for (const auto &e : m_Registry.With<TransformComponent>()) {
+    for (const auto &e : m_Registry.With<TransformComponent, LayoutComponent>()) {
         if (!m_Registry.GetComponent<ParentComponent>(e)) {
             roots.push_back(e);
         }

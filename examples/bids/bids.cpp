@@ -54,11 +54,11 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
 
         float constexpr ballSize = 5;
 
-        float minX = renderRect.x - ballSize;
+        float minX = renderRect.x + ballSize;
         float maxX = renderRect.x + renderRect.width - ballSize;
 
         float minY = renderRect.y + renderRect.height + ballSize;
-        float maxY = renderRect.y + ballSize;
+        float maxY = renderRect.y - ballSize;
 
         raylib::Vector2 start;
         raylib::Vector2 end;
@@ -73,14 +73,15 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
                             : graphComponent->valuesInTime.size() - 1;
         auto step = invertX ? -1 : 1;
 
-        raylib::Vector2 dpiScale = GetWindowScaleDPI();
-        raylib::RenderTexture2D t =
-            LoadRenderTexture(renderRect.width * dpiScale.x, renderRect.height * dpiScale.y);
+        // TODO: Add renderTexture layer
 
-        BeginTextureMode(t);
-        ClearBackground({0, 0, 0, 0});
+        // raylib::Vector2 dpiScale = GetWindowScaleDPI();
+        // raylib::RenderTexture2D t =
+        //     LoadRenderTexture(renderRect.width * dpiScale.x, renderRect.height * dpiScale.y);
+
+        // BeginTextureMode(t);
+        // ClearBackground({0, 0, 0, 0});
         {
-
             bool drawnInvert = false;
             for (size_t i = startI; i != endI; i += step) {
                 start = map(Vector2{graphComponent->valuesInTime[i].first,
@@ -89,8 +90,9 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
                             Vector2{invertX ? minTime : maxTime, maxValue}, Vector2{minX, minY},
                             Vector2{maxX, maxY});
                 if (invertX && !drawnInvert) {
-                    DrawCircle(dpiScale.x * (start.x - renderRect.x),
-                               dpiScale.y * (start.y - renderRect.y), 5, color);
+                    DrawCircle(start.x, start.y, 5, color);
+                    // DrawCircle(dpiScale.x * (start.x - renderRect.x),
+                    //            dpiScale.y * (start.y - renderRect.y), 5, color);
                     drawnInvert = true;
                 }
                 end = map(Vector2{graphComponent->valuesInTime[i + 1].first,
@@ -98,37 +100,43 @@ void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Re
                           Vector2{invertX ? maxTime : minTime, minValue},
                           Vector2{invertX ? minTime : maxTime, maxValue}, Vector2{minX, minY},
                           Vector2{maxX, maxY});
-                DrawLineEx(dpiScale * (start - renderRect.GetPosition()),
-                           dpiScale * (end - renderRect.GetPosition()),
-                           graphComponent->settings.lineThickness, color);
+                // DrawLineEx(dpiScale * (start - renderRect.GetPosition()),
+                //            dpiScale * (end - renderRect.GetPosition()),
+                //            graphComponent->settings.lineThickness, color);
+                DrawLineEx(start, end, graphComponent->settings.lineThickness, color);
             }
 
             if (!invertX)
-                DrawCircle(dpiScale.x * (end.x - renderRect.x), dpiScale.y * (end.y - renderRect.y),
-                           ballSize, color);
+                DrawCircle(end.x, end.y, ballSize, color);
+            // DrawCircle(dpiScale.x * (end.x - renderRect.x), dpiScale.y * (end.y - renderRect.y),
+            //            ballSize, color);
 
             if (graphComponent->settings.showAxis) {
-                DrawLineEx(Vector2{0, 0}, Vector2{0, dpiScale.y * renderRect.height},
+                // DrawLineEx(Vector2{0, 0}, Vector2{0, dpiScale.y * renderRect.height},
+                //            graphComponent->settings.lineThickness, color);
+
+                // DrawLineEx(Vector2{0, dpiScale.y * renderRect.height},
+                //            Vector2{dpiScale.x * renderRect.width, dpiScale.y *
+                //            renderRect.height}, graphComponent->settings.lineThickness, color);
+                DrawLineEx(renderRect.GetPosition(),
+                           Vector2{renderRect.x, renderRect.y + renderRect.height},
                            graphComponent->settings.lineThickness, color);
 
-                DrawLineEx(Vector2{0, dpiScale.y * renderRect.height},
-                           Vector2{dpiScale.x * renderRect.width, dpiScale.y * renderRect.height},
-                           graphComponent->settings.lineThickness, color);
+                DrawLineEx(
+                    Vector2{renderRect.x, renderRect.y + renderRect.height},
+                    Vector2{renderRect.x + renderRect.width, renderRect.y + renderRect.height},
+                    graphComponent->settings.lineThickness, color);
             }
         }
-        EndTextureMode();
+        // EndTextureMode();
 
-        BeginBlendMode(BLEND_ALPHA_PREMULTIPLY);
-        raylib::Shader s =
-            LoadShader("../../resources/shaders/base.vs", "../../resources/shaders/base.fs");
+        // BeginBlendMode(BLEND_ALPHA_PREMULTIPLY);
+        // DrawTexturePro(t.texture, Rectangle{0, 0, (float)t.texture.width,
+        // (float)t.texture.height},
+        //                renderRect, {0, 0}, 0, {255, 255, 255, 255});
 
-        s.BeginMode();
-        DrawTexturePro(t.texture, Rectangle{0, 0, (float)t.texture.width, (float)t.texture.height},
-                       renderRect, {0, 0}, 0, {255, 255, 255, 255});
-
-        s.EndMode();
-        EndBlendMode();
-        UnloadRenderTexture(t);
+        // EndBlendMode();
+        // UnloadRenderTexture(t);
     }
 }
 
@@ -147,11 +155,32 @@ int main() {
             RenderGraphs(_ToRender, _Registry);
         });
 
+    engine.ShowFPS(true);
+
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
     turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
     turnip::ecs::Entity sceneRoot = sceneBuilder.CreateScene({5, 5, 5, 5});
-    auto stack = sceneBuilder.CreateStack(sceneRoot, turnip::ecs::StackType::HORIZONTAL,
-                                          turnip::ecs::StackContentType::CENTER, 4);
+    auto stack = sceneBuilder.CreateStack(
+        sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 4,
+        turnip::Size{.axisX = turnip::SizeType::START, .width = 430});
+
+    auto player = engine.Registry().CreateEntity();
+    player.AddComponent<turnip::ecs::TransformComponent>(
+        Rectangle{430 + 430 / 2 - 32, 640 / 2 - 32, 32, 32});
+    player.AddComponent<turnip::ecs::SpriteComponent>(resourcesManager.GetTexture("devil"),
+                                                      turnip::LRTB());
+
+    engine.AddUpdateStep([&player](float _Time, float _DeltaTime) {
+        auto tr = player.GetComponent<turnip::ecs::TransformComponent>();
+        if (IsKeyDown(KEY_A))
+            tr->worldRect.x -= 100 * _DeltaTime;
+        if (IsKeyDown(KEY_S))
+            tr->worldRect.y += 100 * _DeltaTime;
+        if (IsKeyDown(KEY_D))
+            tr->worldRect.x += 100 * _DeltaTime;
+        if (IsKeyDown(KEY_W))
+            tr->worldRect.y -= 100 * _DeltaTime;
+    });
 
     GraphComponent *sellGraph;
     GraphComponent *buyGraph;

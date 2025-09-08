@@ -39,6 +39,7 @@ public:
     ecs::RenderSystem &RenderSystem();
 
     void AddUpdateStep(ecs::UpdateCallback _UpdateCallback);
+    void ShowFPS(bool _Value);
 
     void Run();
 

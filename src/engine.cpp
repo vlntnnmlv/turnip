@@ -21,6 +21,8 @@ void Engine::AddUpdateStep(ecs::UpdateCallback _UpdateCallback) {
     updateStep.AddComponent<ecs::UpdateComponent>(_UpdateCallback);
 }
 
+void Engine::ShowFPS(bool _Value) { m_RenderSystem.ShowFPS(_Value); }
+
 void Engine::Run() {
     SetTargetFPS(120);
 
