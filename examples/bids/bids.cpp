@@ -28,6 +28,7 @@ static Vector2 map(Vector2 _V, Vector2 _MinFrom, Vector2 _MaxFrom, Vector2 _MinT
 }
 
 void RenderGraphs(std::vector<turnip::ecs::EntityID> &_ToRender, turnip::ecs::Registry &_Registry) {
+
     for (turnip::ecs::EntityID e : _ToRender) {
         turnip::ecs::TransformComponent *transformComponent =
             _Registry.GetComponent<turnip::ecs::TransformComponent>(e);
@@ -160,27 +161,32 @@ int main() {
     turnip::UISceneBuilder &sceneBuilder = engine.UISceneBuilder();
     turnip::ResourcesManager &resourcesManager = engine.ResourcesManager();
     turnip::ecs::Entity sceneRoot = sceneBuilder.CreateScene({5, 5, 5, 5});
+
+    // TODO: FIX LAYOUT ENGINE
+    auto mainStack = sceneBuilder.CreateStack(sceneRoot, turnip::ecs::StackType::HORIZONTAL,
+                                              turnip::ecs::StackContentType::START, 4);
+
     auto stack = sceneBuilder.CreateStack(
-        sceneRoot, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 4,
-        turnip::Size{.axisX = turnip::SizeType::START, .width = 430});
+        mainStack, turnip::ecs::StackType::HORIZONTAL, turnip::ecs::StackContentType::CENTER, 4,
+        turnip::Size{.axisX = turnip::SizeType::START, .width = 500});
+    // turnip::Size{.axisX = turnip::SizeType::START, .width = 600});
 
-    auto player = engine.Registry().CreateEntity();
-    player.AddComponent<turnip::ecs::TransformComponent>(
-        Rectangle{430 + 430 / 2 - 32, 640 / 2 - 32, 32, 32});
-    player.AddComponent<turnip::ecs::SpriteComponent>(resourcesManager.GetTexture("devil"),
-                                                      turnip::LRTB());
+    auto buttonsStack = sceneBuilder.CreateStack(mainStack, turnip::ecs::StackType::VERTICAL,
+                                                 turnip::ecs::StackContentType::CENTER, 4);
 
-    engine.AddUpdateStep([&player](float _Time, float _DeltaTime) {
-        auto tr = player.GetComponent<turnip::ecs::TransformComponent>();
-        if (IsKeyDown(KEY_A))
-            tr->worldRect.x -= 100 * _DeltaTime;
-        if (IsKeyDown(KEY_S))
-            tr->worldRect.y += 100 * _DeltaTime;
-        if (IsKeyDown(KEY_D))
-            tr->worldRect.x += 100 * _DeltaTime;
-        if (IsKeyDown(KEY_W))
-            tr->worldRect.y -= 100 * _DeltaTime;
-    });
+    {
+        int rowsCount = 5;
+        int colsCount = 5;
+        for (int i = 0; i < rowsCount; i++) {
+            auto row = sceneBuilder.CreateStack(buttonsStack, turnip::ecs::StackType::HORIZONTAL,
+                                                turnip::ecs::StackContentType::CENTER, 4);
+            for (int j = 0; j < colsCount; j++) {
+                auto btn = sceneBuilder.CreateLabeledButton(
+                    row, []() {}, resourcesManager.GetSmoothCornerTexture(4), "Hi from",
+                    resourcesManager.GetFont("martian_mono"), 24, 5, turnip::LRTB{4, 4, 4, 4});
+            }
+        }
+    }
 
     GraphComponent *sellGraph;
     GraphComponent *buyGraph;
@@ -225,6 +231,22 @@ int main() {
     static float buyValue = 0;
     static bool sellButtonPressed = false;
     static bool buyButtonPressed = false;
+
+    {
+        auto buttonsStack = sceneBuilder.CreateStack(
+            stack, turnip::ecs::StackType::VERTICAL, turnip::ecs::StackContentType::CENTER, 4,
+            turnip::Size{.axisX = turnip::SizeType::END, .width = 100});
+
+        sceneBuilder.CreateButton(
+            buttonsStack, []() { sellButtonPressed = true; },
+            resourcesManager.GetSmoothCornerTexture(4), turnip::LRTB{4, 4, 4, 4},
+            raylib::Color{201, 255, 213, 255});
+
+        sceneBuilder.CreateButton(
+            buttonsStack, []() { buyButtonPressed = true; },
+            resourcesManager.GetSmoothCornerTexture(4), turnip::LRTB{4, 4, 4, 4},
+            raylib::Color{255, 206, 213, 255});
+    }
 
     {
         auto buttonsStack = sceneBuilder.CreateStack(

@@ -50,6 +50,14 @@ public:
                              Size _Size = Size{SizeType::FILL, SizeType::FILL},
                              LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0});
 
+    ecs::Entity CreateLabeledButton(ecs::Entity _Parent, std::function<void()> _OnClick,
+                                    raylib::Texture2D &_Texture, const std::string &_Text,
+                                    raylib::Font &_Font, float _FontSize = 24, float _Spacing = 5,
+                                    LRTB _Patch = {0, 0, 0, 0},
+                                    raylib::Color _Color = {255, 255, 255, 255},
+                                    Size _Size = Size{SizeType::FILL, SizeType::FILL},
+                                    LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0});
+
 private:
     ecs::Registry &m_Registry;
     void SetParent(ecs::Entity _Child, ecs::Entity _Parent);

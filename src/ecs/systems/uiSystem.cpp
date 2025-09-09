@@ -169,7 +169,7 @@ void UISystem::PlaceInWorld(EntityID _EntityID) {
         transformComponent->worldRect = transformComponent->rect;
     else {
         TransformComponent *parentTransformComponent =
-            m_Registry.GetComponent<TransformComponent>(parentComponent->parent.ID());
+            m_Registry.GetComponent<TransformComponent>(parentComponent->parent);
         transformComponent->worldRect = RectangleUtils::Move(
             transformComponent->rect,
             Vector2{parentTransformComponent->worldRect.x, parentTransformComponent->worldRect.y});

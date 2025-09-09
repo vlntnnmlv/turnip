@@ -8,8 +8,8 @@
 
 namespace turnip::ecs {
 struct ParentComponent : IComponent {
-    Entity parent;
+    EntityID parent;
 
-    ParentComponent(Entity _Parent = Entity{});
+    ParentComponent(EntityID _Parent = NullEntityID);
 };
 } // namespace turnip::ecs

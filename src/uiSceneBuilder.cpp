@@ -74,6 +74,24 @@ ecs::Entity UISceneBuilder::CreateButton(ecs::Entity _Parent, std::function<void
     return node;
 }
 
+ecs::Entity UISceneBuilder::CreateLabeledButton(ecs::Entity _Parent, std::function<void()> _OnClick,
+                                                raylib::Texture2D &_Texture,
+                                                const std::string &_Text, raylib::Font &_Font,
+                                                float _FontSize, float _Spacing, LRTB _Patch,
+                                                raylib::Color _Color, Size _Size, LRTB _Margin,
+                                                LRTB _Padding) {
+    ecs::Entity node = CreateNode(_Parent, _Size, _Margin, _Padding);
+    ecs::Entity img = CreateNode(node);
+
+    img.AddComponent<ecs::SpriteComponent>(_Texture, _Patch);
+    img.AddComponent<ecs::ColorComponent>(_Color);
+    img.AddComponent<ecs::HoverComponent>();
+
+    node.AddComponent<ecs::TextComponent>(_Text, _Font, _FontSize, _Spacing);
+    node.AddComponent<ecs::ButtonComponent>(_OnClick, img);
+    return node;
+}
+
 void UISceneBuilder::SetParent(ecs::Entity _Child, ecs::Entity _Parent) {
     _Child.AddComponent<ecs::ParentComponent>(_Parent);
 
