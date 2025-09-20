@@ -4,13 +4,14 @@ INCLUDEDIR := /usr/local/include
 
 # Raylib include directories
 I_RAYLIB := /raylib
-I_RAYLIB_CPP := /raylib-cpp
+# I_RAYLIB_CPP := /raylib-cpp
 
 # Local include directory
 I := ../../include/
 
 # Final include flags
-INCLUDE = -I$(INCLUDEDIR)$(I_RAYLIB) -I$(INCLUDEDIR)$(I_RAYLIB_CPP) -I$(I)
+INCLUDE = -I$(INCLUDEDIR)$(I_RAYLIB) -I$(I)
+# -I$(INCLUDEDIR)$(I_RAYLIB_CPP) 
 
 # --- Libraries ---
 # Global lib directory
