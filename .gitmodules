@@ -1,3 +1,6 @@
 [submodule "vendor/raylib"]
 	path = vendor/raylib
 	url = https://github.com/raysan5/raylib.git
+[submodule "vendor/--force"]
+	path = vendor/--force
+	url = https://github.com/bkaradzic/bgfx.cmake
