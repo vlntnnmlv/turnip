@@ -1,6 +1,8 @@
 [submodule "vendor/bgfx.cmake"]
 	path = vendor/bgfx.cmake
 	url = https://github.com/bkaradzic/bgfx.cmake
+    ignore = all
 [submodule "vendor/SDL"]
 	path = vendor/SDL
 	url = https://github.com/libsdl-org/SDL.git
+    ignore = all
