@@ -1,7 +1,17 @@
-#include "app.hpp"
+// Copyright 2025 Valentin Namleev
+
+#include <bgfx/platform.h>
 #include <bx/math.h>
 #include <format>
+#include <iostream>
 
+#include "app.hpp"
+
+//
+
+#include "assetManager.hpp"
+
+namespace turnip {
 App::App(const char *_title, int _width, int _height) : m_width(_width), m_height(_height) {
     if (!SDL_Init(0)) {
         std::cerr << "SDL_Init failed: " << SDL_GetError() << "\n";
@@ -52,16 +62,24 @@ struct PosColorVertex {
 };
 
 static PosColorVertex cubeVertices[] = {
-    {-1.0f, 1.0f, 1.0f, 0xff000000},   {1.0f, 1.0f, 1.0f, 0xff0000ff},
-    {-1.0f, -1.0f, 1.0f, 0xff00ff00},  {1.0f, -1.0f, 1.0f, 0xff00ffff},
-    {-1.0f, 1.0f, -1.0f, 0xffff0000},  {1.0f, 1.0f, -1.0f, 0xffff00ff},
-    {-1.0f, -1.0f, -1.0f, 0xffffff00}, {1.0f, -1.0f, -1.0f, 0xffffffff},
+    {-1.0f, 1.0f, 0.0f, 0xff000000},
+    {1.0f, 1.0f, 0.0f, 0xff0000ff},
+    {-1.0f, -1.0f, 0.0f, 0xff00ff00},
+    {1.0f, -1.0f, 0.0f, 0xff00ffff},
 };
 
-static const uint16_t cubeTriList[] = {
-    0, 1, 2, 1, 3, 2, 4, 6, 5, 5, 6, 7, 0, 2, 4, 4, 2, 6,
-    1, 5, 3, 5, 7, 3, 0, 4, 1, 4, 5, 1, 2, 3, 6, 6, 3, 7,
-};
+// {-1.0f, 1.0f, 1.0f, 0xff000000},
+//                       {1.0f, 1.0f, 1.0f, 0xff0000ff}, {-1.0f, -1.0f, 1.0f, 0xff00ff00},
+//                       {1.0f, -1.0f, 1.0f, 0xff00ffff}, {-1.0f, 1.0f, -1.0f, 0xffff0000},
+//                       {1.0f, 1.0f, -1.0f, 0xffff00ff}, {-1.0f, -1.0f, -1.0f, 0xffffff00},
+//                       {1.0f, -1.0f, -1.0f, 0xffffffff},
+// };
+
+static const uint16_t cubeTriList[] = {0, 1, 2, 1, 3, 2, 4, 6, 5, 5, 6, 7};
+
+// 0, 1, 2, 1, 3, 2, 4, 6, 5, 5, 6, 7, 0, 2, 4, 4, 2, 6, 1, 5, 3, 5, 7, 3, 0, 4, 1, 4, 5, 1, 2, 3,
+// 6,
+//     6, 3, 7,
 
 static bgfx::ShaderHandle loadShader(const char *FILENAME) {
     const char *shaderPath = "???";
@@ -89,8 +107,8 @@ static bgfx::ShaderHandle loadShader(const char *FILENAME) {
         break;
     }
 
-    const char *p = std::format("examplesNew/tmp/{0}", FILENAME).c_str();
-    FILE *file = fopen(std::format("examplesNew/tmp/{0}", FILENAME).c_str(), "rb");
+    const char *p = std::format("examples/simple/{0}", FILENAME).c_str();
+    FILE *file = fopen(std::format("examples/simple/{0}", FILENAME).c_str(), "rb");
     if (file == NULL) {
         throw std::runtime_error("Couldn't load shader file at:");
     }
@@ -110,19 +128,27 @@ static bgfx::ShaderHandle loadShader(const char *FILENAME) {
 void App::Run() {
     unsigned int counter = 0;
 
+    // layout of paramater describing one vertex
     bgfx::VertexLayout pcvDecl;
     pcvDecl.begin()
         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
         .end();
+
+    //
     bgfx::VertexBufferHandle vbh =
         bgfx::createVertexBuffer(bgfx::makeRef(cubeVertices, sizeof(cubeVertices)), pcvDecl);
+
+    // triangles descrition
     bgfx::IndexBufferHandle ibh =
         bgfx::createIndexBuffer(bgfx::makeRef(cubeTriList, sizeof(cubeTriList)));
 
     bgfx::ShaderHandle vsh = loadShader("vs_cubes.bin");
     bgfx::ShaderHandle fsh = loadShader("fs_cubes.bin");
     bgfx::ProgramHandle program = bgfx::createProgram(vsh, fsh, true);
+
+    AssetManager a;
+    auto th = a.LoadTexture("resources/textures/bean.png");
 
     while (m_running) {
         SDL_Event event;
@@ -143,14 +169,14 @@ void App::Run() {
         bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff);
         bgfx::setViewRect(0, 0, 0, uint16_t(m_width), uint16_t(m_height));
 
-        Update();
+        // Update(program);
         //
         // const bx::Vec3 at = {0.0f, 0.0f, 0.0f};
         // const bx::Vec3 eye = {0.0f, 0.0f, -5.0f};
         // float view[16];
         // bx::mtxLookAt(view, eye, at);
         // float proj[16];
-        // bx::mtxProj(proj, 60.0f, float(w) / float(h), 0.1f, 100.0f,
+        // bx::mtxProj(proj, 60.0f, float(m_width) / float(m_height), 0.1f, 100.0f,
         //             bgfx::getCaps()->homogeneousDepth);
         // bgfx::setViewTransform(0, view, proj);
 
@@ -158,12 +184,17 @@ void App::Run() {
         // bx::mtxRotateXY(mtx, counter * 0.01f, counter * 0.01f);
         // bgfx::setTransform(mtx);
 
-        // bgfx::setVertexBuffer(0, vbh);
-        // bgfx::setIndexBuffer(ibh);
+        bgfx::setVertexBuffer(0, vbh);
+        bgfx::setIndexBuffer(ibh);
 
-        // bgfx::submit(0, program);
-        // bgfx::frame();
-        // counter++;
+        bgfx::UniformHandle texSampler =
+            bgfx::createUniform("s_Texture", bgfx::UniformType::Sampler);
+        bgfx::setTexture(0, texSampler, th);
+        bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A);
+
+        bgfx::submit(0, program);
+        bgfx::frame();
+        counter++;
         //
 
         bgfx::frame();
@@ -173,7 +204,7 @@ void App::Run() {
     // bgfx::destroy(vbh);
 }
 
-void App::Update() {}
+void App::Update(bgfx::ProgramHandle _program) {}
 
 App::~App() {
     bgfx::shutdown();
@@ -183,3 +214,4 @@ App::~App() {
 
     SDL_Quit();
 }
+} // namespace turnip

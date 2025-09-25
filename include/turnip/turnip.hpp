@@ -3,6 +3,8 @@
 #pragma once
 
 #include "app.hpp"
+#include "assetManager.hpp"
+#include "renderer.hpp"
 
 namespace turnip {
 class Turnip : public App {
@@ -11,5 +13,10 @@ public:
     virtual ~Turnip() override;
 
 private:
+    void Update(bgfx::ProgramHandle _program) override;
+
+private:
+    AssetManager m_assetManager;
+    Renderer m_renderer;
 };
 } // namespace turnip

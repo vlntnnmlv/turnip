@@ -8,5 +8,6 @@ int main() {
     } catch (std::runtime_error _e) {
         std::println("{}", _e.what());
     }
+
     return 0;
 }

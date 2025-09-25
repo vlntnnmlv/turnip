@@ -7,8 +7,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Add vendor
+# Add bgfx
 add_subdirectory(vendor/bgfx.cmake)
+
+# Add SDL
 add_subdirectory(vendor/SDL)
 
 # Add engine
@@ -26,8 +28,8 @@ foreach(Example ${EXAMPLE_DIRS})
     endif()
 endforeach()
 
+# Create symlink to compile_commands.json for IDE to pick it up
 if (PROJECT_IS_TOP_LEVEL AND UNIX)
-    # Create symlink to compile_commands.json for IDE to pick it up
     execute_process(
         COMMAND ${CMAKE_COMMAND} -E create_symlink
         ${CMAKE_BINARY_DIR}/compile_commands.json
