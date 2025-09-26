@@ -5,9 +5,20 @@
 #include <bgfx/bgfx.h>
 
 namespace turnip {
+
+struct Rectangle {
+    float x;
+    float y;
+    float width;
+    float height;
+};
+
 struct Vertex {
-    float X, Y, Z;
-    float U, V;
+    float x;
+    float y;
+    float z;
+    float u;
+    float v;
 
     static void InitLayout(bgfx::VertexLayout &_layout) {
         _layout.begin()
@@ -19,8 +30,16 @@ struct Vertex {
 
 class Renderer {
 public:
-    void RenderTexture(bgfx::TextureHandle _textureHandle, bgfx::ProgramHandle _program);
+    Renderer();
+    ~Renderer();
+    void RenderTexture(bgfx::TextureHandle _textureHandle, const Rectangle &rectangle);
 
 private:
+    bgfx::ProgramHandle m_Program;
+    bgfx::VertexBufferHandle m_VertexBuffer;
+    bgfx::IndexBufferHandle m_TrianglesBuffer;
+
+    bgfx::VertexLayout m_Layout;
+    bgfx::UniformHandle m_TextureSamplerUniform;
 };
 } // namespace turnip

@@ -1,50 +1,92 @@
 // Copyright 2025 Valentin Namleev
 
+#include <bgfx/embedded_shader.h>
 #include <bx/math.h>
 
-#include "renderer.hpp"
+#include <essl/quad_fs.sc.bin.h>
+#include <essl/quad_vs.sc.bin.h>
+#include <glsl/quad_fs.sc.bin.h>
+#include <glsl/quad_vs.sc.bin.h>
+#include <spirv/quad_fs.sc.bin.h>
+#include <spirv/quad_vs.sc.bin.h>
+#if defined(_WIN32)
+#include <dx11/quad.fs.sc.bin.h>
+#include <dx11/quad.vs.sc.bin.h>
+#endif //  defined(_WIN32)
+#if __APPLE__
+#include <metal/quad_fs.sc.bin.h>
+#include <metal/quad_vs.sc.bin.h>
+#endif // __APPLE__
+
+#include "turnip/assetLoader.hpp"
+#include "turnip/renderer.hpp"
 
 namespace turnip {
 
-static Vertex s_SproutQuad[] = {
-    {-1.0f, 1.0f, 0.0f, 0.0f, 0.0f},
-    {1.0f, 1.0f, 0.0f, 1.0f, 0.0f},
-    {-1.0f, -1.0f, 0.0f, 0.0f, 1.0f},
-    {1.0f, -1.0f, 0.0f, 1.0f, 1.0f},
-};
+// static Vertex quadVertices[] = {
+//     {-1.0f, -1.0f, 0.0f, 0.0f, 1.0f},
+//     {1.0f, -1.0f, 0.0f, 1.0f, 1.0f},
+//     {1.0f, 1.0f, 0.0f, 1.0f, 0.0f},
+//     {-1.0f, 1.0f, 0.0f, 0.0f, 0.0f},
+// };
 
-static const uint16_t s_SoilIndices[] = {0, 1, 2, 2, 1, 3};
+static const uint16_t quadTriangles[] = {0, 2, 1, 0, 3, 2};
 
-void Renderer::RenderTexture(bgfx::TextureHandle _textureHandle, bgfx::ProgramHandle _program) {
-    static bgfx::VertexLayout sproutLayout;
-    static bgfx::VertexBufferHandle sproutVB = BGFX_INVALID_HANDLE;
-    static bgfx::IndexBufferHandle soilIB = BGFX_INVALID_HANDLE;
-    static bgfx::UniformHandle texSampler = BGFX_INVALID_HANDLE;
+static void fillQuadFromRect(Vertex *o_out, const Rectangle &_rect) {
+    float xMin = _rect.x;
+    float xMax = _rect.x + _rect.width;
 
-    if (!bgfx::isValid(sproutVB)) {
-        Vertex::InitLayout(sproutLayout);
-        sproutVB = bgfx::createVertexBuffer(bgfx::makeRef(s_SproutQuad, sizeof(s_SproutQuad)),
-                                            sproutLayout);
-        soilIB = bgfx::createIndexBuffer(bgfx::makeRef(s_SoilIndices, sizeof(s_SoilIndices)));
-        texSampler = bgfx::createUniform("s_Texture", bgfx::UniformType::Sampler);
+    float yMin = _rect.y;
+    float yMax = _rect.y + _rect.height;
+
+    o_out[0] = {xMin, yMin, 0.0f, 0.0f, 0.0f};
+    o_out[1] = {xMax, yMin, 0.0f, 1.0f, 0.0f};
+    o_out[2] = {xMax, yMax, 0.0f, 1.0f, 1.0f};
+    o_out[3] = {xMin, yMax, 0.0f, 0.0f, 1.0f};
+}
+
+Renderer::Renderer() {
+    Vertex::InitLayout(m_Layout);
+
+    m_VertexBuffer = BGFX_INVALID_HANDLE;
+    m_TrianglesBuffer =
+        bgfx::createIndexBuffer(bgfx::makeRef(quadTriangles, sizeof(quadTriangles)));
+
+    const bgfx::EmbeddedShader embeddedVertexShader = BGFX_EMBEDDED_SHADER(quad_vs);
+    const bgfx::EmbeddedShader embeddedFragmentShader = BGFX_EMBEDDED_SHADER(quad_fs);
+
+    bgfx::ShaderHandle vetrexShader =
+        bgfx::createEmbeddedShader(&embeddedVertexShader, bgfx::getRendererType(), "quad_vs");
+    bgfx::ShaderHandle fragmentShader =
+        bgfx::createEmbeddedShader(&embeddedFragmentShader, bgfx::getRendererType(), "quad_fs");
+    m_Program = bgfx::createProgram(vetrexShader, fragmentShader, true);
+
+    m_TextureSamplerUniform = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
+}
+
+Renderer::~Renderer() {
+    bgfx::destroy(m_TextureSamplerUniform);
+    bgfx::destroy(m_TrianglesBuffer);
+    bgfx::destroy(m_VertexBuffer);
+}
+
+void Renderer::RenderTexture(bgfx::TextureHandle _textureHandle, const Rectangle &rectangle) {
+    Vertex quadVerticies[4];
+    fillQuadFromRect(quadVerticies, rectangle);
+
+    if (bgfx::isValid(m_VertexBuffer)) {
+        bgfx::destroy(m_VertexBuffer);
     }
 
-    // Ortho projection
-    float ortho[16];
-    bx::mtxOrtho(ortho, 0.0f, 1280.0f, 720.0f, 0.0f, 0.0f, 1000.0f, 0.0f, false);
-    bgfx::setViewTransform(0, nullptr, ortho);
-    bgfx::setViewRect(0, 0, 0, 1280, 720);
+    m_VertexBuffer =
+        bgfx::createVertexBuffer(bgfx::copy(quadVerticies, sizeof(quadVerticies)), m_Layout);
 
-    float model[16];
-    bx::mtxIdentity(model);
-    bgfx::setTransform(model);
+    bgfx::setVertexBuffer(0, m_VertexBuffer);
+    bgfx::setIndexBuffer(m_TrianglesBuffer);
 
-    bgfx::setVertexBuffer(0, sproutVB);
-    bgfx::setIndexBuffer(soilIB);
+    bgfx::setTexture(0, m_TextureSamplerUniform, _textureHandle);
+    bgfx::setState(BGFX_STATE_DEFAULT);
 
-    bgfx::setTexture(0, texSampler, _textureHandle);
-    bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A);
-
-    bgfx::submit(0, _program);
+    bgfx::submit(0, m_Program);
 }
 }

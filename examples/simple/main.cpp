@@ -1,9 +1,11 @@
-#include "turnip.hpp"
+#include <turnip/turnip.hpp>
+
 #include <print>
 
 int main() {
     try {
         turnip::Turnip app("Turnip", 800, 600);
+        app.SetScreenTexture("resources/textures/devil.png");
         app.Run();
     } catch (std::runtime_error _e) {
         std::println("{}", _e.what());

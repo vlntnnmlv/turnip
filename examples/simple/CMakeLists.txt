@@ -1,5 +1,4 @@
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 add_compile_definitions(BX_CONFIG_DEBUG=1)
 
 # Create executable

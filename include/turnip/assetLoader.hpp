@@ -7,9 +7,10 @@
 #include <bx/readerwriter.h>
 
 namespace turnip {
-class AssetManager {
+class AssetLoader {
 public:
     bgfx::TextureHandle LoadTexture(const char *_filePath);
+    bgfx::ShaderHandle LoadShader(const char *_filePath);
 
 private:
     static bx::DefaultAllocator s_allocator;

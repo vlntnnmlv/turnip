@@ -4,7 +4,7 @@
 
 #include <cstddef>
 
-#include "./turnip/ecs/registry.hpp"
+#include "turnip/ecs/registry.hpp"
 
 namespace turnip::ecs {
 class Entity {

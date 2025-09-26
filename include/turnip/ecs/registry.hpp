@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "./turnip/ecs/component.hpp"
+#include "turnip/ecs/component.hpp"
 
 namespace turnip::ecs {
 using ComponentTypeSet = std::set<std::type_index>;

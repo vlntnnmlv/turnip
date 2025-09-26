@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "./turnip/ecs/registry.hpp"
+#include "turnip/ecs/registry.hpp"
 
 namespace turnip::ecs {
 struct ISystem {

@@ -1,13 +1,24 @@
 // Copyright 2025 Valentin Namleev
 
-#include "turnip.hpp"
+#include "turnip/turnip.hpp"
 
 namespace turnip {
-static bgfx::TextureHandle texture;
+Turnip::Turnip(const char *_title, int _width, int _height) : App(_title, _width, _height) {}
 
-Turnip::Turnip(const char *_title, int _width, int _height) : App(_title, _width, _height) {
-    texture = m_assetManager.LoadTexture("resources/textures/bean.png");
+void Turnip::SetScreenTexture(const char *_filepath) {
+    m_ScreenTexture = m_assetLoader.LoadTexture(_filepath);
 }
-Turnip::~Turnip() {}
-void Turnip::Update(bgfx::ProgramHandle _program) { m_renderer.RenderTexture(texture, _program); }
-} // namespace turnip
+
+void Turnip::Update() {
+    m_renderer.RenderTexture(m_ScreenTexture, Rectangle{0, 0, 400, 300});
+    m_renderer.RenderTexture(m_ScreenTexture, Rectangle{400, 300, 400, 300});
+}
+
+void Turnip::ProcessEvent(const SDL_Event &_event) {
+    if (_event.type == SDL_EVENT_KEY_DOWN) {
+        if (_event.key.key == SDLK_RIGHT) {
+            m_ScreenTexture = m_assetLoader.LoadTexture("resources/textures/bush.png");
+        }
+    }
+}
+} // namespace turnips
