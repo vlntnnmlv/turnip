@@ -13,7 +13,9 @@ At first this project's goal was just to undestand how big ECS system's work und
 All dependencies are either in a form of a single header (like stb_image.h), and others are git submodules.
 
 Rendering: [bgfx](https://github.com/bkaradzic/bgfx.git)
+
 Windowing and events: [SDL](https://github.com/libsdl-org/SDL.git)
+
 Images loading: [STB](https://github.com/nothings/stb)
 
 The project was only built for OSX, but usage of cross-platform libraries like SDL, STB and BGFX imply that at some point **turnip** will be able to be built on every system.
