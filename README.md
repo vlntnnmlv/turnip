@@ -1,5 +1,3 @@
-![Turnip](resources/textures/turnip.png)
-
 # Turnip
 
 C++ ECS Game engine
@@ -33,3 +31,5 @@ The project was only built for OSX, but usage of cross-platform libraries like S
 * ```cmake -S . -B build``` in root directory to generate cmake build directory
 * Then ```cmake --build build```. You will find everything in build directory.
 
+
+![Turnip](resources/textures/turnip.png)
