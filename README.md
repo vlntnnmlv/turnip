@@ -1,4 +1,4 @@
-# Turnip
+# Fey
 
 C++ ECS Game engine
 
@@ -7,8 +7,6 @@ At first this project's goal was just to undestand how big ECS system's work und
 **WORK IN PROGRESS**
 
 ## Dependencies
-
-All dependencies are either in a form of a single header (like stb_image.h), and others are git submodules.
 
 Rendering: [bgfx](https://github.com/bkaradzic/bgfx.git)
 
@@ -30,6 +28,3 @@ The project was only built for OSX, but usage of cross-platform libraries like S
 
 * ```cmake -S . -B build``` in root directory to generate cmake build directory
 * Then ```cmake --build build```. You will find everything in build directory.
-
-
-![Turnip](resources/textures/turnip.png)
