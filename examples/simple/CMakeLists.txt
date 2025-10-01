@@ -13,5 +13,5 @@ target_include_directories(simple PRIVATE
 
 # Link against engine
 target_link_libraries(simple
-    PRIVATE turnip
+    PRIVATE feyerverx
 )

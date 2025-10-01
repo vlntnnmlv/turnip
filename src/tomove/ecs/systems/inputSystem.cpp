@@ -2,7 +2,7 @@
 
 #include "./turnip/ecs/systems/inputSystem.hpp"
 
-namespace turnip::ecs {
+namespace feyerverx::ecs {
 InputSystem::InputSystem(Registry &_Registry, events::EventQueue &_EventQueue)
     : ISystem(_Registry), m_EventQueue(_EventQueue) {}
 

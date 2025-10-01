@@ -2,7 +2,7 @@
 *.d
 
 /build
-turnip.a
+feyerverx.a
 
 .vscode
 .config
@@ -10,6 +10,6 @@ turnip.a
 .clang-format
 .DS_Store
 .cache
-/turnip
-/turnip.dSYM
+/feyerverx
+/feyerverx.dSYM
 __pycache__

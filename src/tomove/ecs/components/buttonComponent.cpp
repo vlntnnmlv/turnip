@@ -2,7 +2,7 @@
 
 #include "./turnip/ecs/components/buttonComponent.hpp"
 
-namespace turnip::ecs {
+namespace feyerverx::ecs {
 ButtonComponent::ButtonComponent(std::function<void()> _OnClick, Entity _Image)
     : onClick(_OnClick), image(_Image) {};
-} // namespace turnip::ecs
+} // namespace feyerverx::ecs

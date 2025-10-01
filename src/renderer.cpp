@@ -1,5 +1,7 @@
 // Copyright 2025 Valentin Namleev
 
+#include <print>
+
 #include <bgfx/embedded_shader.h>
 #include <bx/math.h>
 
@@ -18,17 +20,12 @@
 #include <metal/quad_vs.sc.bin.h>
 #endif // __APPLE__
 
-#include "turnip/assetLoader.hpp"
-#include "turnip/renderer.hpp"
+#include "feyerverx/assetLoader.hpp"
+#include "feyerverx/logger.hpp"
+#include "feyerverx/renderer.hpp"
+#include "feyerverx/texture.hpp"
 
-namespace turnip {
-
-// static Vertex quadVertices[] = {
-//     {-1.0f, -1.0f, 0.0f, 0.0f, 1.0f},
-//     {1.0f, -1.0f, 0.0f, 1.0f, 1.0f},
-//     {1.0f, 1.0f, 0.0f, 1.0f, 0.0f},
-//     {-1.0f, 1.0f, 0.0f, 0.0f, 0.0f},
-// };
+namespace feyerverx {
 
 static const uint16_t quadTriangles[] = {0, 2, 1, 0, 3, 2};
 
@@ -45,11 +42,11 @@ static void fillQuadFromRect(Vertex *o_out, const Rectangle &_rect) {
     o_out[3] = {xMin, yMax, 0.0f, 0.0f, 1.0f};
 }
 
-Renderer::Renderer() {
-    Vertex::InitLayout(m_Layout);
+void Renderer::init() {
+    Vertex::InitLayout(m_layout);
 
-    m_VertexBuffer = BGFX_INVALID_HANDLE;
-    m_TrianglesBuffer =
+    m_vertexBuffer = BGFX_INVALID_HANDLE;
+    m_trianglesBuffer =
         bgfx::createIndexBuffer(bgfx::makeRef(quadTriangles, sizeof(quadTriangles)));
 
     const bgfx::EmbeddedShader embeddedVertexShader = BGFX_EMBEDDED_SHADER(quad_vs);
@@ -59,34 +56,37 @@ Renderer::Renderer() {
         bgfx::createEmbeddedShader(&embeddedVertexShader, bgfx::getRendererType(), "quad_vs");
     bgfx::ShaderHandle fragmentShader =
         bgfx::createEmbeddedShader(&embeddedFragmentShader, bgfx::getRendererType(), "quad_fs");
-    m_Program = bgfx::createProgram(vetrexShader, fragmentShader, true);
+    m_program = bgfx::createProgram(vetrexShader, fragmentShader, true);
 
-    m_TextureSamplerUniform = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
+    m_textureSamplerUniform = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
 }
+
+Renderer::Renderer() {}
 
 Renderer::~Renderer() {
-    bgfx::destroy(m_TextureSamplerUniform);
-    bgfx::destroy(m_TrianglesBuffer);
-    bgfx::destroy(m_VertexBuffer);
+    destroyHandle(m_textureSamplerUniform);
+    destroyHandle(m_trianglesBuffer);
+    destroyHandle(m_vertexBuffer);
+    destroyHandle(m_program);
 }
 
-void Renderer::RenderTexture(bgfx::TextureHandle _textureHandle, const Rectangle &rectangle) {
+void Renderer::renderTexture(const Texture &texture, const Rectangle &rectangle) {
     Vertex quadVerticies[4];
     fillQuadFromRect(quadVerticies, rectangle);
 
-    if (bgfx::isValid(m_VertexBuffer)) {
-        bgfx::destroy(m_VertexBuffer);
+    if (bgfx::isValid(m_vertexBuffer)) {
+        bgfx::destroy(m_vertexBuffer);
     }
 
-    m_VertexBuffer =
-        bgfx::createVertexBuffer(bgfx::copy(quadVerticies, sizeof(quadVerticies)), m_Layout);
+    m_vertexBuffer =
+        bgfx::createVertexBuffer(bgfx::copy(quadVerticies, sizeof(quadVerticies)), m_layout);
 
-    bgfx::setVertexBuffer(0, m_VertexBuffer);
-    bgfx::setIndexBuffer(m_TrianglesBuffer);
+    bgfx::setVertexBuffer(0, m_vertexBuffer);
+    bgfx::setIndexBuffer(m_trianglesBuffer);
 
-    bgfx::setTexture(0, m_TextureSamplerUniform, _textureHandle);
+    bgfx::setTexture(0, m_textureSamplerUniform, texture.handle());
     bgfx::setState(BGFX_STATE_DEFAULT);
 
-    bgfx::submit(0, m_Program);
+    bgfx::submit(0, m_program);
 }
 }

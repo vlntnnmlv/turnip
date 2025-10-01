@@ -17,7 +17,7 @@ struct GraphSettings {
     bool invertY = false;
 };
 
-struct GraphComponent : turnip::ecs::IComponent {
+struct GraphComponent : feyerverx::ecs::IComponent {
     std::vector<ValueInTime> valuesInTime{};
     GraphSettings settings;
 

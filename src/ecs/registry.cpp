@@ -1,9 +1,9 @@
 // Copyright 2025 Valentin Namleev
 
-#include "./turnip/ecs/registry.hpp"
-#include "./turnip/ecs/entity.hpp"
+#include "feyerverx/ecs/registry.hpp"
+#include "feyerverx/ecs/entity.hpp"
 
-namespace turnip::ecs {
+namespace feyerverx::ecs {
 
 Entity Registry::CreateEntity() {
     EntityID entityID = m_NextEntityID++;
@@ -25,4 +25,4 @@ bool Registry::HasComponentByType(EntityID _EntyityID, std::type_index _T) {
         return false;
     return it->second.find(_EntyityID) != it->second.end();
 }
-} // namespace turnip::ecs
+} // namespace feyerverx::ecs

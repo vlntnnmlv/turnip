@@ -2,6 +2,6 @@
 
 #include "./turnip/ecs/components/transformComponent.hpp"
 
-namespace turnip::ecs {
+namespace feyerverx::ecs {
 TransformComponent::TransformComponent(Rectangle _Rect) : rect(_Rect), worldRect(_Rect) {}
-} // namespace turnip::ecs
+} // namespace feyerverx::ecs

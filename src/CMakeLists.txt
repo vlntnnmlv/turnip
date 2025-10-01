@@ -20,16 +20,15 @@ bgfx_compile_shaders(
     AS_HEADERS
 )
 
-# set(SOURCE_FILES)
-# file(GLOB_RECURSE SOURCE_FILES ${CMAKE_SOURCE_DIR}/*.cpp)
-
 # Engine library
-add_library(turnip STATIC
-# source files
-# ${SOURCE_FILES}
-app.cpp
-turnip.cpp
+add_library(feyerverx STATIC
+fey.cpp
+scene.cpp
+error.cpp
+logger.cpp
 assetLoader.cpp
+assetManager.cpp
+texture.cpp
 renderer.cpp
 camera.cpp
 ecs/entity.cpp
@@ -43,7 +42,7 @@ ${SHADERS_DIR}/quad_fs.sc
 set(VENDOR_DIR ${CMAKE_SOURCE_DIR}/vendor)
 
 # Engine headers
-target_include_directories(turnip
+target_include_directories(feyerverx
     PUBLIC ${CMAKE_SOURCE_DIR}/include
     PUBLIC ${BGFX_DIR}/include
     PUBLIC ${BX_DIR}/include
@@ -55,7 +54,7 @@ target_include_directories(turnip
 )
 
 # Dependencies
-target_link_libraries(turnip
+target_link_libraries(feyerverx
     PRIVATE
         bgfx
         bimg

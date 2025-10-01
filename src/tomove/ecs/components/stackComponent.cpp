@@ -2,7 +2,7 @@
 
 #include "./turnip/ecs/components/stackComponent.hpp"
 
-namespace turnip::ecs {
+namespace feyerverx::ecs {
 StackComponent::StackComponent(StackType _Type, StackContentType _ContentType, float _Spacing)
     : type(_Type), contentType(_ContentType), spacing(_Spacing) {}
-} // namespace turnip::ecs
+} // namespace feyerverx::ecs

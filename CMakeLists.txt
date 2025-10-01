@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(turnip)
+project(feyerverx)
 
 # Set global C++ standard
 set(CMAKE_CXX_STANDARD 23)

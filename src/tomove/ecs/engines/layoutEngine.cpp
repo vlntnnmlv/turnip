@@ -4,7 +4,7 @@
 #include "./turnip/ecs/components/textComponent.hpp"
 #include <iostream>
 
-namespace turnip::ecs {
+namespace feyerverx::ecs {
 LayoutEngine::LayoutEngine(Registry &_Registry) : m_Registry(_Registry) {}
 
 // TODO: Add max available size everywhere, not only to stack contents && test layouting
@@ -298,4 +298,4 @@ void LayoutEngine::ArrangeStackContent(EntityID _EntityID, ChildrenComponent *_C
         }
     }
 }
-} // namespace turnip::ecs
+} // namespace feyerverx::ecs

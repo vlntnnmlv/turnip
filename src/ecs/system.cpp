@@ -1,7 +1,7 @@
 // Copyright 2025 Valentin Namleev
 
-#include "turnip/ecs/system.hpp"
+#include "feyerverx/ecs/system.hpp"
 
-namespace turnip::ecs {
+namespace feyerverx::ecs {
 ISystem::ISystem(Registry &_Registry) : m_Registry(_Registry) {}
-} // namespace turnip::ecs
+} // namespace feyerverx::ecs

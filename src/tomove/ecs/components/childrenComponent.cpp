@@ -2,6 +2,6 @@
 
 #include "./turnip/ecs/components/childrenComponent.hpp"
 
-namespace turnip::ecs {
+namespace feyerverx::ecs {
 ChildrenComponent::ChildrenComponent(std::vector<EntityID> _Children) : children(_Children) {}
-} // namespace turnip::ecs
+} // namespace feyerverx::ecs

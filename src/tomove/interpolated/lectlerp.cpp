@@ -2,7 +2,7 @@
 
 #include "./turnip/interpolated/rectlerp.hpp"
 
-namespace turnip {
+namespace feyerverx {
 
 raylib::Rectangle Rectlerp::Rect() const { return raylib::Rectangle{x, y, width, height}; }
 void Rectlerp::SetRect(raylib::Rectangle _Rect) {
@@ -11,4 +11,4 @@ void Rectlerp::SetRect(raylib::Rectangle _Rect) {
     width = _Rect.width;
     height = _Rect.height;
 }
-} // namespace turnip
+} // namespace feyerverx

@@ -2,7 +2,7 @@
 
 #include "./turnip/rectangleUtils.hpp"
 
-namespace turnip {
+namespace feyerverx {
 Vector2 RectangleUtils::Center(const Rectangle &_Rect) {
     return Vector2{_Rect.x + _Rect.width / 2, _Rect.y + _Rect.height / 2};
 }
@@ -33,4 +33,4 @@ inline raylib::Rectangle operator*(const raylib::Rectangle a, float b) {
     return raylib::Rectangle(a.x * b, a.y * b, a.width * b, a.height * b);
 }
 
-} // namespace turnip
+} // namespace feyerverx

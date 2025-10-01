@@ -4,7 +4,7 @@
 
 // TODO: Remove raylib.cpp
 
-namespace turnip {
+namespace feyerverx {
 Engine::Engine(float _WindowWidth, float _WindowHeight, const std::string &_WindowTitle)
     : m_Size{_WindowWidth, _WindowHeight},
       m_Window(std::make_unique<raylib::Window>(m_Size.x, m_Size.y, _WindowTitle, m_WindowFlags)),
@@ -41,4 +41,4 @@ void Engine::Update() {
     m_UISystem.Update(deltaTime);
     m_RenderSystem.Update(deltaTime);
 }
-} // namespace turnip
+} // namespace feyerverx

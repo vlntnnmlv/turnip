@@ -4,7 +4,7 @@
 #include "turnip/ecs/components/buttonComponent.hpp"
 #include "turnip/ecs/components/textComponent.hpp"
 
-namespace turnip {
+namespace feyerverx {
 UISceneBuilder::UISceneBuilder(ecs::Registry &_Registry) : m_Registry(_Registry) {}
 
 ecs::Entity UISceneBuilder::CreateNode(ecs::Entity _Parent, Size _Size, LRTB _Margin,
@@ -103,4 +103,4 @@ void UISceneBuilder::SetParent(ecs::Entity _Child, ecs::Entity _Parent) {
     childrenComponent = _Parent.GetComponent<ecs::ChildrenComponent>();
     childrenComponent->children.push_back(_Child.ID());
 }
-} // namespace turnip
+} // namespace feyerverx

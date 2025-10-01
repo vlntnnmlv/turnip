@@ -1,9 +1,9 @@
 #include <bgfx/bgfx.h>
 #include <bx/math.h>
 
-#include "turnip/camera.hpp"
+#include "feyerverx/camera.hpp"
 
-namespace turnip {
+namespace feyerverx {
 CameraOrthogonal::CameraOrthogonal(float left, float right, float top, float bottom, float near,
                                    float far)
     : m_left(left), m_right(right), m_top(top), m_bottom(bottom), m_near(near), m_far(far) {}

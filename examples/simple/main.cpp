@@ -1,15 +1,16 @@
-#include <turnip/turnip.hpp>
+// Copyright 2025 Valentin Namleev
 
 #include <print>
 
+#include <feyerverx/error.hpp>
+#include <feyerverx/fey.hpp>
+
 int main() {
     try {
-        turnip::Turnip app("Turnip", 800, 600);
-        app.SetScreenTexture("resources/textures/devil.png");
-        app.Run();
-    } catch (std::runtime_error _e) {
-        std::println("{}", _e.what());
+        feyerverx::Fey fey("Turnip", 800, 600);
+        fey.run();
+    } catch (feyerverx::FeyError &e) {
+        std::print("{}", e.what());
     }
-
     return 0;
 }

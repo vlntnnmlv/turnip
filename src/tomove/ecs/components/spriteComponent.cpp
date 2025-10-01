@@ -2,7 +2,7 @@
 
 #include "./turnip/ecs/components/spriteComponent.hpp"
 
-namespace turnip::ecs {
+namespace feyerverx::ecs {
 SpriteComponent::SpriteComponent(raylib::Texture2D &_Texture, LRTB _Patch)
     : texture(_Texture), patch(_Patch) {}
-} // namespace turnip::ecs
+} // namespace feyerverx::ecs

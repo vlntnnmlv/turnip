@@ -2,7 +2,7 @@
 
 #include "./turnip/events/eventQueue.hpp"
 
-namespace turnip::events {
+namespace feyerverx::events {
 void EventQueue::Push(const InputEvent &_Event) { m_Queue.push_back(_Event); }
 
 const std::vector<InputEvent> &EventQueue::Poll() const { return m_Queue; }
@@ -17,4 +17,4 @@ std::optional<InputEvent> EventQueue::Pop() {
 }
 
 void EventQueue::Clear() { m_Queue.clear(); }
-} // namespace turnip::events
+} // namespace feyerverx::events

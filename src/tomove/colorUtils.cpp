@@ -2,7 +2,7 @@
 
 #include "./turnip/colorUtils.hpp"
 
-namespace turnip {
+namespace feyerverx {
 raylib::Color ColorUtils::GetColorShade(float _Gradient, raylib::Color _Color) {
     return raylib::Color{(unsigned char)((int)_Color.r * _Gradient),
                          (unsigned char)((int)_Color.g * _Gradient),
@@ -14,4 +14,4 @@ raylib::Color ColorUtils::OKLCH2RGB(raylib::Color _OKLCH) {
     return raylib::Color{(unsigned char)((int)_OKLCH.r), (unsigned char)((int)_OKLCH.g),
                          (unsigned char)((int)_OKLCH.b), 255};
 }
-} // namespace turnip
+} // namespace feyerverx

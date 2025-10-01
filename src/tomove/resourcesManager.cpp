@@ -4,7 +4,7 @@
 
 #include "./turnip/resourcesManager.hpp"
 
-namespace turnip {
+namespace feyerverx {
 void ResourcesManager::SetResourcesDirectory(const std::string &_ResourcesDirectory) {
     m_ResourcesDirectory = _ResourcesDirectory;
 }
@@ -132,4 +132,4 @@ void ResourcesManager::CreateFrameTexture(size_t _Thickness) {
     SetTextureFilter(t.texture, TextureFilter::TEXTURE_FILTER_BILINEAR);
     m_FrameTextures[_Thickness] = std::make_unique<raylib::Texture2D>(t.texture);
 }
-} // namespace turnip
+} // namespace feyerverx

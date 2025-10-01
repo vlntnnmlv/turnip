@@ -7,15 +7,15 @@
 #include <format>
 #include <print>
 
-#include "turnip/assetLoader.hpp"
+#include "feyerverx/assetLoader.hpp"
 
-namespace turnip {
-bgfx::TextureHandle AssetLoader::LoadTexture(const char *_filePath) {
+namespace feyerverx {
+bgfx::TextureHandle AssetLoader::loadTexture(const std::string &filepath) {
     int width, height, channels;
-    stbi_uc *pixels = stbi_load(_filePath, &width, &height, &channels, 4); // Force RGBA8
+    stbi_uc *pixels = stbi_load(filepath.c_str(), &width, &height, &channels, 4); // Force RGBA8
 
     if (!pixels) {
-        // Handle error: texture not found or failed to load
+        std::print("Texture failed to load!\n", filepath);
         return BGFX_INVALID_HANDLE;
     }
 
@@ -38,7 +38,7 @@ bgfx::TextureHandle AssetLoader::LoadTexture(const char *_filePath) {
     return textureHandle;
 }
 
-bgfx::ShaderHandle AssetLoader::LoadShader(const char *_filePath) {
+bgfx::ShaderHandle AssetLoader::loadShader(const std::string &filepath) {
     const char *shaderPath = "???";
 
     switch (bgfx::getRendererType()) {
@@ -64,8 +64,8 @@ bgfx::ShaderHandle AssetLoader::LoadShader(const char *_filePath) {
         break;
     }
 
-    const char *p = std::format("examples/simple/{0}", _filePath).c_str();
-    FILE *file = fopen(std::format("examples/simple/{0}", _filePath).c_str(), "rb");
+    const char *p = std::format("examples/simple/{0}", filepath.c_str()).c_str();
+    FILE *file = fopen(std::format("examples/simple/{0}", filepath.c_str()).c_str(), "rb");
     if (file == NULL) {
         throw std::runtime_error("Couldn't load shader file at:");
     }

@@ -3,7 +3,7 @@
 #include "./turnip/ecs/systems/uiSystem.hpp"
 #include "./turnip/ecs/components/renderTransformComponent.hpp"
 
-namespace turnip::ecs {
+namespace feyerverx::ecs {
 UISystem::UISystem(Registry &_Registry, events::EventQueue &_EventQueue, Vector2 _Size)
     : ISystem(_Registry), m_EventQueue(_EventQueue), m_LayoutEngine(m_Registry), m_Size(_Size) {}
 
@@ -182,4 +182,4 @@ void UISystem::PlaceInWorld(EntityID _EntityID) {
         PlaceInWorld(child);
     }
 }
-} // namespace turnip::ecs
+} // namespace feyerverx::ecs

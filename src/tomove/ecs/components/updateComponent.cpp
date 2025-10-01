@@ -2,6 +2,6 @@
 
 #include "./turnip/ecs/components/updateComponent.hpp"
 
-namespace turnip::ecs {
+namespace feyerverx::ecs {
 UpdateComponent::UpdateComponent(UpdateCallback _OnUpdate) : onUpdate(_OnUpdate) {}
-} // namespace turnip::ecs
+} // namespace feyerverx::ecs

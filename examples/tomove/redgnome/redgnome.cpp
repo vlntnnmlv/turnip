@@ -14,7 +14,7 @@
 #include <string>
 
 int main() {
-    turnip::Engine engine(640, 480, "Turnip");
+    feyerverx::Engine engine(640, 480, "Turnip");
     engine.ResourcesManager().SetResourcesDirectory(std::filesystem::absolute("../../resources"));
     engine.RenderSystem().SetBackgroundColor({52, 67, 94, 255});
 

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <cstdint>
 
-namespace turnip {
+namespace feyerverx {
 float SimplePow(float x, uint32_t p) {
     float res = 1.0f;
     for (uint32_t i(p); i--;) {
