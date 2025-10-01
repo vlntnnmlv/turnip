@@ -23,6 +23,8 @@ bgfx_compile_shaders(
 # Engine library
 add_library(feyerverx STATIC
 fey.cpp
+guardSDL.cpp
+guardBGFX.cpp
 scene.cpp
 error.cpp
 logger.cpp

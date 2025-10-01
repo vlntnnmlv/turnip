@@ -11,13 +11,11 @@
 #include <bx/math.h>
 
 #include "feyerverx/camera.hpp"
+#include "feyerverx/guardBGFX.hpp"
+#include "feyerverx/guardSDL.hpp"
 #include "feyerverx/scene.hpp"
 
 namespace feyerverx {
-using unique_ptr_SDL_Window = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyWindow)>;
-#define MAKE_UNIQUE_SDL_WINDOW(...)                                                                \
-    unique_ptr_SDL_Window(SDL_CreateWindow(__VA_ARGS__), SDL_DestroyWindow)
-
 class Fey {
 public:
     Fey(const std::string &title, int _width, int _height);
@@ -26,19 +24,21 @@ public:
     void run();
 
 private:
-    void tryInitSDL();
-    void tryInitBGFX();
     void initCamera();
 
 private:
     std::string m_title;
-
     int m_width;
     int m_height;
-    bool m_running;
-    std::unique_ptr<ICamera> m_camera;
-    unique_ptr_SDL_Window m_window;
 
-    Scene m_scene;
+    bool m_running;
+
+    GuardSDL m_guardSDL;
+    GuardBGFX m_guardBGFX;
+
+    std::unique_ptr<ICamera> m_camera;
+
+    Scene m_scene; // There should be an stack of scenes. Some scenes are acitve, some suspended.
+                   // Each scene may have it's own camera.
 };
 } // namespace feyerverx
