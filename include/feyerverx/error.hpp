@@ -10,7 +10,8 @@ enum class FeyErrorType {
     SDLInitializationError,
     WindowInitializationError,
     GettingNativeWindowHandleError,
-    BGFXInitializationError
+    BGFXInitializationError,
+    WrongNumberOfArguments
 };
 
 class FeyError : public std::runtime_error {

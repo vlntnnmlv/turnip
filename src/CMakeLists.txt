@@ -20,22 +20,11 @@ bgfx_compile_shaders(
     AS_HEADERS
 )
 
+file(GLOB_RECURSE SOURCE_FILES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "*.cpp")
+
 # Engine library
 add_library(feyerverx STATIC
-fey.cpp
-guardSDL.cpp
-guardBGFX.cpp
-scene.cpp
-error.cpp
-logger.cpp
-assetLoader.cpp
-assetManager.cpp
-texture.cpp
-renderer.cpp
-camera.cpp
-ecs/entity.cpp
-ecs/registry.cpp
-ecs/system.cpp
+${SOURCE_FILES}
 # shaders
 ${SHADERS_DIR}/quad_vs.sc
 ${SHADERS_DIR}/quad_fs.sc

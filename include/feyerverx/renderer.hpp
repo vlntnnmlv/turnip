@@ -5,19 +5,13 @@
 #include <bgfx/bgfx.h>
 
 #include "feyerverx/logger.hpp"
+#include "feyerverx/rectangle.hpp"
 #include "feyerverx/texture.hpp"
 
 namespace feyerverx {
 template <typename T>
 concept IsHandle = requires(T handle) {
     handle.idx; // Requires the existence of a member named 'foo'
-};
-
-struct Rectangle {
-    float x;
-    float y;
-    float width;
-    float height;
 };
 
 struct Vertex {

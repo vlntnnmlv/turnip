@@ -20,7 +20,7 @@ Fey::Fey(const std::string &title, int width, int height)
 
     initCamera();
 
-    m_scene.init();
+    m_globalSystems.push_back(std::make_unique<ecs::RenderSystem>());
 }
 
 void Fey::initCamera() {
@@ -30,46 +30,84 @@ void Fey::initCamera() {
     Logger::instance().log(LogLevel::Info, "Inited camera!");
 }
 
+AssetManager &Fey::assetManager() { return m_assetManager; }
+
+ecs::Scene &Fey::addScene(bool isActive) {
+    ecs::Scene &scene = m_scenes.emplace_back();
+    scene.isActive = isActive;
+    return scene;
+}
+
 void Fey::run() {
     m_running = true;
     while (m_running) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
+        processEvents();
+        update();
 
-            if (event.type == SDL_EVENT_QUIT) {
-                m_running = false;
-            }
+        bgfx::touch(0);
+        bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff);
 
-            if (event.type == SDL_EVENT_KEY_DOWN) {
-                if (event.key.key == SDLK_ESCAPE)
-                    m_running = false;
+        // draw
 
-                if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-                    int newW = event.window.data1;
-                    int newH = event.window.data2;
+        bgfx::setDebug(BGFX_DEBUG_TEXT);
+        bgfx::dbgTextClear();
+        bgfx::dbgTextPrintf(1, 1, 0x4f, "elapsed: %fs", m_clock.elapsedTimeSeconds());
+        bgfx::dbgTextPrintf(1, 2, 0x4f, "dt: %fs", m_clock.deltaTimeSeconds());
+        bgfx::dbgTextPrintf(1, 3, 0x4f, "fps: %f", 1 / m_clock.deltaTimeSeconds());
+        bgfx::frame();
+    }
+}
 
-                    m_width = newW;
-                    m_height = newH;
+void Fey::processEvents() {
+    static SDL_Event event;
+    while (SDL_PollEvent(&event)) {
 
-                    bgfx::reset(uint32_t(m_width), uint32_t(m_height), BGFX_RESET_VSYNC);
-                    m_camera->resizeView(m_width, m_height);
-                    m_camera->setView();
-                }
-
-                m_scene.processEvent(event);
-            }
-
-            bgfx::touch(0);
-            bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff);
-
-            m_scene.update();
-
-            bgfx::setDebug(BGFX_DEBUG_TEXT);
-            bgfx::dbgTextClear();
-            bgfx::dbgTextPrintf(1, 1, 0x4f, "Fey running");
-
-            bgfx::frame();
+        if (event.type == SDL_EVENT_QUIT) {
+            m_running = false;
         }
+
+        if (event.type == SDL_EVENT_KEY_DOWN) {
+            if (event.key.key == SDLK_ESCAPE)
+                m_running = false;
+
+            if (event.type == SDL_EVENT_WINDOW_RESIZED) {
+                int newW = event.window.data1;
+                int newH = event.window.data2;
+
+                m_width = newW;
+                m_height = newH;
+
+                bgfx::reset(uint32_t(m_width), uint32_t(m_height), BGFX_RESET_VSYNC);
+                m_camera->resizeView(m_width, m_height);
+                m_camera->setView();
+            }
+
+            for (ecs::Scene &scene : m_scenes) {
+                if (!scene.isActive)
+                    continue;
+
+                scene.enqueueEvent(event);
+            }
+        }
+    }
+}
+
+void Fey::update() {
+    m_clock.update();
+
+    float deltaTime = m_clock.deltaTimeSeconds();
+    for (ecs::Scene &scene : m_scenes) {
+        if (!scene.isActive)
+            continue;
+
+        scene.update(deltaTime);
+        for (std::unique_ptr<ecs::ISystem> &system : m_globalSystems) {
+            system->enqueueScene(scene);
+        }
+    }
+
+    for (std::unique_ptr<ecs::ISystem> &system : m_globalSystems) {
+        system->update(deltaTime);
     }
 }
 

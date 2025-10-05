@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <chrono>
 #include <memory>
 #include <optional>
 #include <string>
@@ -10,10 +11,13 @@
 #include <bgfx/platform.h>
 #include <bx/math.h>
 
+#include "feyerverx/ecs/scene.hpp"
+#include "feyerverx/ecs/systems/renderSystem.hpp"
+
 #include "feyerverx/camera.hpp"
+#include "feyerverx/clock.hpp"
 #include "feyerverx/guardBGFX.hpp"
 #include "feyerverx/guardSDL.hpp"
-#include "feyerverx/scene.hpp"
 
 namespace feyerverx {
 class Fey {
@@ -21,7 +25,13 @@ public:
     Fey(const std::string &title, int _width, int _height);
     ~Fey();
 
+    AssetManager &assetManager();
+
+    ecs::Scene &addScene(bool isActive = false);
+
     void run();
+    void processEvents();
+    void update();
 
 private:
     void initCamera();
@@ -31,14 +41,18 @@ private:
     int m_width;
     int m_height;
 
+    Clock m_clock;
+
     bool m_running;
 
     GuardSDL m_guardSDL;
     GuardBGFX m_guardBGFX;
+    AssetManager m_assetManager;
 
     std::unique_ptr<ICamera> m_camera;
 
-    Scene m_scene; // There should be an stack of scenes. Some scenes are acitve, some suspended.
-                   // Each scene may have it's own camera.
+    std::vector<ecs::Scene> m_scenes{};
+
+    std::vector<std::unique_ptr<ecs::ISystem>> m_globalSystems{};
 };
 } // namespace feyerverx

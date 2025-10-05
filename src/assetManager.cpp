@@ -6,9 +6,9 @@
 
 namespace feyerverx {
 AssetManager::~AssetManager() {
-    // for (auto it = m_assets.begin(); it != m_assets.end(); it++) {
-    //     bgfx::destroy(it->second.handle());
-    // }
+    for (auto it = m_assets.begin(); it != m_assets.end(); it++) {
+        bgfx::destroy(it->second.handle());
+    }
 }
 
 Texture AssetManager::getTexture(const std::string &textureName) {

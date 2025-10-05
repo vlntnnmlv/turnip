@@ -3,14 +3,18 @@
 #pragma once
 
 #include "feyerverx/ecs/registry.hpp"
+#include "feyerverx/ecs/scene.hpp"
 
 namespace feyerverx::ecs {
+class Scene;
+
 struct ISystem {
-    ISystem(Registry &_Registry);
+    ISystem() = default;
     virtual ~ISystem() = default;
-    virtual void Update(float _DeltaTime) = 0;
+    virtual void update(float deltaTime) = 0;
+    virtual void enqueueScene(Scene &scene) = 0;
 
 protected:
-    Registry &m_Registry;
+    std::vector<Entity> m_entityQueue{};
 };
 } // namespace feyerverx::ecs
