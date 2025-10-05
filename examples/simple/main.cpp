@@ -25,6 +25,9 @@ int main() {
 
         feyerverx::Texture t = feyerverx::Texture(fey.assetManager().getTexture("bush"));
 
+        addSpriteToRender(mainScene, t, feyerverx::Rectangle{0, 0, 400, 300});
+        addSpriteToRender(mainScene, t, feyerverx::Rectangle{400, 300, 400, 300});
+
         fey.run();
 
     } catch (feyerverx::FeyError &e) {
