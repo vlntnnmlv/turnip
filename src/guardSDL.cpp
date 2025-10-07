@@ -5,7 +5,7 @@
 #include "feyerverx/logger.hpp"
 
 namespace feyerverx {
-GuardSDL::GuardSDL(const std::string &title, int width, int height)
+GuardSDL::GuardSDL(const std::string &title, const float width, const float height)
     : m_window(nullptr, &SDL_DestroyWindow) {
     if (!SDL_Init(0)) {
         throw FeyError(FeyErrorType::SDLInitializationError, SDL_GetError());
@@ -26,7 +26,7 @@ GuardSDL::~GuardSDL() { SDL_Quit(); }
 void *GuardSDL::windowHandle() const {
     SDL_PropertiesID windowProperties = SDL_GetWindowProperties(m_window.get());
 
-    // TODO: Add crossplatfom logic of getting window handle:
+    // TODO: Add cross-platform logic of getting window handle:
     // https://wiki.libsdl.org/SDL3/SDL_GetWindowProperties
     void *nativeWindowHandle =
         SDL_GetPointerProperty(windowProperties, SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, nullptr);

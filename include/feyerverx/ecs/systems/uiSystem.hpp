@@ -29,10 +29,10 @@ public:
 
     void update([[maybe_unused]] float deltaTime) override;
     void enqueueScene(Scene &scene) override;
-
-    Vector2f m_size{};
+    void processEvent(const SDL_Event &event) override;
 
 private:
+    Vector2f m_size{};
     std::vector<Entity> m_roots;
     LayoutEngine m_layoutEngine{};
 

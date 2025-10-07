@@ -14,7 +14,7 @@ using unique_ptr_SDL_Window = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyW
 
 class GuardSDL {
 public:
-    GuardSDL(const std::string &title, int width, int height);
+    GuardSDL(const std::string &title, float width, float height);
     ~GuardSDL();
     [[nodiscard]] void *windowHandle() const;
 

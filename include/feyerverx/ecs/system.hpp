@@ -13,6 +13,7 @@ struct ISystem {
     virtual ~ISystem() = default;
     virtual void update(float deltaTime) = 0;
     virtual void enqueueScene(Scene &scene) = 0;
+    virtual void processEvent(const SDL_Event &event) {}
 
 protected:
     std::vector<Entity> m_entityQueue{};

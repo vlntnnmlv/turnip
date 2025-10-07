@@ -14,10 +14,22 @@ void UISystem::update(float deltaTime) {
     m_roots.clear();
 }
 void UISystem::enqueueScene(Scene &scene) {
+    // TODO: actually enqueue event, and process them in update
     for (const auto &e : scene.registry().with<TransformComponent, LayoutComponent>()) {
         if (!scene.registry().getComponent<ParentComponent>(e)) {
             m_roots.emplace_back(e, &scene.registry());
         }
+    }
+}
+
+void UISystem::processEvent(const SDL_Event &event) {
+    // TODO: create custom events class, and set window_created event for initialize size value
+    if (event.type == SDL_EVENT_WINDOW_RESIZED) {
+        const int newWidth = event.window.data1;
+        const int newHeight = event.window.data2;
+
+        m_size.x = static_cast<float>(newWidth);
+        m_size.y = static_cast<float>(newHeight);
     }
 }
 

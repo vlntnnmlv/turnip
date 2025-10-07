@@ -24,9 +24,7 @@ int main() {
         feyerverx::Fey fey("Fey", 800, 600);
         feyerverx::ecs::Scene &mainScene = fey.addScene("main_scene", true);
 
-        auto ui = std::make_unique<feyerverx::ecs::UISystem>();
-        ui->m_size = {800, 600};
-        mainScene.addSystem(std::move(ui));
+        mainScene.addSystem<feyerverx::ecs::UISystem>();
 
         feyerverx::uiBuilder &builder = mainScene.builder();
         const auto root = builder.root();

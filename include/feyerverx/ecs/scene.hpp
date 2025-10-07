@@ -30,6 +30,11 @@ public:
     Entity addEntity();
     void addSystem(std::unique_ptr<ISystem> &&system);
 
+    template <typename T, typename... Args> void addSystem(Args &&...args) {
+        static_assert(std::is_base_of_v<ISystem, T>, "T must derive from IComponent");
+        m_systems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+    }
+
     Registry &registry();
     uiBuilder &builder();
 

@@ -5,7 +5,7 @@
 namespace feyerverx {
 class GuardBGFX {
 public:
-    GuardBGFX(void *windowHandle, int width, int height);
+    GuardBGFX(void *windowHandle, float width, float height);
     ~GuardBGFX();
 };
 } // namespace turnip

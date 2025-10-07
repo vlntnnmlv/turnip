@@ -1,19 +1,17 @@
 // Copyright 2025 Valentin Namleev
 
 #include <bgfx/platform.h>
-#include <bx/math.h>
 #include <bx/timer.h>
 #include <chrono>
-#include <format>
 #include <iostream>
 #include <print>
+#include <utility>
 
-#include "feyerverx/error.hpp"
 #include "feyerverx/fey.hpp"
 #include "feyerverx/logger.hpp"
 
 namespace feyerverx {
-Fey::Fey(const std::string &title, int width, int height)
+Fey::Fey(std::string title, const float width, const float height)
     : m_title(std::move(title)), m_width(width), m_height(height),
       m_guardSDL(m_title, m_width, m_height),
       m_guardBGFX(m_guardSDL.windowHandle(), m_width, m_height) {
@@ -24,7 +22,7 @@ Fey::Fey(const std::string &title, int width, int height)
 }
 
 void Fey::initCamera() {
-    m_camera = std::make_unique<CameraOrthogonal>(0.0f, (float)m_width, 0.0f, (float)m_height);
+    m_camera = std::make_unique<CameraOrthogonal>(0.0f, m_width, 0.0f, m_height);
     m_camera->setView();
 
     Logger::instance().log(LogLevel::Info, "Inited camera!");
@@ -32,7 +30,7 @@ void Fey::initCamera() {
 
 AssetManager &Fey::assetManager() { return m_assetManager; }
 
-ecs::Scene &Fey::addScene(const std::string &id, bool isActive) {
+ecs::Scene &Fey::addScene(const std::string &id, const bool isActive) {
     ecs::Scene &scene = m_scenes.emplace_back(id);
     scene.isActive = isActive;
     return scene;
@@ -66,28 +64,28 @@ void Fey::processEvents() {
             m_running = false;
         }
 
+        if (event.type == SDL_EVENT_WINDOW_RESIZED) {
+            const int newWidth = event.window.data1;
+            const int newHeight = event.window.data2;
+
+            m_width = static_cast<float>(newWidth);
+            m_height = static_cast<float>(newHeight);
+
+            m_camera->resizeView(m_width, m_height);
+            m_camera->setView();
+            bgfx::reset(newWidth, newHeight, BGFX_RESET_VSYNC);
+        }
+
         if (event.type == SDL_EVENT_KEY_DOWN) {
             if (event.key.key == SDLK_ESCAPE)
                 m_running = false;
+        }
 
-            if (event.type == SDL_EVENT_WINDOW_RESIZED) {
-                int newW = event.window.data1;
-                int newH = event.window.data2;
+        for (ecs::Scene &scene : m_scenes) {
+            if (!scene.isActive)
+                continue;
 
-                m_width = newW;
-                m_height = newH;
-
-                bgfx::reset(uint32_t(m_width), uint32_t(m_height), BGFX_RESET_VSYNC);
-                m_camera->resizeView(m_width, m_height);
-                m_camera->setView();
-            }
-
-            for (ecs::Scene &scene : m_scenes) {
-                if (!scene.isActive)
-                    continue;
-
-                scene.enqueueEvent(event);
-            }
+            scene.enqueueEvent(event);
         }
     }
 }
@@ -95,13 +93,13 @@ void Fey::processEvents() {
 void Fey::update() {
     m_clock.update();
 
-    float deltaTime = m_clock.deltaTimeSeconds();
+    const float deltaTime = m_clock.deltaTimeSeconds();
     for (ecs::Scene &scene : m_scenes) {
         if (!scene.isActive)
             continue;
 
         scene.update(deltaTime);
-        for (std::unique_ptr<ecs::ISystem> &system : m_globalSystems) {
+        for (const std::unique_ptr<ecs::ISystem> &system : m_globalSystems) {
             system->enqueueScene(scene);
         }
     }
@@ -110,6 +108,4 @@ void Fey::update() {
         system->update(deltaTime);
     }
 }
-
-Fey::~Fey() {}
 } // namespace feyerverx

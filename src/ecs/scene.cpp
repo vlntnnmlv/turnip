@@ -20,5 +20,8 @@ void Scene::update(float deltaTime) {
     for (std::unique_ptr<ISystem> const &system : m_systems)
         system->update(deltaTime);
 }
-void Scene::enqueueEvent(const SDL_Event &_event) {}
+void Scene::enqueueEvent(const SDL_Event &event) {
+    for (std::unique_ptr<ISystem> const &system : m_systems)
+        system->processEvent(event);
+}
 } // namespace feyerverx

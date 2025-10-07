@@ -8,15 +8,15 @@
 #include "feyerverx/logger.hpp"
 
 namespace feyerverx {
-GuardBGFX::GuardBGFX(void *windowHandle, int width, int height) {
+GuardBGFX::GuardBGFX(void *windowHandle, const float width, const float height) {
     bgfx::renderFrame();
 
     bgfx::Init init;
     init.type = bgfx::RendererType::Count;
 
     init.platformData.nwh = windowHandle;
-    init.resolution.width = width;
-    init.resolution.height = height;
+    init.resolution.width = static_cast<uint32_t>(width);
+    init.resolution.height = static_cast<uint32_t>(height);
     init.resolution.reset = BGFX_RESET_VSYNC;
 
     init.platformData.ndt = nullptr;

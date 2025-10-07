@@ -17,8 +17,8 @@
 namespace feyerverx {
 class Fey {
 public:
-    Fey(const std::string &title, int _width, int _height);
-    ~Fey();
+    Fey(std::string title, float width, float height);
+    ~Fey() = default;
 
     AssetManager &assetManager();
 
@@ -32,12 +32,12 @@ private:
     void initCamera();
 
     std::string m_title;
-    int m_width;
-    int m_height;
+    float m_width;
+    float m_height;
 
     Clock m_clock;
 
-    bool m_running;
+    bool m_running = false;
 
     GuardSDL m_guardSDL;
     GuardBGFX m_guardBGFX;
