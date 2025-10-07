@@ -2,35 +2,34 @@
 
 #pragma once
 
-#include <cstddef>
-
 #include "feyerverx/ecs/registry.hpp"
 
 namespace feyerverx::ecs {
 class Entity {
 public:
     Entity();
-    Entity(EntityID _ID, Registry *const _Registry);
+    Entity(EntityID entityID, Registry *registry);
 
-    EntityID ID() const;
+    [[nodiscard]] EntityID ID() const;
 
-    template <typename T, typename... Args> void AddComponent(Args &&...args) {
-        return m_Registry->AddComponent<T>(m_ID, std::forward<Args>(args)...);
+    template <typename T, typename... Args> void addComponent(Args &&...args) {
+        return m_Registry->addComponent<T>(m_ID, std::forward<Args>(args)...);
     }
 
-    template <typename T> T *GetComponent() const { return m_Registry->GetComponent<T>(m_ID); }
+    template <typename T> T *getComponent() const { return m_Registry->getComponent<T>(m_ID); }
 
-    template <typename T> bool HasComponent() const {
-        return m_Registry->GetComponent<T>(m_ID) != nullptr;
+    template <typename T> [[nodiscard]] bool hasComponent() const {
+        return m_Registry->getComponent<T>(m_ID) != nullptr;
     }
 
-    template <typename T> void Remove() { m_Registry->RemoveComponent<T>(m_ID); }
+    template <typename T> void remove() const { m_Registry->removeComponent<T>(m_ID); }
 
-    inline bool operator==(const Entity &_Other) { return ID() == _Other.ID(); }
-    inline bool operator!=(const Entity &_Other) { return !(*this == _Other); }
-    inline bool operator==(const EntityID &_OtherID) { return ID() == _OtherID; }
-    inline bool operator!=(const EntityID &_OtherID) { return !(*this == _OtherID); }
-    inline operator EntityID() { return ID(); }
+    bool operator==(const Entity &other) const { return ID() == other.ID(); }
+    bool operator!=(const Entity &other) const { return !(*this == other); }
+    bool operator==(const EntityID &otherID) const { return ID() == otherID; }
+    bool operator!=(const EntityID &otherID) const { return !(*this == otherID); }
+
+    operator EntityID() const { return ID(); }
 
 private:
     EntityID m_ID;

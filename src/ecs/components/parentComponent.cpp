@@ -3,5 +3,5 @@
 #include "feyerverx/ecs/components/parentComponent.hpp"
 
 namespace feyerverx::ecs {
-ParentComponent::ParentComponent(EntityID _Parent) : parent(_Parent) {}
+ParentComponent::ParentComponent(Entity parent) : parent(parent) {}
 } // namespace feyerverx::ecs

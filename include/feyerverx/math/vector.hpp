@@ -10,7 +10,6 @@
 #include "feyerverx/error.hpp"
 
 namespace feyerverx {
-
 template <typename T>
 concept arithmetic = std::is_arithmetic_v<T>;
 

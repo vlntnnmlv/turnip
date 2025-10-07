@@ -5,6 +5,6 @@
 
 namespace feyerverx::ecs {
 Entity::Entity() : m_ID(NullEntityID) {}
-Entity::Entity(EntityID _ID, Registry *const _Registry) : m_ID(_ID), m_Registry(_Registry) {}
+Entity::Entity(EntityID _ID, Registry *const registry) : m_ID(_ID), m_Registry(registry) {}
 EntityID Entity::ID() const { return m_ID; }
 } // namespace feyerverx::ecs

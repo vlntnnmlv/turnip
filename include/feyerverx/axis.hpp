@@ -10,13 +10,12 @@ namespace feyerverx {
 enum class Axis { HORIZONTAL = 0, VERTICAL = 1 };
 
 struct AxisHelper {
-    static float &GetRectPosition(Rectangle &_Rect, Axis _Axis);
-    static float &GetRectSize(Rectangle &_Rect, Axis _Axis);
-    static float GetLayoutSize(const feyerverx::Size &_Size, Axis _Axis);
-    static std::optional<float> GetLayoutConstraintSize(const feyerverx::Size &_Size, Axis _Axis,
-                                                        bool _Min);
-    static feyerverx::SizeType GetLayoutSizeType(const feyerverx::Size &_Size, Axis _Axis);
-    static float GetPadding(const LRTB &_Padding, Axis _Axis, bool _IsStart);
-    static float GetMargin(const LRTB &_Margin, Axis _Axis, bool _IsStart);
+    static float &getRectPosition(Rectangle &rect, Axis axis);
+    static float &getRectSize(Rectangle &rect, Axis axis);
+    static float getLayoutSize(const Size &size, Axis axis);
+    static std::optional<float> getLayoutConstraintSize(const Size &size, Axis axis, bool min);
+    static SizeType getLayoutSizeType(const Size &size, Axis axis);
+    static float getPadding(const LRTB &padding, Axis axis, bool isStart);
+    static float getMargin(const LRTB &margin, Axis axis, bool isStart);
 };
 } // namespace feyerverx

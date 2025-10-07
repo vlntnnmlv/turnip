@@ -2,11 +2,12 @@
 
 #pragma once
 
+#include "feyerverx/uiBuilder.hpp"
+
 #include <vector>
 
 #include <SDL3/SDL.h>
 
-#include "feyerverx/assetManager.hpp"
 #include "feyerverx/ecs/entity.hpp"
 #include "feyerverx/ecs/registry.hpp"
 #include "feyerverx/ecs/system.hpp"
@@ -17,11 +18,7 @@ struct ISystem;
 
 class Scene {
 public:
-    std::string id;
-    bool isActive;
-
-public:
-    Scene() noexcept;
+    explicit Scene(const std::string &id) noexcept;
     ~Scene() = default;
 
     Scene(Scene &&) noexcept = default;
@@ -30,17 +27,24 @@ public:
     Scene(const Scene &) = delete;
     Scene &operator=(const Scene &) = delete;
 
-    ecs::Entity addEntity();
-    ecs::Registry &registry();
+    Entity addEntity();
+    void addSystem(std::unique_ptr<ISystem> &&system);
+
+    Registry &registry();
+    uiBuilder &builder();
 
     void update(float deltaTime);
     void enqueueEvent(const SDL_Event &event);
 
+    std::string ID;
+    bool isActive = false;
+
 private:
-    static size_t nextuid;
+    static size_t nextUID;
     size_t uid;
 
-    ecs::Registry m_registry{};
+    Registry m_registry{};
+    uiBuilder m_builder{m_registry};
     std::vector<std::unique_ptr<ecs::ISystem>> m_systems{};
 };
 } // namespace feyerverx

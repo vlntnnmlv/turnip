@@ -2,9 +2,6 @@
 
 #pragma once
 
-#include <algorithm>
-#include <limits>
-
 #include "feyerverx/axis.hpp"
 #include "feyerverx/ecs/components/childrenComponent.hpp"
 #include "feyerverx/ecs/components/layoutComponent.hpp"
@@ -16,33 +13,30 @@
 namespace feyerverx::ecs {
 class LayoutEngine {
 public:
-    LayoutEngine(Registry &_Registry);
-
-    bool TryMeasureEntityContent(EntityID _EntityID);
-    bool TryArrangeEntityContent(EntityID _EntityID);
+    bool tryMeasureEntityContent(Entity entity);
+    bool tryArrangeEntityContent(Entity entity);
 
 private:
-    float GetRealSize(float _Value, Size _Size, Axis _Axis, float _MaxAvailableValue);
+    float getRealSize(float value, const Size &size, Axis axis, float maxAvailableValue);
 
-    void MeasureText(TextComponent *_TextComponent, TransformComponent *_TransformComponent);
+    void measureText(TextComponent *textComponent, TransformComponent *transformComponent);
 
-    void MeasureNodeContent(ChildrenComponent *_ChildrenComponent,
-                            TransformComponent *_TransformComponent,
-                            LayoutComponent *_LayoutComponent);
+    void measureNodeContent(ChildrenComponent *childrenComponent,
+                            TransformComponent *transformComponent,
+                            LayoutComponent *layoutComponent);
 
-    void ArrangeNodeContent(ChildrenComponent *_ChildrenComponent,
-                            TransformComponent *_TransformComponent,
-                            LayoutComponent *_LayoutComponent);
+    void arrangeNodeContent(ChildrenComponent *childrenComponent,
+                            TransformComponent *transformComponent,
+                            LayoutComponent *layoutComponent);
 
-    void MeasureStackContent(EntityID _EntityID, ChildrenComponent *_ChildrenComponent,
-                             TransformComponent *_TransformComponent,
-                             LayoutComponent *_LayoutComponent, StackComponent *_StackComponent);
+    void measureStackContent(Entity entity, ChildrenComponent *childrenComponent,
+                             TransformComponent *transformComponent,
+                             LayoutComponent *layoutComponent, StackComponent *stackComponent);
 
-    void ArrangeStackContent(EntityID _EntityID, ChildrenComponent *_ChildrenComponent,
-                             TransformComponent *_TransformComponent,
-                             LayoutComponent *_LayoutComponent, StackComponent *_StackComponent);
+    void arrangeStackContent(Entity entity, ChildrenComponent *childrenComponent,
+                             TransformComponent *transformComponent,
+                             LayoutComponent *layoutComponent, StackComponent *stackComponent);
 
-    std::unordered_map<EntityID, float> m_AlignedContentSizes;
-    Registry &m_registry;
+    std::unordered_map<EntityID, float> m_alignedContentSizes;
 };
 } // namespace feyerverx::ecs

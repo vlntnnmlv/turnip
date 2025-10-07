@@ -2,39 +2,39 @@
 
 #include "feyerverx/ecs/engines/layoutEngine.hpp"
 #include "feyerverx/ecs/components/textComponent.hpp"
+#include "feyerverx/ecs/entity.hpp"
+
+#include <algorithm>
 #include <iostream>
 
 namespace feyerverx::ecs {
-LayoutEngine::LayoutEngine(Registry &_Registry) : m_registry(_Registry) {}
-
 // TODO: Add max available size everywhere, not only to stack contents && test layouting
 // TODO: Check jittering on stack height increase
 // TODO: Make TransformComponent.worldRect a normal rect, and move rectlerp logic to
 // renderTransformComponent
-bool LayoutEngine::TryMeasureEntityContent(EntityID _EntityID) {
-    ChildrenComponent *childrenComponent = m_registry.GetComponent<ChildrenComponent>(_EntityID);
-    TransformComponent *transformComponent = m_registry.GetComponent<TransformComponent>(_EntityID);
+bool LayoutEngine::tryMeasureEntityContent(const Entity entity) {
+    ChildrenComponent *childrenComponent = entity.getComponent<ChildrenComponent>();
+    TransformComponent *transformComponent = entity.getComponent<TransformComponent>();
 
-    MeasureText(m_registry.GetComponent<TextComponent>(_EntityID), transformComponent);
+    measureText(entity.getComponent<TextComponent>(), transformComponent);
 
     if (!childrenComponent)
         return false;
 
-    LayoutComponent *layoutComponent = m_registry.GetComponent<LayoutComponent>(_EntityID);
-    StackComponent *stackComponent = m_registry.GetComponent<StackComponent>(_EntityID);
+    LayoutComponent *layoutComponent = entity.getComponent<LayoutComponent>();
 
-    if (!stackComponent)
-        MeasureNodeContent(childrenComponent, transformComponent, layoutComponent);
+    if (StackComponent *stackComponent = entity.getComponent<StackComponent>(); !stackComponent)
+        measureNodeContent(childrenComponent, transformComponent, layoutComponent);
     else
-        MeasureStackContent(_EntityID, childrenComponent, transformComponent, layoutComponent,
+        measureStackContent(entity, childrenComponent, transformComponent, layoutComponent,
                             stackComponent);
     return true;
 }
 
-void LayoutEngine::MeasureText(TextComponent *_TextComponent,
-                               TransformComponent *_TransformComponent) {
+void LayoutEngine::measureText(TextComponent *textComponent,
+                               TransformComponent *transformComponent) {
     // TODO: Make this better!
-    if (!_TextComponent)
+    if (!textComponent)
         return;
 
     // Vector2f panelSize = _TransformComponent->worldRect.GetSize();
@@ -60,101 +60,103 @@ void LayoutEngine::MeasureText(TextComponent *_TextComponent,
     // _TextComponent->fontSize = std::clamp(fontSize, fontSize, _TextComponent->fontSizeOriginal);
 }
 
-bool LayoutEngine::TryArrangeEntityContent(EntityID _EntityID) {
-    ChildrenComponent *childrenComponent = m_registry.GetComponent<ChildrenComponent>(_EntityID);
+bool LayoutEngine::tryArrangeEntityContent(Entity entity) {
+    ChildrenComponent *childrenComponent = entity.getComponent<ChildrenComponent>();
 
     if (!childrenComponent)
         return false;
 
-    TransformComponent *transformComponent = m_registry.GetComponent<TransformComponent>(_EntityID);
+    TransformComponent *transformComponent = entity.getComponent<TransformComponent>();
 
-    LayoutComponent *layoutComponent = m_registry.GetComponent<LayoutComponent>(_EntityID);
-    StackComponent *stackComponent = m_registry.GetComponent<StackComponent>(_EntityID);
+    LayoutComponent *layoutComponent = entity.getComponent<LayoutComponent>();
 
-    if (!stackComponent)
-        ArrangeNodeContent(childrenComponent, transformComponent, layoutComponent);
+    if (StackComponent *stackComponent = entity.getComponent<StackComponent>(); !stackComponent)
+        arrangeNodeContent(childrenComponent, transformComponent, layoutComponent);
     else
-        ArrangeStackContent(_EntityID, childrenComponent, transformComponent, layoutComponent,
+        arrangeStackContent(entity, childrenComponent, transformComponent, layoutComponent,
                             stackComponent);
     return true;
 }
 
 // TODO: Make this BETTER
-float LayoutEngine::GetRealSize(float _Value, Size _Size, Axis _Axis, float _MaxAvailableValue) {
+float LayoutEngine::getRealSize(const float value, const Size &size, const Axis axis,
+                                const float maxAvailableValue) {
 
-    std::optional<float> minSize = AxisHelper::GetLayoutConstraintSize(_Size, _Axis, true);
-    std::optional<float> maxSize = AxisHelper::GetLayoutConstraintSize(_Size, _Axis, false);
+    const std::optional<float> minSize = AxisHelper::getLayoutConstraintSize(size, axis, true);
+    const std::optional<float> maxSize = AxisHelper::getLayoutConstraintSize(size, axis, false);
 
-    float minValue = minSize.has_value() ? minSize.value() : 0;
-    float maxValue =
+    const float minValue = minSize.has_value() ? minSize.value() : 0;
+    const float maxValue =
         std::min(maxSize.has_value() ? maxSize.value() : std::numeric_limits<float>::max(),
-                 _MaxAvailableValue);
+                 maxAvailableValue);
 
-    float size = std::clamp(_Value, minValue, maxValue);
-
-    return size;
+    return std::clamp(value, minValue, maxValue);
 }
 
-void LayoutEngine::MeasureNodeContent(ChildrenComponent *_ChildrenComponent,
-                                      TransformComponent *_TransformComponent,
-                                      LayoutComponent *_LayoutComponent) {
-    for (const auto &child : _ChildrenComponent->children) {
-        LayoutComponent *childLayoutComponent = m_registry.GetComponent<LayoutComponent>(child);
-        TransformComponent *childTransformComponent =
-            m_registry.GetComponent<TransformComponent>(child);
+void LayoutEngine::measureNodeContent(ChildrenComponent *childrenComponent,
+                                      TransformComponent *transformComponent,
+                                      LayoutComponent *layoutComponent) {
+    if (!childrenComponent->children.has_value())
+        return;
 
-        for (Axis axis : {Axis::VERTICAL, Axis::HORIZONTAL}) {
-            float availableSpace =
-                AxisHelper::GetRectSize(_TransformComponent->rect, axis) -
-                AxisHelper::GetPadding(_LayoutComponent->padding, axis, true) -
-                AxisHelper::GetPadding(_LayoutComponent->padding, axis, false) -
-                AxisHelper::GetPadding(childLayoutComponent->margin, axis, true) -
-                AxisHelper::GetPadding(childLayoutComponent->margin, axis, false);
+    for (const auto &child : childrenComponent->children.value()) {
+        LayoutComponent *childLayoutComponent = child.getComponent<LayoutComponent>();
+        TransformComponent *childTransformComponent = child.getComponent<TransformComponent>();
 
-            switch (AxisHelper::GetLayoutSizeType(childLayoutComponent->size, axis)) {
-            case feyerverx::SizeType::FILL:
-                AxisHelper::GetRectSize(childTransformComponent->rect, axis) = availableSpace;
+        for (const Axis axis : {Axis::VERTICAL, Axis::HORIZONTAL}) {
+            const float availableSpace =
+                AxisHelper::getRectSize(transformComponent->rect, axis) -
+                AxisHelper::getPadding(layoutComponent->padding, axis, true) -
+                AxisHelper::getPadding(layoutComponent->padding, axis, false) -
+                AxisHelper::getPadding(childLayoutComponent->margin, axis, true) -
+                AxisHelper::getPadding(childLayoutComponent->margin, axis, false);
+
+            switch (AxisHelper::getLayoutSizeType(childLayoutComponent->size, axis)) {
+            case SizeType::FILL:
+                AxisHelper::getRectSize(childTransformComponent->rect, axis) = availableSpace;
                 break;
             default:
-                AxisHelper::GetRectSize(childTransformComponent->rect, axis) =
-                    GetRealSize(AxisHelper::GetLayoutSize(childLayoutComponent->size, axis),
+                AxisHelper::getRectSize(childTransformComponent->rect, axis) =
+                    getRealSize(AxisHelper::getLayoutSize(childLayoutComponent->size, axis),
                                 childLayoutComponent->size, axis,
-                                AxisHelper::GetLayoutSize(childLayoutComponent->size, axis));
+                                AxisHelper::getLayoutSize(childLayoutComponent->size, axis));
                 break;
             }
         }
     }
 }
 
-void LayoutEngine::ArrangeNodeContent(ChildrenComponent *_ChildrenComponent,
-                                      TransformComponent *_TransformComponent,
-                                      LayoutComponent *_LayoutComponent) {
-    for (const auto &child : _ChildrenComponent->children) {
-        LayoutComponent *childLayoutComponent = m_registry.GetComponent<LayoutComponent>(child);
-        TransformComponent *childTransformComponent =
-            m_registry.GetComponent<TransformComponent>(child);
+void LayoutEngine::arrangeNodeContent(ChildrenComponent *childrenComponent,
+                                      TransformComponent *transformComponent,
+                                      LayoutComponent *layoutComponent) {
+    if (!childrenComponent->children.has_value())
+        return;
 
-        for (Axis axis : {Axis::HORIZONTAL, Axis::VERTICAL}) {
-            float &pos = AxisHelper::GetRectPosition(childTransformComponent->rect, axis);
+    for (const auto &child : childrenComponent->children.value()) {
+        LayoutComponent *childLayoutComponent = child.getComponent<LayoutComponent>();
+        TransformComponent *childTransformComponent = child.getComponent<TransformComponent>();
 
-            switch (AxisHelper::GetLayoutSizeType(childLayoutComponent->size, axis)) {
-            case feyerverx::SizeType::FILL:
-            case feyerverx::SizeType::START:
-                pos = AxisHelper::GetPadding(_LayoutComponent->padding, axis, true) +
-                      AxisHelper::GetMargin(childLayoutComponent->margin, axis, true);
+        for (const Axis axis : {Axis::HORIZONTAL, Axis::VERTICAL}) {
+            float &pos = AxisHelper::getRectPosition(childTransformComponent->rect, axis);
+
+            switch (AxisHelper::getLayoutSizeType(childLayoutComponent->size, axis)) {
+            case SizeType::FILL:
+            case SizeType::START:
+                pos = AxisHelper::getPadding(layoutComponent->padding, axis, true) +
+                      AxisHelper::getMargin(childLayoutComponent->margin, axis, true);
                 break;
-            case feyerverx::SizeType::END:
-                pos = AxisHelper::GetRectSize(_TransformComponent->rect, axis) -
-                      AxisHelper::GetPadding(_LayoutComponent->padding, axis, false) -
-                      AxisHelper::GetMargin(childLayoutComponent->margin, axis, false) -
-                      AxisHelper::GetRectSize(childTransformComponent->rect, axis);
+            case SizeType::END:
+                pos = AxisHelper::getRectSize(transformComponent->rect, axis) -
+                      AxisHelper::getPadding(layoutComponent->padding, axis, false) -
+                      AxisHelper::getMargin(childLayoutComponent->margin, axis, false) -
+                      AxisHelper::getRectSize(childTransformComponent->rect, axis);
                 break;
-            case feyerverx::SizeType::CENTER:
-                pos = AxisHelper::GetRectPosition(_TransformComponent->rect, axis) +
-                      AxisHelper::GetRectSize(_TransformComponent->rect, axis) * 0.5f -
-                      AxisHelper::GetRectSize(childTransformComponent->rect, axis) * 0.5f;
+            case SizeType::CENTER:
+                pos = AxisHelper::getRectPosition(transformComponent->rect, axis) +
+                      AxisHelper::getRectSize(transformComponent->rect, axis) * 0.5f -
+                      AxisHelper::getRectSize(childTransformComponent->rect, axis) * 0.5f;
                 break;
-            case feyerverx::SizeType::ABSOLUTE:
+            case SizeType::ABSOLUTE:
                 pos = (axis == Axis::HORIZONTAL) ? childLayoutComponent->size.x
                                                  : childLayoutComponent->size.y;
                 break;
@@ -163,134 +165,139 @@ void LayoutEngine::ArrangeNodeContent(ChildrenComponent *_ChildrenComponent,
     }
 }
 
-void LayoutEngine::MeasureStackContent(EntityID _EntityID, ChildrenComponent *_ChildrenComponent,
-                                       TransformComponent *_TransformComponent,
-                                       LayoutComponent *_LayoutComponent,
-                                       StackComponent *_StackComponent) {
-    Axis axis = _StackComponent->type == StackType::HORIZONTAL ? Axis::HORIZONTAL : Axis::VERTICAL;
+void LayoutEngine::measureStackContent(Entity entity, ChildrenComponent *childrenComponent,
+                                       TransformComponent *transformComponent,
+                                       LayoutComponent *layoutComponent,
+                                       StackComponent *stackComponent) {
+    if (!childrenComponent->children.has_value())
+        return;
 
-    float fillSpace = AxisHelper::GetRectSize(_TransformComponent->rect, axis) -
-                      AxisHelper::GetPadding(_LayoutComponent->padding, axis, true) -
-                      AxisHelper::GetPadding(_LayoutComponent->padding, axis, false) -
-                      (_ChildrenComponent->children.size() - 1) * _StackComponent->spacing;
+    Axis axis = stackComponent->type == StackType::HORIZONTAL ? Axis::HORIZONTAL : Axis::VERTICAL;
+
+    float fillSpace = AxisHelper::getRectSize(transformComponent->rect, axis) -
+                      AxisHelper::getPadding(layoutComponent->padding, axis, true) -
+                      AxisHelper::getPadding(layoutComponent->padding, axis, false) -
+                      (childrenComponent->children.value().size() - 1) * stackComponent->spacing;
     float virtualFillSpace = fillSpace;
 
     int fillChildrenCount = 0;
 
-    for (auto const &child : _ChildrenComponent->children) {
-        LayoutComponent *childLayoutComponent = m_registry.GetComponent<LayoutComponent>(child);
+    for (auto const &child : childrenComponent->children.value()) {
+        LayoutComponent *childLayoutComponent = child.getComponent<LayoutComponent>();
 
-        fillSpace -= AxisHelper::GetMargin(childLayoutComponent->margin, axis, true) +
-                     AxisHelper::GetMargin(childLayoutComponent->margin, axis, false);
+        fillSpace -= AxisHelper::getMargin(childLayoutComponent->margin, axis, true) +
+                     AxisHelper::getMargin(childLayoutComponent->margin, axis, false);
 
-        if (AxisHelper::GetLayoutSizeType(childLayoutComponent->size, axis) != SizeType::FILL) {
-            fillSpace -= AxisHelper::GetLayoutSize(childLayoutComponent->size, axis);
+        if (AxisHelper::getLayoutSizeType(childLayoutComponent->size, axis) != SizeType::FILL) {
+            fillSpace -= AxisHelper::getLayoutSize(childLayoutComponent->size, axis);
         } else
             fillChildrenCount += 1;
     }
 
-    Axis orthogonalAxis = (axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
+    const Axis orthogonalAxis = (axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
 
-    m_AlignedContentSizes[_EntityID] =
-        (_ChildrenComponent->children.size() - 1) * _StackComponent->spacing;
+    m_alignedContentSizes[entity.ID()] =
+        (childrenComponent->children.value().size() - 1) * stackComponent->spacing;
 
-    for (auto const &child : _ChildrenComponent->children) {
-        TransformComponent *childTransformComponent =
-            m_registry.GetComponent<TransformComponent>(child);
+    for (auto const &child : childrenComponent->children.value()) {
+        TransformComponent *childTransformComponent = child.getComponent<TransformComponent>();
 
-        LayoutComponent *childLayoutComponent = m_registry.GetComponent<LayoutComponent>(child);
+        LayoutComponent *childLayoutComponent = child.getComponent<LayoutComponent>();
 
-        switch (AxisHelper::GetLayoutSizeType(childLayoutComponent->size, axis)) {
+        switch (AxisHelper::getLayoutSizeType(childLayoutComponent->size, axis)) {
         case SizeType::FILL:
-            m_AlignedContentSizes[_EntityID] +=
-                AxisHelper::GetRectSize(childTransformComponent->rect, axis) =
-                    GetRealSize(fillSpace / fillChildrenCount, childLayoutComponent->size, axis,
+            m_alignedContentSizes[entity.ID()] +=
+                AxisHelper::getRectSize(childTransformComponent->rect, axis) =
+                    getRealSize(fillSpace / fillChildrenCount, childLayoutComponent->size, axis,
                                 fillSpace / fillChildrenCount);
 
             break;
         default:
-            m_AlignedContentSizes[_EntityID] +=
-                AxisHelper::GetRectSize(childTransformComponent->rect, axis) =
-                    GetRealSize(AxisHelper::GetLayoutSize(childLayoutComponent->size, axis),
+            m_alignedContentSizes[entity.ID()] +=
+                AxisHelper::getRectSize(childTransformComponent->rect, axis) =
+                    getRealSize(AxisHelper::getLayoutSize(childLayoutComponent->size, axis),
                                 childLayoutComponent->size, axis,
-                                virtualFillSpace / (_ChildrenComponent->children.size()));
+                                virtualFillSpace / childrenComponent->children.value().size());
             break;
         }
 
         float orthoAvailable =
-            AxisHelper::GetRectSize(_TransformComponent->rect, orthogonalAxis) -
-            AxisHelper::GetPadding(_LayoutComponent->padding, orthogonalAxis, true) -
-            AxisHelper::GetPadding(_LayoutComponent->padding, orthogonalAxis, false) -
-            AxisHelper::GetMargin(childLayoutComponent->margin, orthogonalAxis, true) -
-            AxisHelper::GetMargin(childLayoutComponent->margin, orthogonalAxis, false);
+            AxisHelper::getRectSize(transformComponent->rect, orthogonalAxis) -
+            AxisHelper::getPadding(layoutComponent->padding, orthogonalAxis, true) -
+            AxisHelper::getPadding(layoutComponent->padding, orthogonalAxis, false) -
+            AxisHelper::getMargin(childLayoutComponent->margin, orthogonalAxis, true) -
+            AxisHelper::getMargin(childLayoutComponent->margin, orthogonalAxis, false);
 
-        switch (AxisHelper::GetLayoutSizeType(childLayoutComponent->size, orthogonalAxis)) {
+        switch (AxisHelper::getLayoutSizeType(childLayoutComponent->size, orthogonalAxis)) {
         case SizeType::FILL:
-            AxisHelper::GetRectSize(childTransformComponent->rect, orthogonalAxis) = orthoAvailable;
+            AxisHelper::getRectSize(childTransformComponent->rect, orthogonalAxis) = orthoAvailable;
             break;
         default:
-            AxisHelper::GetRectSize(childTransformComponent->rect, orthogonalAxis) =
-                AxisHelper::GetLayoutSize(childLayoutComponent->size, orthogonalAxis);
+            AxisHelper::getRectSize(childTransformComponent->rect, orthogonalAxis) =
+                AxisHelper::getLayoutSize(childLayoutComponent->size, orthogonalAxis);
             break;
         }
     }
 }
 
-void LayoutEngine::ArrangeStackContent(EntityID _EntityID, ChildrenComponent *_ChildrenComponent,
-                                       TransformComponent *_TransformComponent,
-                                       LayoutComponent *_LayoutComponent,
-                                       StackComponent *_StackComponent) {
-    Axis axis =
-        (_StackComponent->type == StackType::HORIZONTAL) ? Axis::HORIZONTAL : Axis::VERTICAL;
-    Axis orthogonalAxis = (axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
+void LayoutEngine::arrangeStackContent(Entity entity, ChildrenComponent *childrenComponent,
+                                       TransformComponent *transformComponent,
+                                       LayoutComponent *layoutComponent,
+                                       StackComponent *stackComponent) {
+    if (!childrenComponent->children.has_value())
+        return;
 
-    float currentOffset;
-    switch (_StackComponent->contentType) {
+    const Axis axis =
+        (stackComponent->type == StackType::HORIZONTAL) ? Axis::HORIZONTAL : Axis::VERTICAL;
+    const Axis orthogonalAxis = (axis == Axis::HORIZONTAL) ? Axis::VERTICAL : Axis::HORIZONTAL;
+
+    float currentOffset = 0;
+    switch (stackComponent->contentType) {
     case StackContentType::START:
-        currentOffset = AxisHelper::GetPadding(_LayoutComponent->padding, axis, true);
+        currentOffset = AxisHelper::getPadding(layoutComponent->padding, axis, true);
         break;
     case StackContentType::CENTER:
-        currentOffset = AxisHelper::GetRectSize(_TransformComponent->rect, axis) / 2 -
-                        m_AlignedContentSizes[_EntityID] / 2;
+        currentOffset = AxisHelper::getRectSize(transformComponent->rect, axis) / 2 -
+                        m_alignedContentSizes[entity.ID()] / 2;
         break;
     case StackContentType::END:
-        currentOffset = AxisHelper::GetRectSize(_TransformComponent->rect, axis) -
-                        AxisHelper::GetPadding(_LayoutComponent->padding, axis, false) -
-                        m_AlignedContentSizes[_EntityID];
+        currentOffset = AxisHelper::getRectSize(transformComponent->rect, axis) -
+                        AxisHelper::getPadding(layoutComponent->padding, axis, false) -
+                        m_alignedContentSizes[entity.ID()];
         break;
     }
 
-    for (size_t i = 0; i < _ChildrenComponent->children.size(); ++i) {
-        EntityID child = _ChildrenComponent->children[i];
-        TransformComponent *childTransform = m_registry.GetComponent<TransformComponent>(child);
-        LayoutComponent *childLayout = m_registry.GetComponent<LayoutComponent>(child);
+    for (size_t i = 0; i < childrenComponent->children.value().size(); ++i) {
+        Entity child = childrenComponent->children.value()[i];
+        TransformComponent *childTransform = child.getComponent<TransformComponent>();
+        LayoutComponent *childLayout = child.getComponent<LayoutComponent>();
 
         // main axis
-        currentOffset += AxisHelper::GetMargin(childLayout->margin, axis, true);
+        currentOffset += AxisHelper::getMargin(childLayout->margin, axis, true);
 
-        AxisHelper::GetRectPosition(childTransform->rect, axis) = currentOffset;
+        AxisHelper::getRectPosition(childTransform->rect, axis) = currentOffset;
 
-        currentOffset += AxisHelper::GetRectSize(childTransform->rect, axis);
-        currentOffset += AxisHelper::GetMargin(childLayout->margin, axis, false);
-        currentOffset += _StackComponent->spacing;
+        currentOffset += AxisHelper::getRectSize(childTransform->rect, axis);
+        currentOffset += AxisHelper::getMargin(childLayout->margin, axis, false);
+        currentOffset += stackComponent->spacing;
 
         // orthogonal axis
-        float &pos = AxisHelper::GetRectPosition(childTransform->rect, orthogonalAxis);
-        float size = AxisHelper::GetRectSize(childTransform->rect, orthogonalAxis);
+        float &pos = AxisHelper::getRectPosition(childTransform->rect, orthogonalAxis);
+        float size = AxisHelper::getRectSize(childTransform->rect, orthogonalAxis);
 
-        switch (AxisHelper::GetLayoutSizeType(childLayout->size, orthogonalAxis)) {
+        switch (AxisHelper::getLayoutSizeType(childLayout->size, orthogonalAxis)) {
         case SizeType::FILL:
         case SizeType::START:
-            pos = AxisHelper::GetPadding(_LayoutComponent->padding, orthogonalAxis, true) +
-                  AxisHelper::GetMargin(childLayout->margin, orthogonalAxis, true);
+            pos = AxisHelper::getPadding(layoutComponent->padding, orthogonalAxis, true) +
+                  AxisHelper::getMargin(childLayout->margin, orthogonalAxis, true);
             break;
         case SizeType::END:
-            pos = AxisHelper::GetRectSize(_TransformComponent->rect, orthogonalAxis) -
-                  AxisHelper::GetPadding(_LayoutComponent->padding, orthogonalAxis, false) -
-                  AxisHelper::GetMargin(childLayout->margin, orthogonalAxis, false) - size;
+            pos = AxisHelper::getRectSize(transformComponent->rect, orthogonalAxis) -
+                  AxisHelper::getPadding(layoutComponent->padding, orthogonalAxis, false) -
+                  AxisHelper::getMargin(childLayout->margin, orthogonalAxis, false) - size;
             break;
         case SizeType::CENTER:
-            pos = AxisHelper::GetRectSize(_TransformComponent->rect, orthogonalAxis) * 0.5f -
+            pos = AxisHelper::getRectSize(transformComponent->rect, orthogonalAxis) * 0.5f -
                   size * 0.5f;
             break;
         case SizeType::ABSOLUTE:

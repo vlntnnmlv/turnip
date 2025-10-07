@@ -16,7 +16,7 @@ class GuardSDL {
 public:
     GuardSDL(const std::string &title, int width, int height);
     ~GuardSDL();
-    void *windowHandle() const;
+    [[nodiscard]] void *windowHandle() const;
 
 private:
     unique_ptr_SDL_Window m_window;

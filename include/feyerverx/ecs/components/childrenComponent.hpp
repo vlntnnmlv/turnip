@@ -2,15 +2,16 @@
 
 #pragma once
 
+#include <optional>
 #include <vector>
 
 #include "feyerverx/ecs/component.hpp"
-#include "feyerverx/ecs/registry.hpp"
+#include "feyerverx/ecs/entity.hpp"
 
 namespace feyerverx::ecs {
 struct ChildrenComponent : IComponent {
-    std::vector<EntityID> children;
+    std::optional<std::vector<Entity>> children = std::nullopt;
 
-    ChildrenComponent(std::vector<EntityID> _Children = {});
+    explicit ChildrenComponent(std::vector<Entity> children = {});
 };
 } // namespace feyerverx::ecs

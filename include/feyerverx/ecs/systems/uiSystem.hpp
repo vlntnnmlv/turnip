@@ -11,6 +11,7 @@
 // #include "feyerverx/ecs/components/transformComponent.hpp"
 // #include "feyerverx/ecs/engines/layoutEngine.hpp"
 // #include "feyerverx/ecs/registry.hpp"
+#include "feyerverx/ecs/engines/layoutEngine.hpp"
 #include "feyerverx/ecs/system.hpp"
 // #include "feyerverx/events/eventQueue.hpp"
 // // #include "feyerverx/rectangleUtils.hpp"
@@ -21,7 +22,26 @@
 // #include <unordered_map>
 
 namespace feyerverx::ecs {
-class UISystem : public ISystem {};
+class UISystem final : public ISystem {
+public:
+    UISystem() = default;
+    ~UISystem() override = default;
+
+    void update([[maybe_unused]] float deltaTime) override;
+    void enqueueScene(Scene &scene) override;
+
+    Vector2f m_size{};
+
+private:
+    std::vector<Entity> m_roots;
+    LayoutEngine m_layoutEngine{};
+
+    void processLayout();
+
+    void measureEntityContent(Entity entity);
+    void arrangeEntityContent(Entity entity);
+    void placeInWorld(Entity entity);
+};
 }
 // public:
 //     UISystem(Registry &_Registry, events::EventQueue &_EventQueue, Vector2f _Size);

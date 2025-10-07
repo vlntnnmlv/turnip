@@ -5,8 +5,6 @@
 #include <string>
 
 #include <bgfx/bgfx.h>
-#include <bimg/decode.h>
-#include <bx/readerwriter.h>
 
 namespace feyerverx {
 class AssetLoader {

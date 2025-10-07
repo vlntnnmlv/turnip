@@ -3,6 +3,7 @@
 #pragma once
 
 #include <any>
+#include <ranges>
 #include <set>
 #include <typeindex>
 #include <unordered_map>
@@ -21,43 +22,43 @@ class Registry {
 public:
     Registry() = default;
 
-    Entity CreateEntity();
+    Entity createEntity();
 
-    void RemoveEntity(EntityID _EntityID);
+    void removeEntity(EntityID entityID);
 
-    template <typename T, typename... Args> void AddComponent(EntityID _EntityID, Args &&..._Args) {
-        static_assert(std::is_base_of<IComponent, T>::value, "T must derive from IComponent");
-        auto &map = GetComponentMap<T>();
+    template <typename T, typename... Args> void addComponent(EntityID _EntityID, Args &&..._Args) {
+        static_assert(std::is_base_of_v<IComponent, T>, "T must derive from IComponent");
+        auto &map = getComponentMap<T>();
         map[_EntityID] = std::make_unique<T>(std::forward<Args>(_Args)...);
     }
 
-    template <typename T> void RemoveComponent(EntityID _EntityID) {
-        GetComponentMap<T>().erase(_EntityID);
+    template <typename T> void removeComponent(const EntityID entityID) {
+        getComponentMap<T>().erase(entityID);
     }
 
-    template <typename T> T *GetComponent(EntityID _EntityID) {
-        auto &map = GetComponentMap<T>();
-        auto it = map.find(_EntityID);
-        return (it != map.end()) ? static_cast<T *>(it->second.get()) : nullptr;
+    template <typename T> T *getComponent(const EntityID entityID) {
+        auto &map = getComponentMap<T>();
+        auto it = map.find(entityID);
+        return it != map.end() ? static_cast<T *>(it->second.get()) : nullptr;
     }
 
-    template <typename T> std::vector<EntityID> With() {
+    template <typename T> std::vector<EntityID> with() {
         std::vector<EntityID> result;
-        for (auto const &[id, _] : GetComponentMap<T>()) {
+        for (auto const &[id, _] : getComponentMap<T>()) {
             result.push_back(id);
         }
         return result;
     }
 
-    std::vector<EntityID> With(const ComponentTypeSet &_ComponentTypeSet) {
+    std::vector<EntityID> with(const ComponentTypeSet &_ComponentTypeSet) {
         if (_ComponentTypeSet.empty())
             return {};
 
         const std::type_index *driverType = nullptr;
         size_t minSize = std::numeric_limits<size_t>::max();
         for (const std::type_index &componentType : _ComponentTypeSet) {
-            auto it = m_Components.find(componentType);
-            if (it == m_Components.end())
+            auto it = m_components.find(componentType);
+            if (it == m_components.end())
                 return {};
 
             size_t size = it->second.size();
@@ -70,17 +71,17 @@ public:
         if (!driverType)
             return {};
 
-        const auto &driverMap = m_Components.at(*driverType);
+        const auto &driverMap = m_components.at(*driverType);
 
         std::vector<EntityID> result;
         result.reserve(driverMap.size());
-        for (const auto &[id, _] : driverMap) {
+        for (const auto &id : std::ranges::views::keys(driverMap)) {
             bool hasAll = true;
             for (const auto &type : _ComponentTypeSet) {
                 if (type == *driverType)
                     continue;
 
-                if (!HasComponentByType(id, type)) {
+                if (!hasComponentByType(id, type)) {
                     hasAll = false;
                     break;
                 }
@@ -93,9 +94,9 @@ public:
         return result;
     }
 
-    template <typename T0, typename T1, typename... TRest> std::vector<EntityID> With() {
-        auto &map0 = GetComponentMap<T0>();
-        auto &map1 = GetComponentMap<T1>();
+    template <typename T0, typename T1, typename... TRest> std::vector<EntityID> with() {
+        auto &map0 = getComponentMap<T0>();
+        auto &map1 = getComponentMap<T1>();
 
         auto *driver = &map0;
         std::type_index otherType = typeid(T1);
@@ -108,15 +109,15 @@ public:
         result.reserve(driver->size());
 
         for (auto const &[id, _] : *driver) {
-            if (!HasComponentByType(id, otherType))
+            if (!hasComponentByType(id, otherType))
                 continue;
 
             if constexpr (sizeof...(TRest) > 0) {
-                if (!(HasComponent<TRest>(id) && ...))
+                if (!(hasComponent<TRest>(id) && ...))
                     continue;
             }
 
-            if (otherType == typeid(T0) ? !HasComponent<T1>(id) : !HasComponent<T0>(id))
+            if (otherType == typeid(T0) ? !hasComponent<T1>(id) : !hasComponent<T0>(id))
                 continue;
 
             result.push_back(id);
@@ -127,28 +128,28 @@ public:
 
 private:
     template <typename T>
-    std::unordered_map<EntityID, std::unique_ptr<IComponent>> &GetComponentMap() {
+    std::unordered_map<EntityID, std::unique_ptr<IComponent>> &getComponentMap() {
         auto key = std::type_index(typeid(T));
-        auto it = m_Components.find(key);
-        if (it == m_Components.end()) {
-            auto [newIt, _] = m_Components.emplace(
+        auto it = m_components.find(key);
+        if (it == m_components.end()) {
+            auto [newIt, _] = m_components.emplace(
                 key, std::unordered_map<EntityID, std::unique_ptr<IComponent>>{});
             it = newIt;
         }
         return it->second;
     }
 
-    template <typename T> bool HasComponent(EntityID _EntyityID) {
-        return GetComponent<T>(_EntyityID) != nullptr;
+    template <typename T> bool hasComponent(const EntityID entityID) {
+        return getComponent<T>(entityID) != nullptr;
     }
 
-    bool HasComponentByType(EntityID _EntyityID, std::type_index _T);
+    bool hasComponentByType(EntityID entityID, std::type_index t);
 
-    EntityID m_NextEntityID = 1;
+    EntityID m_nextEntityID = 1;
 
-    std::vector<EntityID> m_Alive;
+    std::vector<EntityID> m_alive;
 
     std::unordered_map<std::type_index, std::unordered_map<EntityID, std::unique_ptr<IComponent>>>
-        m_Components;
+        m_components;
 };
 } // namespace feyerverx::ecs

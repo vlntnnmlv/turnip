@@ -1,17 +1,86 @@
 // Copyright 2025 Valentin Namleev
 
 #include "feyerverx/ecs/systems/uiSystem.hpp"
+
+#include "feyerverx/ecs/components/parentComponent.hpp"
 // #include "feyerverx/ecs/components/renderTransformComponent.hpp"
 
-// namespace feyerverx::ecs {}
 // UISystem::UISystem(Registry &_Registry, events::EventQueue &_EventQueue, Vector2f _Size)
 //     : ISystem(_Registry), m_EventQueue(_EventQueue), m_LayoutEngine(m_registry), m_Size(_Size) {}
 
-// void UISystem::update([[maybe_unused]] float _DeltaTime) {
-//     ProcessLayout();
-//     PollEvents();
-// }
+namespace feyerverx::ecs {
+void UISystem::update(float deltaTime) {
+    processLayout();
+    m_roots.clear();
+}
+void UISystem::enqueueScene(Scene &scene) {
+    for (const auto &e : scene.registry().with<TransformComponent, LayoutComponent>()) {
+        if (!scene.registry().getComponent<ParentComponent>(e)) {
+            m_roots.emplace_back(e, &scene.registry());
+        }
+    }
+}
 
+void UISystem::processLayout() {
+    // m_WasResized |= IsWindowResized();
+
+    for (auto root : m_roots) {
+        auto transformComponent = root.getComponent<TransformComponent>();
+
+        // if (!m_wasResized) {
+        transformComponent->rect.width = m_size.x;
+        transformComponent->rect.height = m_size.y;
+        // } else {
+        //     transformComponent->rect.width = GetRenderWidth();
+        //     transformComponent->rect.height = GetRenderHeight();
+        // }
+
+        measureEntityContent(root);
+        arrangeEntityContent(root);
+        placeInWorld(root);
+    }
+}
+
+void UISystem::measureEntityContent(Entity entity) {
+    if (!m_layoutEngine.tryMeasureEntityContent(entity))
+        return;
+
+    for (const auto &child : entity.getComponent<ChildrenComponent>()->children.value()) {
+        measureEntityContent(child);
+    }
+}
+
+void UISystem::arrangeEntityContent(Entity entity) {
+    if (!m_layoutEngine.tryArrangeEntityContent(entity))
+        return;
+
+    for (const auto &child : entity.getComponent<ChildrenComponent>()->children.value()) {
+        arrangeEntityContent(child);
+    }
+}
+
+void UISystem::placeInWorld(Entity entity) {
+    TransformComponent *transformComponent = entity.getComponent<TransformComponent>();
+    ParentComponent *parentComponent = entity.getComponent<ParentComponent>();
+    ChildrenComponent *childrenComponent = entity.getComponent<ChildrenComponent>();
+
+    if (!parentComponent)
+        transformComponent->worldRect = transformComponent->rect;
+    else {
+        TransformComponent *parentTransformComponent =
+            parentComponent->parent.getComponent<TransformComponent>();
+        transformComponent->worldRect = transformComponent->rect.move(
+            Vector2f{parentTransformComponent->worldRect.x, parentTransformComponent->worldRect.y});
+    }
+
+    if (!childrenComponent)
+        return;
+
+    for (const auto &child : childrenComponent->children.value()) {
+        placeInWorld(child);
+    }
+}
+} // feyerverx::ecs
 // void UISystem::PollEvents() {
 //     while (auto optionalEvent = m_EventQueue.Pop()) {
 
@@ -141,49 +210,4 @@
 //     return roots;
 // }
 
-// void UISystem::MeasureEntityContent(EntityID _EntityID) {
-//     if (!m_LayoutEngine.TryMeasureEntityContent(_EntityID))
-//         return;
-
-//     for (const auto &child : m_registry.GetComponent<ChildrenComponent>(_EntityID)->children) {
-//         MeasureEntityContent(child);
-//     }
-// }
-
-// void UISystem::ArrangeEntityContent(EntityID _EntityID) {
-//     if (!m_LayoutEngine.TryArrangeEntityContent(_EntityID))
-//         return;
-
-//     for (const auto &child : m_registry.GetComponent<ChildrenComponent>(_EntityID)->children) {
-//         ArrangeEntityContent(child);
-//     }
-// }
-
-// void UISystem::PlaceInWorld(EntityID _EntityID) {
-//     // TransformComponent *transformComponent =
-//     // m_registry.GetComponent<TransformComponent>(_EntityID);
-
-//     // ParentComponent *parentComponent = m_registry.GetComponent<ParentComponent>(_EntityID);
-
-//     // ChildrenComponent *childrenComponent =
-//     m_registry.GetComponent<ChildrenComponent>(_EntityID);
-
-//     // if (!parentComponent)
-//     //     transformComponent->worldRect = transformComponent->rect;
-//     // else {
-//     //     TransformComponent *parentTransformComponent =
-//     //         m_registry.GetComponent<TransformComponent>(parentComponent->parent);
-//     //     transformComponent->worldRect = RectangleUtils::Move(
-//     //         transformComponent->rect,
-//     //         Vector2{parentTransformComponent->worldRect.x,
-//     //         parentTransformComponent->worldRect.y});
-//     // }
-
-//     // if (!childrenComponent)
-//     //     return;
-
-//     // for (const auto &child : childrenComponent->children) {
-//     //     PlaceInWorld(child);
-//     // }
-// }
 // } // namespace feyerverx::ecs

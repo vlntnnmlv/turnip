@@ -2,11 +2,12 @@
 *.d
 
 /build
+/build-debug
+/build-release
 feyerverx.a
 
 .vscode
 .config
-.editorconfig
 .clang-format
 .DS_Store
 .cache

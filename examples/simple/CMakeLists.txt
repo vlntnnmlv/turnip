@@ -3,15 +3,15 @@ add_compile_definitions(BX_CONFIG_DEBUG=1)
 
 # Create executable
 add_executable(simple
-    main.cpp
+        main.cpp
 )
 
 # Include headers
 target_include_directories(simple PRIVATE
-    ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/include
 )
 
 # Link against engine
 target_link_libraries(simple
-    PRIVATE feyerverx
+        PRIVATE feyerverx
 )

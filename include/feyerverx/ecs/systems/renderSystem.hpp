@@ -19,13 +19,13 @@
 #include "feyerverx/ecs/system.hpp"
 
 namespace feyerverx::ecs {
-class RenderSystem : public ISystem {
+class RenderSystem final : public ISystem {
 public:
     RenderSystem();
-    ~RenderSystem() = default;
+    ~RenderSystem() override = default;
 
-    virtual void update(float deltaTime) override;
-    virtual void enqueueScene(Scene &scene) override;
+    void update(float deltaTime) override;
+    void enqueueScene(Scene &scene) override;
 
 private:
     Renderer m_renderer{};

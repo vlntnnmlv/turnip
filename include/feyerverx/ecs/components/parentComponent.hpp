@@ -3,13 +3,14 @@
 #pragma once
 
 #include "feyerverx/ecs/component.hpp"
+#include "feyerverx/ecs/entity.hpp"
 
 #include "feyerverx/ecs/registry.hpp"
 
 namespace feyerverx::ecs {
 struct ParentComponent : IComponent {
-    EntityID parent;
+    Entity parent;
 
-    ParentComponent(EntityID _Parent = NullEntityID);
+    explicit ParentComponent(Entity parent = {});
 };
 } // namespace feyerverx::ecs

@@ -5,24 +5,25 @@
 
 namespace feyerverx::ecs {
 
-Entity Registry::CreateEntity() {
-    EntityID entityID = m_NextEntityID++;
-    m_Alive.push_back(entityID);
+Entity Registry::createEntity() {
+    EntityID entityID = m_nextEntityID++;
+    m_alive.push_back(entityID);
     return Entity(entityID, this);
 }
 
-void Registry::RemoveEntity(EntityID _EntityID) {
-    m_Alive.erase(std::remove(m_Alive.begin(), m_Alive.end(), _EntityID), m_Alive.end());
+void Registry::removeEntity(const EntityID entityID) {
+    std::erase(m_alive, entityID);
 
-    for (auto &pair : m_Components) {
-        pair.second.erase(_EntityID);
+    for (auto &componentMap : std::ranges::views::values(m_components)) {
+        componentMap.erase(entityID);
     }
 }
 
-bool Registry::HasComponentByType(EntityID _EntyityID, std::type_index _T) {
-    auto it = m_Components.find(_T);
-    if (it == m_Components.end())
+bool Registry::hasComponentByType(const EntityID entityID, const std::type_index t) {
+    const auto it = m_components.find(t);
+    if (it == m_components.end())
         return false;
-    return it->second.find(_EntyityID) != it->second.end();
+
+    return it->second.contains(entityID);
 }
 } // namespace feyerverx::ecs

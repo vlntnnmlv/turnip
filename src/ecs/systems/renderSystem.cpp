@@ -13,7 +13,7 @@ RenderSystem::RenderSystem() { m_renderer.init(); }
 void RenderSystem::enqueueScene(Scene &scene) {
     m_entityQueue.clear();
     Registry &registry = scene.registry();
-    m_entityQueue = scene.registry().With<ecs::TransformComponent, ecs::SpriteComponent>() |
+    m_entityQueue = scene.registry().with<ecs::TransformComponent, ecs::SpriteComponent>() |
                     std::views::transform(
                         [&registry](EntityID entityID) { return Entity(entityID, &(registry)); }) |
                     std::ranges::to<std::vector>();
@@ -21,8 +21,8 @@ void RenderSystem::enqueueScene(Scene &scene) {
 
 void RenderSystem::update(float deltaTime) {
     for (Entity &entity : m_entityQueue) {
-        m_renderer.renderTexture(entity.GetComponent<SpriteComponent>()->texture,
-                                 entity.GetComponent<TransformComponent>()->rect);
+        m_renderer.renderTexture(entity.getComponent<SpriteComponent>()->texture,
+                                 entity.getComponent<TransformComponent>()->rect);
     }
 }
 }

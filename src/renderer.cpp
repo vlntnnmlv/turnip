@@ -52,11 +52,11 @@ void Renderer::init() {
     const bgfx::EmbeddedShader embeddedVertexShader = BGFX_EMBEDDED_SHADER(quad_vs);
     const bgfx::EmbeddedShader embeddedFragmentShader = BGFX_EMBEDDED_SHADER(quad_fs);
 
-    bgfx::ShaderHandle vetrexShader =
+    const bgfx::ShaderHandle vertexShader =
         bgfx::createEmbeddedShader(&embeddedVertexShader, bgfx::getRendererType(), "quad_vs");
-    bgfx::ShaderHandle fragmentShader =
+    const bgfx::ShaderHandle fragmentShader =
         bgfx::createEmbeddedShader(&embeddedFragmentShader, bgfx::getRendererType(), "quad_fs");
-    m_program = bgfx::createProgram(vetrexShader, fragmentShader, true);
+    m_program = bgfx::createProgram(vertexShader, fragmentShader, true);
 
     m_textureSamplerUniform = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
 }

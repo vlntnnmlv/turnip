@@ -4,12 +4,7 @@
 
 #include <chrono>
 #include <memory>
-#include <optional>
 #include <string>
-
-#include <SDL3/SDL.h>
-#include <bgfx/platform.h>
-#include <bx/math.h>
 
 #include "feyerverx/ecs/scene.hpp"
 #include "feyerverx/ecs/systems/renderSystem.hpp"
@@ -27,7 +22,7 @@ public:
 
     AssetManager &assetManager();
 
-    ecs::Scene &addScene(bool isActive = false);
+    ecs::Scene &addScene(const std::string &id, bool isActive = false);
 
     void run();
     void processEvents();
@@ -36,7 +31,6 @@ public:
 private:
     void initCamera();
 
-private:
     std::string m_title;
     int m_width;
     int m_height;

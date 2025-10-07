@@ -32,8 +32,8 @@ void Fey::initCamera() {
 
 AssetManager &Fey::assetManager() { return m_assetManager; }
 
-ecs::Scene &Fey::addScene(bool isActive) {
-    ecs::Scene &scene = m_scenes.emplace_back();
+ecs::Scene &Fey::addScene(const std::string &id, bool isActive) {
+    ecs::Scene &scene = m_scenes.emplace_back(id);
     scene.isActive = isActive;
     return scene;
 }

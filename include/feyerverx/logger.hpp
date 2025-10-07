@@ -17,17 +17,17 @@ public:
     void operator=(Logger const &) = delete;
 
     template <typename... Args>
-    void log(LogLevel logLevel, const std::string_view format, Args &&...args) const {
+    void log(const LogLevel logLevel, const std::string_view format, Args &&...args) const {
         std::string message = std::vformat(format, std::make_format_args(args)...);
         std::string line = std::format("[{}] {}", logLevelToString(logLevel), message);
         std::print("{}\n", line);
     }
 
-    void log(LogLevel logLevel, const std::string_view message) const;
+    void log(LogLevel logLevel, std::string_view message) const;
 
 private:
     Logger();
 
-    std::string_view logLevelToString(LogLevel logLevel) const;
+    [[nodiscard]] std::string_view logLevelToString(LogLevel logLevel) const;
 };
 } // namespace feyerverx
