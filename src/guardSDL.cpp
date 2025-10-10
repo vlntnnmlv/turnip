@@ -5,33 +5,54 @@
 #include "feyerverx/logger.hpp"
 
 namespace feyerverx {
-GuardSDL::GuardSDL(const std::string &title, const float width, const float height)
-    : m_window(nullptr, &SDL_DestroyWindow) {
+std::variant<std::unique_ptr<GuardSDL>, Error>
+GuardSDL::create(const std::string &title, const float width, const float height) {
     if (!SDL_Init(0)) {
-        throw FeyError(FeyErrorType::SDLInitializationError, SDL_GetError());
+        return Error{ErrorType::SDLInitializationError, SDL_GetError()};
     }
 
-    m_window = MAKE_UNIQUE_SDL_WINDOW(title.c_str(), width, height,
-                                      SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+    SDL_Window *window =
+        SDL_CreateWindow(title.c_str(), static_cast<int>(width), static_cast<int>(height),
+                         SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
-    if (!m_window) {
-        throw FeyError(FeyErrorType::WindowInitializationError, SDL_GetError());
+    if (!window) {
+        return Error{ErrorType::WindowInitializationError, SDL_GetError()};
     }
 
     Logger::instance().log(LogLevel::Info, "Inited SDL!");
+
+    using Ret = std::variant<std::unique_ptr<GuardSDL>, Error>;
+    return Ret(std::in_place_index<0>, std::unique_ptr<GuardSDL>(new GuardSDL{window}));
 }
 
-GuardSDL::~GuardSDL() { SDL_Quit(); }
+GuardSDL::GuardSDL(GuardSDL &&other) noexcept : m_window{std::move(other.m_window)} {}
 
-void *GuardSDL::windowHandle() const {
-    SDL_PropertiesID windowProperties = SDL_GetWindowProperties(m_window.get());
+GuardSDL &GuardSDL::operator=(GuardSDL &&other) noexcept {
+    if (this != &other) {
+        m_window = std::move(other.m_window);
+    }
+
+    return *this;
+}
+
+GuardSDL::GuardSDL(SDL_Window *window) : m_window{window, SDL_DestroyWindow} {
+    std::print("GuardSDL constructor!\n");
+}
+
+GuardSDL::~GuardSDL() {
+    SDL_Quit();
+    std::print("GuardSDL destructor!\n");
+}
+
+std::variant<void *, Error> GuardSDL::windowHandle() const {
+    const SDL_PropertiesID windowProperties = SDL_GetWindowProperties(m_window.get());
 
     // TODO: Add cross-platform logic of getting window handle:
     // https://wiki.libsdl.org/SDL3/SDL_GetWindowProperties
     void *nativeWindowHandle =
         SDL_GetPointerProperty(windowProperties, SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, nullptr);
     if (!nativeWindowHandle) {
-        throw FeyError(FeyErrorType::GettingNativeWindowHandleError, SDL_GetError());
+        return Error{ErrorType::GettingNativeWindowHandleError, SDL_GetError()};
     }
 
     return nativeWindowHandle;

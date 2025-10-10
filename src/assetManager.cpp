@@ -24,7 +24,7 @@ Texture AssetManager::getTexture(const std::string &textureName) {
 
     std::print("{}", texturePath.c_str());
 
-    bgfx::TextureHandle textureHandle = m_assetLoader.loadTexture(texturePath);
+    bgfx::TextureHandle textureHandle = AssetLoader::loadTexture(texturePath);
 
     m_assets.emplace(textureName, textureHandle);
     return m_assets.at(textureName);

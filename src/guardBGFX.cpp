@@ -3,12 +3,15 @@
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 
-#include "feyerverx/error.hpp"
 #include "feyerverx/guardBGFX.hpp"
 #include "feyerverx/logger.hpp"
 
 namespace feyerverx {
-GuardBGFX::GuardBGFX(void *windowHandle, const float width, const float height) {
+std::variant<std::unique_ptr<GuardBGFX>, Error>
+GuardBGFX::create(void *windowHandle, const float width, const float height) {
+
+    std::print("GuardBGFX constructor!\n");
+
     bgfx::renderFrame();
 
     bgfx::Init init;
@@ -28,14 +31,19 @@ GuardBGFX::GuardBGFX(void *windowHandle, const float width, const float height) 
     // otherwise you will not receive a High-DPI OpenGL canvas.
 
     if (!bgfx::init(init)) {
-        throw FeyError(FeyErrorType::BGFXInitializationError, "BGFX failed to initialize");
+        return Error{ErrorType::BGFXInitializationError, "BGFX failed to initialize"};
     }
 
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff);
     bgfx::frame();
 
     Logger::instance().log(LogLevel::Info, "Inited BGFX!");
+
+    return std::unique_ptr<GuardBGFX>(new GuardBGFX{});
 }
 
-GuardBGFX::~GuardBGFX() { bgfx::shutdown(); }
+GuardBGFX::~GuardBGFX() {
+    bgfx::shutdown();
+    std::print("GuardBGFX destructor!\n");
+}
 }

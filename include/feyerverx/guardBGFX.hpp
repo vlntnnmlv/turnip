@@ -2,10 +2,19 @@
 
 #pragma once
 
+#include "error.hpp"
+
+#include <memory>
+#include <variant>
+
 namespace feyerverx {
 class GuardBGFX {
 public:
-    GuardBGFX(void *windowHandle, float width, float height);
+    static std::variant<std::unique_ptr<GuardBGFX>, Error> create(void *windowHandle, float width,
+                                                                  float height);
     ~GuardBGFX();
+
+private:
+    GuardBGFX() = default;
 };
 } // namespace turnip

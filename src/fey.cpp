@@ -11,13 +11,38 @@
 #include "feyerverx/logger.hpp"
 
 namespace feyerverx {
-Fey::Fey(std::string title, const float width, const float height)
-    : m_title(std::move(title)), m_width(width), m_height(height),
-      m_guardSDL(m_title, m_width, m_height),
-      m_guardBGFX(m_guardSDL.windowHandle(), m_width, m_height) {
+std::variant<Fey, Error> Fey::create(const std::string &title, const float width,
+                                     const float height) {
+    std::print("1\n");
+    auto guardSDL = GuardSDL::create(title, width, height);
+    std::print("2\n");
 
-    initCamera();
+    std::print("3\n");
+    if (std::holds_alternative<Error>(guardSDL))
+        return std::get<Error>(guardSDL);
+    std::print("4\n");
 
+    auto nativeWindowHandle = std::get<std::unique_ptr<GuardSDL>>(guardSDL)->windowHandle();
+    if (std::holds_alternative<Error>(nativeWindowHandle))
+        return std::get<Error>(nativeWindowHandle);
+
+    auto guardBGFX = GuardBGFX::create(std::get<void *>(nativeWindowHandle), width, height);
+
+    if (std::holds_alternative<Error>(guardBGFX))
+        return std::get<Error>(guardBGFX);
+
+    return Fey{title, width, height, std::get<std::unique_ptr<GuardSDL>>(guardSDL),
+               std::get<std::unique_ptr<GuardBGFX>>(guardBGFX)};
+}
+
+Fey::Fey(Fey &&other) noexcept
+    : m_title{std::move(other.m_title)}, m_width{other.m_width}, m_height{other.m_height},
+      m_guardSDL{std::move(other.m_guardSDL)}, m_guardBGFX{std::move(other.m_guardBGFX)} {}
+
+Fey::Fey(std::string title, const float width, const float height,
+         std::unique_ptr<GuardSDL> &guardSDL, std::unique_ptr<GuardBGFX> &guardBGFX)
+    : m_title(std::move(title)), m_width(width), m_height(height), m_guardSDL(std::move(guardSDL)),
+      m_guardBGFX(std::move(guardBGFX)) {
     m_globalSystems.push_back(std::make_unique<ecs::RenderSystem>());
 }
 

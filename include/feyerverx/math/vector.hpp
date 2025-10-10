@@ -22,8 +22,8 @@ public:
 
     explicit Vector(std::initializer_list<T> values) {
         if (values.size() != N) {
-            throw new FeyError(FeyErrorType::WrongNumberOfArguments,
-                               "Wrong number of arguments in Vector<T, N> constructor");
+            throw new FeyException(ErrorType::WrongNumberOfArguments,
+                                   "Wrong number of arguments in Vector<T, N> constructor");
         }
 
         std::copy(values.begin(), values.end(), coordinates.begin());

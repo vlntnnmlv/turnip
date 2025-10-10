@@ -23,8 +23,8 @@ bgfx::TextureHandle AssetLoader::loadTexture(const std::string &filepath) {
         bgfx::copy(pixels, width * height * 4); // Copy pixel data to bgfx memory
     stbi_image_free(pixels);                    // Free stb_image's memory
 
-    bgfx::TextureHandle textureHandle = bgfx::createTexture2D(
-        (uint16_t)width, (uint16_t)height,
+    const bgfx::TextureHandle textureHandle = bgfx::createTexture2D(
+        static_cast<uint16_t>(width), static_cast<uint16_t>(height),
         false, // No mipmaps in this example
         1,     // Number of layers
         bgfx::TextureFormat::RGBA8,
@@ -62,16 +62,17 @@ bgfx::ShaderHandle AssetLoader::loadShader(const std::string &filepath) {
     case bgfx::RendererType::Vulkan:
         shaderPath = "resources/shaders/spirv";
         break;
+    default:
+        break;
     }
 
-    const char *p = std::format("examples/simple/{0}", filepath.c_str()).c_str();
-    FILE *file = fopen(std::format("examples/simple/{0}", filepath.c_str()).c_str(), "rb");
-    if (file == NULL) {
+    FILE *file = fopen(std::format("examples/simple/{0}", filepath).c_str(), "rb");
+    if (file == nullptr) {
         throw std::runtime_error("Couldn't load shader file at:");
     }
 
     fseek(file, 0, SEEK_END);
-    long fileSize = ftell(file);
+    const long fileSize = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     const bgfx::Memory *mem = bgfx::alloc(fileSize + 1);

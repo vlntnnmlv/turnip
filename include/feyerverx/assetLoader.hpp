@@ -9,7 +9,7 @@
 namespace feyerverx {
 class AssetLoader {
 public:
-    bgfx::TextureHandle loadTexture(const std::string &filename);
-    bgfx::ShaderHandle loadShader(const std::string &filename);
+    static bgfx::TextureHandle loadTexture(const std::string &filepath);
+    static bgfx::ShaderHandle loadShader(const std::string &filepath);
 };
 } // namespace feyerverx

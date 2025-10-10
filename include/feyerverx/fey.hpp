@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <chrono>
 #include <memory>
 #include <string>
 
@@ -11,13 +10,16 @@
 
 #include "feyerverx/camera.hpp"
 #include "feyerverx/clock.hpp"
+#include "feyerverx/error.hpp"
 #include "feyerverx/guardBGFX.hpp"
 #include "feyerverx/guardSDL.hpp"
 
 namespace feyerverx {
 class Fey {
 public:
-    Fey(std::string title, float width, float height);
+    static std::variant<Fey, Error> create(const std::string &title, float width, float height);
+
+    Fey(Fey &&other) noexcept;
     ~Fey() = default;
 
     AssetManager &assetManager();
@@ -29,6 +31,9 @@ public:
     void update();
 
 private:
+    Fey(std::string title, float width, float height, std::unique_ptr<GuardSDL> &guardSDL,
+        std::unique_ptr<GuardBGFX> &guardBGFX);
+
     void initCamera();
 
     std::string m_title;
@@ -39,11 +44,12 @@ private:
 
     bool m_running = false;
 
-    GuardSDL m_guardSDL;
-    GuardBGFX m_guardBGFX;
     AssetManager m_assetManager;
 
-    std::unique_ptr<ICamera> m_camera;
+    std::unique_ptr<GuardSDL> m_guardSDL;
+    std::unique_ptr<GuardBGFX> m_guardBGFX;
+
+    std::unique_ptr<ICamera> m_camera; // TODO: move to scene class
 
     std::vector<ecs::Scene> m_scenes{};
 
