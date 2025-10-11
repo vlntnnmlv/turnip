@@ -6,6 +6,7 @@
 /build-release
 feyerverx.a
 
+.idea
 .vscode
 .config
 .clang-format

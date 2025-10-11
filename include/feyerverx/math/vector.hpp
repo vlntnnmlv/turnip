@@ -21,12 +21,7 @@ public:
     Vector() { coordinates.fill(T{}); }
 
     explicit Vector(std::initializer_list<T> values) {
-        if (values.size() != N) {
-            throw new FeyException(ErrorType::WrongNumberOfArguments,
-                                   "Wrong number of arguments in Vector<T, N> constructor");
-        }
-
-        std::copy(values.begin(), values.end(), coordinates.begin());
+        std::copy(values.begin(), values.begin() + N, coordinates.begin());
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Vector &obj) {

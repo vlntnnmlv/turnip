@@ -10,9 +10,7 @@
 
 namespace feyerverx {
 template <typename T>
-concept IsHandle = requires(T handle) {
-    handle.idx; // Requires the existence of a member named 'foo'
-};
+concept IsHandle = requires(T handle) { handle.idx; };
 
 struct Vertex {
     float x;
@@ -31,25 +29,34 @@ struct Vertex {
 
 class Renderer {
 public:
-    Renderer();
+    static Renderer create();
+
+    Renderer(const Renderer &) = delete;
+    Renderer &operator=(const Renderer &) = delete;
+    Renderer(Renderer &&) noexcept;
+    Renderer &operator=(Renderer &&) = delete;
+
     ~Renderer();
 
-    void init();
     void renderTexture(const Texture &texture, const Rectangle &rectangle);
 
 private:
+    Renderer(const bgfx::VertexLayout &layout, const bgfx::VertexBufferHandle &vertexBuffer,
+             const bgfx::IndexBufferHandle &trianglesBuffer, const bgfx::ProgramHandle &program,
+             const bgfx::UniformHandle &textureSamplerUniform);
+
     template <IsHandle T> void destroyHandle(T handle) {
+        Logger::instance().log(LogLevel::Debug, "Trying to destroy render target", handle.idx);
         if (bgfx::isValid(handle)) {
             bgfx::destroy(handle);
+            Logger::instance().log(LogLevel::Debug, "Destroyed render target", handle.idx);
         }
     }
 
-private:
     bgfx::VertexLayout m_layout;
-
-    bgfx::ProgramHandle m_program BGFX_INVALID_HANDLE;
-    bgfx::VertexBufferHandle m_vertexBuffer BGFX_INVALID_HANDLE;
-    bgfx::IndexBufferHandle m_trianglesBuffer BGFX_INVALID_HANDLE;
-    bgfx::UniformHandle m_textureSamplerUniform BGFX_INVALID_HANDLE;
+    bgfx::VertexBufferHandle m_vertexBuffer{bgfx::kInvalidHandle};
+    bgfx::IndexBufferHandle m_trianglesBuffer{bgfx::kInvalidHandle};
+    bgfx::ProgramHandle m_program{bgfx::kInvalidHandle};
+    bgfx::UniformHandle m_textureSamplerUniform{bgfx::kInvalidHandle};
 };
 } // namespace feyerverx

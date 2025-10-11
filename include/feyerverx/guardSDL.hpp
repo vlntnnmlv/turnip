@@ -4,6 +4,7 @@
 
 #include "error.hpp"
 
+#include <expected>
 #include <memory>
 #include <string>
 #include <variant>
@@ -15,8 +16,8 @@ using unique_ptr_SDL_Window = std::unique_ptr<SDL_Window, decltype(&SDL_DestroyW
 
 class GuardSDL {
 public:
-    static std::variant<std::unique_ptr<GuardSDL>, Error> create(const std::string &title,
-                                                                 float width, float height);
+    static std::expected<std::unique_ptr<GuardSDL>, Error> create(const std::string &title,
+                                                                  float width, float height);
 
     GuardSDL(const GuardSDL &) noexcept = delete;
     GuardSDL &operator=(const GuardSDL &) noexcept = delete;
@@ -26,7 +27,7 @@ public:
 
     ~GuardSDL();
 
-    [[nodiscard]] std::variant<void *, Error> windowHandle() const;
+    [[nodiscard]] std::expected<void *, Error> windowHandle() const;
 
     unique_ptr_SDL_Window m_window;
 

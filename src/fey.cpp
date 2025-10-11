@@ -11,49 +11,50 @@
 #include "feyerverx/logger.hpp"
 
 namespace feyerverx {
-std::variant<Fey, Error> Fey::create(const std::string &title, const float width,
-                                     const float height) {
-    std::print("1\n");
-    auto guardSDL = GuardSDL::create(title, width, height);
-    std::print("2\n");
 
-    std::print("3\n");
-    if (std::holds_alternative<Error>(guardSDL))
-        return std::get<Error>(guardSDL);
-    std::print("4\n");
+std::expected<Fey, Error> Fey::create(const std::string &title, const float width,
+                                      const float height) {
+    auto guardSDLResult = GuardSDL::create(title, width, height);
+    if (!guardSDLResult) {
+        return std::unexpected{guardSDLResult.error()};
+    }
+    unique_ptr_guard_sdl guardSDL = std::move(guardSDLResult.value());
 
-    auto nativeWindowHandle = std::get<std::unique_ptr<GuardSDL>>(guardSDL)->windowHandle();
-    if (std::holds_alternative<Error>(nativeWindowHandle))
-        return std::get<Error>(nativeWindowHandle);
+    auto nativeWindowHandleResult = guardSDL->windowHandle();
+    if (!nativeWindowHandleResult) {
+        return std::unexpected{nativeWindowHandleResult.error()};
+    }
+    void *nativeWindowHandle = nativeWindowHandleResult.value();
 
-    auto guardBGFX = GuardBGFX::create(std::get<void *>(nativeWindowHandle), width, height);
+    auto guardBGFXResult = GuardBGFX::create(nativeWindowHandle, width, height);
+    if (!guardBGFXResult.value()) {
+        return std::unexpected{guardBGFXResult.error()};
+    }
+    unique_ptr_guard_bgfx guardBGFX = std::move(guardBGFXResult.value());
 
-    if (std::holds_alternative<Error>(guardBGFX))
-        return std::get<Error>(guardBGFX);
+    auto camera = CameraOrthogonal::createUniquePointer(0.0f, width, 0.0f, height);
 
-    return Fey{title, width, height, std::get<std::unique_ptr<GuardSDL>>(guardSDL),
-               std::get<std::unique_ptr<GuardBGFX>>(guardBGFX)};
+    return Fey{title, width, height, std::move(guardSDL), std::move(guardBGFX), std::move(camera)};
 }
 
 Fey::Fey(Fey &&other) noexcept
-    : m_title{std::move(other.m_title)}, m_width{other.m_width}, m_height{other.m_height},
-      m_guardSDL{std::move(other.m_guardSDL)}, m_guardBGFX{std::move(other.m_guardBGFX)} {}
+    : m_title(std::move(other.m_title)), m_width(other.m_width), m_height(other.m_height),
+      m_guardSDL(std::move(other.m_guardSDL)), m_guardBGFX(std::move(other.m_guardBGFX)),
+      m_camera(std::move(other.m_camera)) {}
 
-Fey::Fey(std::string title, const float width, const float height,
-         std::unique_ptr<GuardSDL> &guardSDL, std::unique_ptr<GuardBGFX> &guardBGFX)
+Fey::Fey(std::string title, const float width, const float height, unique_ptr_guard_sdl &&guardSDL,
+         unique_ptr_guard_bgfx &&guardBGFX, std::unique_ptr<ICamera> &&camera)
     : m_title(std::move(title)), m_width(width), m_height(height), m_guardSDL(std::move(guardSDL)),
-      m_guardBGFX(std::move(guardBGFX)) {
-    m_globalSystems.push_back(std::make_unique<ecs::RenderSystem>());
-}
-
-void Fey::initCamera() {
-    m_camera = std::make_unique<CameraOrthogonal>(0.0f, m_width, 0.0f, m_height);
-    m_camera->setView();
-
-    Logger::instance().log(LogLevel::Info, "Inited camera!");
+      m_guardBGFX(std::move(guardBGFX)), m_camera(std::move(camera)) {
+    int i = 0;
 }
 
 AssetManager &Fey::assetManager() { return m_assetManager; }
+
+void Fey::initGlobalSystems() {
+    Logger::instance().log(LogLevel::Info, "Initializing global systems...");
+    m_globalSystems.push_back(std::make_unique<ecs::RenderSystem>());
+}
 
 ecs::Scene &Fey::addScene(const std::string &id, const bool isActive) {
     ecs::Scene &scene = m_scenes.emplace_back(id);
@@ -62,6 +63,8 @@ ecs::Scene &Fey::addScene(const std::string &id, const bool isActive) {
 }
 
 void Fey::run() {
+    m_camera->setView();
+
     m_running = true;
     while (m_running) {
         processEvents();

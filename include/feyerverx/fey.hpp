@@ -10,49 +10,59 @@
 
 #include "feyerverx/camera.hpp"
 #include "feyerverx/clock.hpp"
-#include "feyerverx/error.hpp"
 #include "feyerverx/guardBGFX.hpp"
 #include "feyerverx/guardSDL.hpp"
 
+// new Fey
+// - new SDL
+// - new BGFX
+// - resources ...
+// ---
+// ~ resources ...
+// ~ BGFX
+// ~ SDL
+// ~ Fey
+
 namespace feyerverx {
+using unique_ptr_guard_sdl = std::unique_ptr<GuardSDL>;
+using unique_ptr_guard_bgfx = std::unique_ptr<GuardBGFX>;
+
 class Fey {
 public:
-    static std::variant<Fey, Error> create(const std::string &title, float width, float height);
+    static std::expected<Fey, Error> create(const std::string &title, float width, float height);
 
+    Fey(const Fey &fey) = delete;
+    Fey &operator=(const Fey &fey) = delete;
     Fey(Fey &&other) noexcept;
+    Fey &operator=(Fey &&other) = delete;
+
     ~Fey() = default;
 
     AssetManager &assetManager();
 
     ecs::Scene &addScene(const std::string &id, bool isActive = false);
+    void initGlobalSystems();
 
     void run();
     void processEvents();
     void update();
 
 private:
-    Fey(std::string title, float width, float height, std::unique_ptr<GuardSDL> &guardSDL,
-        std::unique_ptr<GuardBGFX> &guardBGFX);
+    Fey(std::string title, float width, float height, unique_ptr_guard_sdl &&guardSDL,
+        unique_ptr_guard_bgfx &&guardBGFX, std::unique_ptr<ICamera> &&camera);
 
-    void initCamera();
+    bool m_running = false;
+    Clock m_clock;
 
     std::string m_title;
     float m_width;
     float m_height;
 
-    Clock m_clock;
-
-    bool m_running = false;
-
-    AssetManager m_assetManager;
-
-    std::unique_ptr<GuardSDL> m_guardSDL;
-    std::unique_ptr<GuardBGFX> m_guardBGFX;
-
+    unique_ptr_guard_sdl m_guardSDL;
+    unique_ptr_guard_bgfx m_guardBGFX;
     std::unique_ptr<ICamera> m_camera; // TODO: move to scene class
-
+    AssetManager m_assetManager;
     std::vector<ecs::Scene> m_scenes{};
-
     std::vector<std::unique_ptr<ecs::ISystem>> m_globalSystems{};
 };
 } // namespace feyerverx

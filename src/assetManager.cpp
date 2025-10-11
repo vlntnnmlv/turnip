@@ -22,8 +22,6 @@ Texture AssetManager::getTexture(const std::string &textureName) {
     const std::filesystem::path texturePath =
         std::filesystem::absolute(std::format("../../../resources/textures/{}.png", textureName));
 
-    std::print("{}", texturePath.c_str());
-
     bgfx::TextureHandle textureHandle = AssetLoader::loadTexture(texturePath);
 
     m_assets.emplace(textureName, textureHandle);

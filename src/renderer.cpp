@@ -42,11 +42,12 @@ static void fillQuadFromRect(Vertex *o_out, const Rectangle &_rect) {
     o_out[3] = {xMin, yMax, 0.0f, 0.0f, 1.0f};
 }
 
-void Renderer::init() {
-    Vertex::InitLayout(m_layout);
+Renderer Renderer::create() {
+    bgfx::VertexLayout layout;
+    Vertex::InitLayout(layout);
 
-    m_vertexBuffer = BGFX_INVALID_HANDLE;
-    m_trianglesBuffer =
+    constexpr bgfx::VertexBufferHandle vertexBuffer = BGFX_INVALID_HANDLE;
+    const bgfx::IndexBufferHandle trianglesBuffer =
         bgfx::createIndexBuffer(bgfx::makeRef(quadTriangles, sizeof(quadTriangles)));
 
     const bgfx::EmbeddedShader embeddedVertexShader = BGFX_EMBEDDED_SHADER(quad_vs);
@@ -56,18 +57,47 @@ void Renderer::init() {
         bgfx::createEmbeddedShader(&embeddedVertexShader, bgfx::getRendererType(), "quad_vs");
     const bgfx::ShaderHandle fragmentShader =
         bgfx::createEmbeddedShader(&embeddedFragmentShader, bgfx::getRendererType(), "quad_fs");
-    m_program = bgfx::createProgram(vertexShader, fragmentShader, true);
+    const bgfx::ProgramHandle program = bgfx::createProgram(vertexShader, fragmentShader, true);
 
-    m_textureSamplerUniform = bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
+    const bgfx::UniformHandle textureSamplerUniform =
+        bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
+
+    /* TODO: This factory constructor is used in RenderSystem,
+       where it's move inside of it. The renderer object created in RenderSystem's ```create```
+       is destroyed in the end of that function, because it has moved it inside new RenderSystem
+       object. This calls Renderers destructor, event though it doesn't affect behaviour of the
+       program, I don't like the need to destroy the renderer. Fix it somehow. */
+    return Renderer{layout, vertexBuffer, trianglesBuffer, program, textureSamplerUniform};
 }
 
-Renderer::Renderer() {}
+Renderer::Renderer(Renderer &&other) noexcept {
+    m_layout = other.m_layout;
+    m_vertexBuffer = other.m_vertexBuffer;
+    m_trianglesBuffer = other.m_trianglesBuffer;
+    m_program = other.m_program;
+    m_textureSamplerUniform = other.m_textureSamplerUniform;
+
+    other.m_vertexBuffer = {bgfx::kInvalidHandle};
+    other.m_trianglesBuffer = {bgfx::kInvalidHandle};
+    other.m_program = {bgfx::kInvalidHandle};
+    other.m_textureSamplerUniform = {bgfx::kInvalidHandle};
+}
+
+Renderer::Renderer(const bgfx::VertexLayout &layout, const bgfx::VertexBufferHandle &vertexBuffer,
+                   const bgfx::IndexBufferHandle &trianglesBuffer,
+                   const bgfx::ProgramHandle &program,
+                   const bgfx::UniformHandle &textureSamplerUniform)
+    : m_layout(layout), m_vertexBuffer(vertexBuffer), m_trianglesBuffer(trianglesBuffer),
+      m_program(program), m_textureSamplerUniform(textureSamplerUniform) {
+    Logger::instance().log(LogLevel::Info, "Renderer constructed!");
+}
 
 Renderer::~Renderer() {
     destroyHandle(m_textureSamplerUniform);
     destroyHandle(m_trianglesBuffer);
     destroyHandle(m_vertexBuffer);
     destroyHandle(m_program);
+    Logger::instance().log(LogLevel::Info, "Destroyed renderer!");
 }
 
 void Renderer::renderTexture(const Texture &texture, const Rectangle &rectangle) {

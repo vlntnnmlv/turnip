@@ -1,6 +1,7 @@
 // Copyright 2025 Valentin Namleev
 
 #pragma once
+#include <memory>
 
 namespace feyerverx {
 class ICamera {
@@ -12,13 +13,23 @@ public:
 
 class CameraOrthogonal : public ICamera {
 public:
-    virtual ~CameraOrthogonal() override = default;
+    static std::unique_ptr<ICamera> createUniquePointer(float left, float right, float top,
+                                                        float bottom, float near = 0.0f,
+                                                        float far = 1000.0f);
+
+    CameraOrthogonal(const CameraOrthogonal &other) = delete;
+    CameraOrthogonal &operator=(const CameraOrthogonal &other) = delete;
+    CameraOrthogonal(CameraOrthogonal &&other) = default;
+    CameraOrthogonal &operator=(CameraOrthogonal &&other) = delete;
+
+    ~CameraOrthogonal() override = default;
+
+    void setView() const override;
+    void resizeView(float width, float height) override;
+
+private:
     CameraOrthogonal(float left, float right, float top, float bottom, float near = 0.0f,
                      float far = 1000.0f);
-
-public:
-    virtual void setView() const override;
-    virtual void resizeView(float width, float height) override;
 
 private:
     float m_left;

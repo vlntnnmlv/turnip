@@ -4,17 +4,17 @@
 
 #include "error.hpp"
 
+#include <expected>
 #include <memory>
-#include <variant>
 
 namespace feyerverx {
 class GuardBGFX {
 public:
-    static std::variant<std::unique_ptr<GuardBGFX>, Error> create(void *windowHandle, float width,
-                                                                  float height);
+    static std::expected<std::unique_ptr<GuardBGFX>, Error> create(void *windowHandle, float width,
+                                                                   float height);
     ~GuardBGFX();
 
 private:
-    GuardBGFX() = default;
+    GuardBGFX();
 };
 } // namespace turnip

@@ -9,6 +9,8 @@
 
 #include "feyerverx/assetLoader.hpp"
 
+#include "feyerverx/logger.hpp"
+
 namespace feyerverx {
 bgfx::TextureHandle AssetLoader::loadTexture(const std::string &filepath) {
     int width, height, channels;
@@ -18,6 +20,8 @@ bgfx::TextureHandle AssetLoader::loadTexture(const std::string &filepath) {
         std::print("Texture failed to load!\n", filepath);
         return BGFX_INVALID_HANDLE;
     }
+
+    Logger::instance().log(LogLevel::Info, "Loaded texture at path: {}", filepath);
 
     const bgfx::Memory *mem =
         bgfx::copy(pixels, width * height * 4); // Copy pixel data to bgfx memory
