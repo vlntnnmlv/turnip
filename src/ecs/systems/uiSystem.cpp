@@ -9,6 +9,9 @@
 //     : ISystem(_Registry), m_EventQueue(_EventQueue), m_LayoutEngine(m_registry), m_Size(_Size) {}
 
 namespace feyerverx::ecs {
+
+UISystem::UISystem(const Vector2f size) : m_size(size) {}
+
 void UISystem::update(float deltaTime) {
     processLayout();
     m_roots.clear();

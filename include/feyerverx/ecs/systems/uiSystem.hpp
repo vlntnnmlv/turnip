@@ -13,6 +13,7 @@
 // #include "feyerverx/ecs/registry.hpp"
 #include "feyerverx/ecs/engines/layoutEngine.hpp"
 #include "feyerverx/ecs/system.hpp"
+#include "feyerverx/fey.hpp"
 // #include "feyerverx/events/eventQueue.hpp"
 // // #include "feyerverx/rectangleUtils.hpp"
 
@@ -24,7 +25,7 @@
 namespace feyerverx::ecs {
 class UISystem final : public ISystem {
 public:
-    UISystem() = default;
+    explicit UISystem(Vector2f size);
     ~UISystem() override = default;
 
     void update([[maybe_unused]] float deltaTime) override;

@@ -24,6 +24,12 @@
 // ~ Fey
 
 namespace feyerverx {
+
+struct Specification {
+    const std::string name;
+    Vector2f windowSize;
+};
+
 using unique_ptr_guard_sdl = std::unique_ptr<GuardSDL>;
 using unique_ptr_guard_bgfx = std::unique_ptr<GuardBGFX>;
 
@@ -38,6 +44,7 @@ public:
 
     ~Fey() = default;
 
+    Specification &specification();
     AssetManager &assetManager();
 
     ecs::Scene &addScene(const std::string &id, bool isActive = false);
@@ -48,15 +55,13 @@ public:
     void update();
 
 private:
-    Fey(std::string title, float width, float height, unique_ptr_guard_sdl &&guardSDL,
-        unique_ptr_guard_bgfx &&guardBGFX, std::unique_ptr<ICamera> &&camera);
+    Fey(Specification spec, unique_ptr_guard_sdl &&guardSDL, unique_ptr_guard_bgfx &&guardBGFX,
+        std::unique_ptr<ICamera> &&camera);
+
+    Specification m_specification;
 
     bool m_running = false;
     Clock m_clock;
-
-    std::string m_title;
-    float m_width;
-    float m_height;
 
     unique_ptr_guard_sdl m_guardSDL;
     unique_ptr_guard_bgfx m_guardBGFX;

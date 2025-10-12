@@ -8,6 +8,8 @@
 #include <utility>
 
 #include "feyerverx/fey.hpp"
+
+#include "feyerverx/eventHandler.hpp"
 #include "feyerverx/logger.hpp"
 
 namespace feyerverx {
@@ -34,22 +36,24 @@ std::expected<Fey, Error> Fey::create(const std::string &title, const float widt
 
     auto camera = CameraOrthogonal::createUniquePointer(0.0f, width, 0.0f, height);
 
-    return Fey{title, width, height, std::move(guardSDL), std::move(guardBGFX), std::move(camera)};
+    return Fey{Specification{title, Vector2f{width, height}}, std::move(guardSDL),
+               std::move(guardBGFX), std::move(camera)};
 }
 
 Fey::Fey(Fey &&other) noexcept
-    : m_title(std::move(other.m_title)), m_width(other.m_width), m_height(other.m_height),
-      m_guardSDL(std::move(other.m_guardSDL)), m_guardBGFX(std::move(other.m_guardBGFX)),
-      m_camera(std::move(other.m_camera)) {}
+    : m_specification(std::move(other.m_specification)), m_guardSDL(std::move(other.m_guardSDL)),
+      m_guardBGFX(std::move(other.m_guardBGFX)), m_camera(std::move(other.m_camera)) {}
 
-Fey::Fey(std::string title, const float width, const float height, unique_ptr_guard_sdl &&guardSDL,
-         unique_ptr_guard_bgfx &&guardBGFX, std::unique_ptr<ICamera> &&camera)
-    : m_title(std::move(title)), m_width(width), m_height(height), m_guardSDL(std::move(guardSDL)),
+Fey::Fey(Specification spec, unique_ptr_guard_sdl &&guardSDL, unique_ptr_guard_bgfx &&guardBGFX,
+         std::unique_ptr<ICamera> &&camera)
+    : m_specification(std::move(spec)), m_guardSDL(std::move(guardSDL)),
       m_guardBGFX(std::move(guardBGFX)), m_camera(std::move(camera)) {
     int i = 0;
 }
 
 AssetManager &Fey::assetManager() { return m_assetManager; }
+
+Specification &Fey::specification() { return m_specification; }
 
 void Fey::initGlobalSystems() {
     Logger::instance().log(LogLevel::Info, "Initializing global systems...");
@@ -96,15 +100,17 @@ void Fey::processEvents() {
             const int newWidth = event.window.data1;
             const int newHeight = event.window.data2;
 
-            m_width = static_cast<float>(newWidth);
-            m_height = static_cast<float>(newHeight);
+            m_specification.windowSize.x = static_cast<float>(newWidth);
+            m_specification.windowSize.y = static_cast<float>(newHeight);
 
-            m_camera->resizeView(m_width, m_height);
+            m_camera->resizeView(m_specification.windowSize.y, m_specification.windowSize.x);
             m_camera->setView();
             bgfx::reset(newWidth, newHeight, BGFX_RESET_VSYNC);
         }
 
         if (event.type == SDL_EVENT_KEY_DOWN) {
+            EventSink::OnKeyDown.invoke(event.key.key);
+
             if (event.key.key == SDLK_ESCAPE)
                 m_running = false;
         }

@@ -1,6 +1,8 @@
 // Copyright 2025 Valentin Namleev
 
-#include "feyerverx/ecs/systems/uiSystem.hpp"
+#include "feyerverx/eventHandler.hpp"
+
+#include <feyerverx/ecs/systems/uiSystem.hpp>
 
 #include <feyerverx/ecs/components/spriteComponent.hpp>
 #include <feyerverx/ecs/components/transformComponent.hpp>
@@ -16,6 +18,8 @@ void addSpriteToRender(feyerverx::ecs::Scene &mainScene, feyerverx::Texture &t,
     e.addComponent<feyerverx::ecs::SpriteComponent>(t);
 }
 
+feyerverx::EventHandler<SDL_Keycode> feyerverx::EventSink::OnKeyDown{};
+
 int main() {
 
     auto feyResult = feyerverx::Fey::create("Fey", 800, 600);
@@ -24,11 +28,14 @@ int main() {
         return 1;
     }
 
+    feyerverx::EventSink::OnKeyDown.addCallback([](SDL_Keycode key) { std::println("{}", key); });
+
     feyerverx::Fey fey = std::move(feyResult.value());
     fey.initGlobalSystems();
 
     feyerverx::ecs::Scene &mainScene = fey.addScene("main_scene", true);
-    mainScene.addSystem<feyerverx::ecs::UISystem>();
+    mainScene.addSystem<feyerverx::ecs::UISystem>(fey.specification().windowSize);
+
     feyerverx::uiBuilder &builder = mainScene.builder();
     const auto root = builder.root();
     const auto stack = builder.stack(root, feyerverx::ecs::StackType::HORIZONTAL,
