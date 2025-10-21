@@ -28,9 +28,9 @@ public:
     explicit UISystem(Vector2f size);
     ~UISystem() override = default;
 
-    void update([[maybe_unused]] float deltaTime) override;
-    void enqueueScene(Scene &scene) override;
-    void processEvent(const SDL_Event &event) override;
+    void update(float deltaTime, std::shared_ptr<Registry>) override;
+    void enqueueScene(Scene &scene);
+    void processEvent(const SDL_Event &event);
 
 private:
     Vector2f m_size{};

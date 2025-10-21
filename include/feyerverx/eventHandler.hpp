@@ -12,17 +12,15 @@ template <typename Event> struct EventHandler {
     void addCallback(const Callback &callback) { callbacks.push_back(callback); }
     void addCallback(Callback &&callback) { callbacks.push_back(std::move(callback)); }
 
+    void operator+=(const Callback &callback) { addCallback(callback); }
+
     void invoke(const Event &event) const {
         for (auto &callback : callbacks) {
             callback(event);
         }
     }
 
+private:
     std::vector<Callback> callbacks{};
-};
-
-class EventSink {
-public:
-    static EventHandler<SDL_Keycode> OnKeyDown;
 };
 }

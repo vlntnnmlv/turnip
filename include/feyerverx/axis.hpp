@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "feyerverx/lrtb.hpp"
 #include "feyerverx/rectangle.hpp"
+#include "feyerverx/rectangleOffset.hpp"
 #include "feyerverx/size.hpp"
 
 namespace feyerverx {
@@ -15,7 +15,7 @@ struct AxisHelper {
     static float getLayoutSize(const Size &size, Axis axis);
     static std::optional<float> getLayoutConstraintSize(const Size &size, Axis axis, bool min);
     static SizeType getLayoutSizeType(const Size &size, Axis axis);
-    static float getPadding(const LRTB &padding, Axis axis, bool isStart);
-    static float getMargin(const LRTB &margin, Axis axis, bool isStart);
+    static float getPadding(const RectangleOffset &padding, Axis axis, bool isStart);
+    static float getMargin(const RectangleOffset &margin, Axis axis, bool isStart);
 };
 } // namespace feyerverx

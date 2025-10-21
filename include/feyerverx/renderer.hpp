@@ -29,7 +29,7 @@ struct Vertex {
 
 class Renderer {
 public:
-    static Renderer create();
+    static std::unique_ptr<Renderer> create();
 
     Renderer(const Renderer &) = delete;
     Renderer &operator=(const Renderer &) = delete;
@@ -38,7 +38,7 @@ public:
 
     ~Renderer();
 
-    void renderTexture(const Texture &texture, const Rectangle &rectangle);
+    void renderTexture(const Texture &texture, const Rectangle &rectangle, uint16_t viewID);
 
 private:
     Renderer(const bgfx::VertexLayout &layout, const bgfx::VertexBufferHandle &vertexBuffer,
@@ -46,10 +46,10 @@ private:
              const bgfx::UniformHandle &textureSamplerUniform);
 
     template <IsHandle T> void destroyHandle(T handle) {
-        Logger::instance().log(LogLevel::Debug, "Trying to destroy render target", handle.idx);
+        Logger::instance().log(LogLevel::Debug, "Trying to destroy render handle {}", handle.idx);
         if (bgfx::isValid(handle)) {
             bgfx::destroy(handle);
-            Logger::instance().log(LogLevel::Debug, "Destroyed render target", handle.idx);
+            Logger::instance().log(LogLevel::Debug, "Destroyed render handle {}", handle.idx);
         }
     }
 

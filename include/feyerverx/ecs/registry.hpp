@@ -26,10 +26,10 @@ public:
 
     void removeEntity(EntityID entityID);
 
-    template <typename T, typename... Args> void addComponent(EntityID _EntityID, Args &&..._Args) {
+    template <typename T, typename... Args> void addComponent(EntityID entityID, Args &&...args) {
         static_assert(std::is_base_of_v<IComponent, T>, "T must derive from IComponent");
         auto &map = getComponentMap<T>();
-        map[_EntityID] = std::make_unique<T>(std::forward<Args>(_Args)...);
+        map[entityID] = std::make_unique<T>(std::forward<Args>(args)...);
     }
 
     template <typename T> void removeComponent(const EntityID entityID) {
@@ -50,13 +50,13 @@ public:
         return result;
     }
 
-    std::vector<EntityID> with(const ComponentTypeSet &_ComponentTypeSet) {
-        if (_ComponentTypeSet.empty())
+    std::vector<EntityID> with(const ComponentTypeSet &componentTypeSet) {
+        if (componentTypeSet.empty())
             return {};
 
         const std::type_index *driverType = nullptr;
         size_t minSize = std::numeric_limits<size_t>::max();
-        for (const std::type_index &componentType : _ComponentTypeSet) {
+        for (const std::type_index &componentType : componentTypeSet) {
             auto it = m_components.find(componentType);
             if (it == m_components.end())
                 return {};
@@ -77,7 +77,7 @@ public:
         result.reserve(driverMap.size());
         for (const auto &id : std::ranges::views::keys(driverMap)) {
             bool hasAll = true;
-            for (const auto &type : _ComponentTypeSet) {
+            for (const auto &type : componentTypeSet) {
                 if (type == *driverType)
                     continue;
 

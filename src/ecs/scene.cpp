@@ -2,26 +2,20 @@
 
 #include "feyerverx/ecs/scene.hpp"
 
+#include "feyerverx/camera.hpp"
+
 namespace feyerverx::ecs {
-size_t Scene::nextUID = 0;
+Scene::Scene(const std::string &id, const RectangleOffset viewport,
+             const Color backgroundColor) noexcept
+    : IIdentifiable(id), m_registry{std::make_shared<Registry>()},
+      m_camera{
+          std::move(CameraPerspective::create(viewport, {400, 300, 200}, 120, 0.1f))},
+      m_backgroundColor{backgroundColor} {}
 
-Scene::Scene(const std::string &id) noexcept : ID(id), uid(nextUID++) {}
-
-Entity Scene::addEntity() { return m_registry.createEntity(); }
+Entity Scene::addEntity() { return m_registry->createEntity(); }
 void Scene::addSystem(std::unique_ptr<ISystem> &&system) { m_systems.push_back(std::move(system)); }
 
-Registry &Scene::registry() { return m_registry; }
-uiBuilder &Scene::builder() { return m_builder; }
-
-void Scene::update(float deltaTime) {
-    for (std::unique_ptr<ISystem> const &system : m_systems)
-        system->enqueueScene(*this);
-
-    for (std::unique_ptr<ISystem> const &system : m_systems)
-        system->update(deltaTime);
-}
-void Scene::enqueueEvent(const SDL_Event &event) {
-    for (std::unique_ptr<ISystem> const &system : m_systems)
-        system->processEvent(event);
-}
+std::shared_ptr<Registry> Scene::registry() { return m_registry; }
+UIBuilder &Scene::builder() { return m_builder; }
+std::unique_ptr<ICamera> &Scene::camera() { return m_camera; }
 } // namespace feyerverx

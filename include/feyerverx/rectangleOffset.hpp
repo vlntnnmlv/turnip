@@ -3,7 +3,7 @@
 #pragma once
 
 namespace feyerverx {
-struct LRTB {
+struct RectangleOffset {
     float left = 0;
     float right = 0;
     float top = 0;

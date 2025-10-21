@@ -24,12 +24,12 @@ SizeType AxisHelper::getLayoutSizeType(const feyerverx::Size &size, Axis axis) {
     return (axis == Axis::HORIZONTAL) ? size.axisX : size.axisY;
 }
 
-float AxisHelper::getPadding(const LRTB &padding, Axis axis, bool isStart) {
+float AxisHelper::getPadding(const RectangleOffset &padding, Axis axis, bool isStart) {
     return axis == Axis::HORIZONTAL ? (isStart ? padding.left : padding.right)
                                     : (isStart ? padding.top : padding.bottom);
 }
 
-float AxisHelper::getMargin(const LRTB &margin, Axis axis, bool isStart) {
+float AxisHelper::getMargin(const RectangleOffset &margin, Axis axis, bool isStart) {
     return axis == Axis::HORIZONTAL ? (isStart ? margin.left : margin.right)
                                     : (isStart ? margin.top : margin.bottom);
 }

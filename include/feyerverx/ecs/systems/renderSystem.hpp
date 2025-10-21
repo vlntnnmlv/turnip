@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <list>
+
 #include "feyerverx/ecs/system.hpp"
 #include "feyerverx/renderer.hpp"
 
@@ -12,10 +14,16 @@ public:
     RenderSystem();
     ~RenderSystem() override = default;
 
-    void update(float deltaTime) override;
-    void enqueueScene(Scene &scene) override;
+    RenderSystem(const RenderSystem &) = delete;
+    void operator=(const RenderSystem &) = delete;
+    RenderSystem(RenderSystem &&) = default;
+    void operator=(const RenderSystem &&) = delete;
+
+    void render(Scene &scene, uint16_t viewID);
+    void update(float deltaTime, std::shared_ptr<Registry> registry) override;
 
 private:
-    Renderer m_renderer;
+    std::unique_ptr<Renderer> m_renderer;
+    std::list<std::pair<Scene &, std::vector<Entity>>> m_scenesEntities{};
 };
 } // namespace feyerverx

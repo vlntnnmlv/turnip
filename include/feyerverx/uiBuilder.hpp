@@ -16,51 +16,51 @@
 #include "feyerverx/font.hpp"
 
 namespace feyerverx {
-class uiBuilder {
+class UIBuilder {
 public:
-    explicit uiBuilder(ecs::Registry &_Registry);
+    explicit UIBuilder(std::shared_ptr<ecs::Registry> registry);
 
-    uiBuilder(uiBuilder &&) noexcept = default;
-    uiBuilder &operator=(uiBuilder &&) noexcept = default;
+    UIBuilder(UIBuilder &&) noexcept = default;
+    UIBuilder &operator=(UIBuilder &&) noexcept = default;
 
-    uiBuilder(const uiBuilder &) = delete;
-    uiBuilder &operator=(const uiBuilder &) = delete;
+    UIBuilder(const UIBuilder &) = delete;
+    UIBuilder &operator=(const UIBuilder &) = delete;
 
-    ecs::Entity node(ecs::Entity _Parent, Size _Size = Size{SizeType::FILL, SizeType::FILL},
-                     LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0});
+    ecs::Entity node(ecs::Entity parent, Size size = Size{SizeType::FILL, SizeType::FILL},
+                     RectangleOffset margin = {0, 0, 0, 0}, RectangleOffset padding = {0, 0, 0, 0});
 
-    ecs::Entity root(LRTB _Padding = {0, 0, 0, 0});
+    ecs::Entity root(RectangleOffset padding = {0, 0, 0, 0});
 
-    ecs::Entity image(ecs::Entity _Parent, Texture &_Texture, LRTB _Patch = {0, 0, 0, 0},
-                      Color _Color = {255, 255, 255, 255},
+    ecs::Entity image(ecs::Entity parent, Texture &texture, RectangleOffset _Patch = {0, 0, 0, 0},
+                      Color color = {255, 255, 255, 255},
                       Size _Size = Size{SizeType::FILL, SizeType::FILL},
-                      LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0});
+                      RectangleOffset _Margin = {0, 0, 0, 0}, RectangleOffset _Padding = {0, 0, 0, 0});
 
     ecs::Entity stack(ecs::Entity _Parent, ecs::StackType _StackType,
                       ecs::StackContentType _StackContentType = ecs::StackContentType::CENTER,
                       float _Spacing = 0, Size _Size = Size{SizeType::FILL, SizeType::FILL},
-                      LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0});
+                      RectangleOffset _Margin = {0, 0, 0, 0}, RectangleOffset _Padding = {0, 0, 0, 0});
 
     ecs::Entity text(ecs::Entity _Parent, const std::string &_Text, Font &_Font,
                      float _FontSize = 24, float _Spacing = 5, Color _Color = {255, 255, 255, 255},
-                     Size _Size = Size{SizeType::FILL, SizeType::FILL}, LRTB _Margin = {0, 0, 0, 0},
-                     LRTB _Padding = {0, 0, 0, 0});
+                     Size _Size = Size{SizeType::FILL, SizeType::FILL}, RectangleOffset _Margin = {0, 0, 0, 0},
+                     RectangleOffset _Padding = {0, 0, 0, 0});
 
     // TODO: Think how to make this better!
     ecs::Entity button(ecs::Entity _Parent, std::function<void()> _OnClick, Texture &_Texture,
-                       LRTB _Patch = {0, 0, 0, 0}, Color _Color = {255, 255, 255, 255},
+                       RectangleOffset _Patch = {0, 0, 0, 0}, Color _Color = {255, 255, 255, 255},
                        Size _Size = Size{SizeType::FILL, SizeType::FILL},
-                       LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0});
+                       RectangleOffset _Margin = {0, 0, 0, 0}, RectangleOffset _Padding = {0, 0, 0, 0});
 
     ecs::Entity labeledButton(ecs::Entity _Parent, std::function<void()> _OnClick,
                               Texture &_Texture, const std::string &_Text, Font &_Font,
-                              float _FontSize = 24, float _Spacing = 5, LRTB _Patch = {0, 0, 0, 0},
+                              float _FontSize = 24, float _Spacing = 5, RectangleOffset _Patch = {0, 0, 0, 0},
                               Color _Color = {255, 255, 255, 255},
                               Size _Size = Size{SizeType::FILL, SizeType::FILL},
-                              LRTB _Margin = {0, 0, 0, 0}, LRTB _Padding = {0, 0, 0, 0});
+                              RectangleOffset _Margin = {0, 0, 0, 0}, RectangleOffset _Padding = {0, 0, 0, 0});
 
 private:
-    std::reference_wrapper<ecs::Registry> m_registry;
-    void setParent(ecs::Entity _Child, ecs::Entity _Parent);
+    std::shared_ptr<ecs::Registry> m_registry;
+    void setParent(ecs::Entity child, ecs::Entity parent);
 };
 } // namespace feyerverx

@@ -2,18 +2,18 @@
 
 #pragma once
 
-#include "feyerverx/ecs/registry.hpp"
-#include "feyerverx/ecs/scene.hpp"
+#include <SDL3/SDL_events.h>
+
+#include "feyerverx/ecs/entity.hpp"
+#include "feyerverx/identifiable.hpp"
 
 namespace feyerverx::ecs {
 class Scene;
 
-struct ISystem {
-    ISystem() = default;
+struct ISystem : IIdentifiable {
+    explicit ISystem(const std::string &id);
     virtual ~ISystem() = default;
-    virtual void update(float deltaTime) = 0;
-    virtual void enqueueScene(Scene &scene) = 0;
-    virtual void processEvent(const SDL_Event &event) {}
+    virtual void update(float deltaTime, std::shared_ptr<Registry> registry) = 0;
 
 protected:
     std::vector<Entity> m_entityQueue{};

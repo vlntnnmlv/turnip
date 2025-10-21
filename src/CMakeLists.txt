@@ -41,7 +41,6 @@ target_include_directories(feyerverx
         PUBLIC ${VENDOR_DIR}/SDL/include
         PUBLIC ${VENDOR_DIR}/stb/include
         PRIVATE ${CMAKE_BINARY_DIR}/include/generated/shaders
-
 )
 
 # Dependencies

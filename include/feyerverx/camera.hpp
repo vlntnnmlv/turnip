@@ -1,20 +1,37 @@
 // Copyright 2025 Valentin Namleev
 
 #pragma once
+
+#include <bx/math.h>
 #include <memory>
 
+#include "math/vector.hpp"
+
+#include "identifiable.hpp"
+#include "rectangleOffset.hpp"
+
 namespace feyerverx {
-class ICamera {
+class ICamera : public IIdentifiable {
 public:
+    explicit ICamera(const std::string &id, RectangleOffset viewport, float near, float far);
     virtual ~ICamera() = default;
-    virtual void setView() const = 0;
-    virtual void resizeView(float width, float height) = 0;
+    virtual void setView(uint16_t viewID) const = 0;
+
+    [[nodiscard]] RectangleOffset viewport() const noexcept;
+    [[nodiscard]] float near() const noexcept;
+    [[nodiscard]] float far() const noexcept;
+    void updateViewport(RectangleOffset viewportScaled, Vector2f windowSize);
+
+private:
+    RectangleOffset m_viewportScaled;
+    RectangleOffset m_viewport;
+    float m_near;
+    float m_far;
 };
 
-class CameraOrthogonal : public ICamera {
+class CameraOrthogonal final : public ICamera {
 public:
-    static std::unique_ptr<ICamera> createUniquePointer(float left, float right, float top,
-                                                        float bottom, float near = 0.0f,
+    static std::unique_ptr<ICamera> create(RectangleOffset viewport, float near = 0.0f,
                                                         float far = 1000.0f);
 
     CameraOrthogonal(const CameraOrthogonal &other) = delete;
@@ -24,19 +41,52 @@ public:
 
     ~CameraOrthogonal() override = default;
 
-    void setView() const override;
-    void resizeView(float width, float height) override;
+    void setView(uint16_t viewID) const override;
 
 private:
-    CameraOrthogonal(float left, float right, float top, float bottom, float near = 0.0f,
-                     float far = 1000.0f);
+    CameraOrthogonal(RectangleOffset viewport, float near = 0.0f, float far = 1000.0f);
+};
+
+class CameraPerspective final : public ICamera {
+public:
+    static std::unique_ptr<ICamera> create(RectangleOffset viewport, Vector3f position,
+                                                        float FOV = 120.0f, float near = 0.0f,
+                                                        float far = 1000.0f);
+
+    CameraPerspective(const CameraPerspective &other) = delete;
+    CameraPerspective &operator=(const CameraPerspective &other) = delete;
+    CameraPerspective(CameraPerspective &&other) = default;
+    CameraPerspective &operator=(CameraPerspective &&other) = delete;
+
+    ~CameraPerspective() override = default;
+
+    void setView(uint16_t viewID) const override;
 
 private:
-    float m_left;
-    float m_right;
-    float m_top;
-    float m_bottom;
-    float m_near;
-    float m_far;
+    CameraPerspective(RectangleOffset viewport, Vector3f position, float FOV, float near = 0.0f,
+                      float far = 1000.0f);
+
+    void updateVectors() {
+        static bx::Vec3 forward{0.0f, 0.0f, -1.0f};
+        static bx::Vec3 upWorld{0.0f, -1.0f, 0.0f};
+
+        const bx::Vec3 eye{m_eye.x, m_eye.y, m_eye.z};
+
+        const bx::Quaternion rotation =
+            bx::fromEuler(bx::Vec3{m_rotation.x, m_rotation.y, m_rotation.z});
+
+        const bx::Vec3 lookingAt = bx::add(eye, bx::mul(forward, rotation));
+        m_lookingAt = Vector3f{lookingAt.x, lookingAt.y, lookingAt.z};
+
+        const bx::Vec3 up = bx::mul(upWorld, rotation);
+        m_up = Vector3f{up.x, up.y, up.z};
+    }
+
+    float m_FOV;
+
+    Vector3f m_rotation{};
+    Vector3f m_eye{};
+    Vector3f m_lookingAt{};
+    Vector3f m_up{};
 };
 } // namespace feyerverx

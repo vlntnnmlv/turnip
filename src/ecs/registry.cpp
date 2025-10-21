@@ -8,7 +8,7 @@ namespace feyerverx::ecs {
 Entity Registry::createEntity() {
     EntityID entityID = m_nextEntityID++;
     m_alive.push_back(entityID);
-    return Entity(entityID, this);
+    return {entityID, this};
 }
 
 void Registry::removeEntity(const EntityID entityID) {

@@ -3,14 +3,14 @@
 #pragma once
 
 #include "feyerverx/ecs/component.hpp"
-#include "feyerverx/lrtb.hpp"
+#include "feyerverx/rectangleOffset.hpp"
 #include "feyerverx/texture.hpp"
 
 namespace feyerverx::ecs {
 struct SpriteComponent : IComponent {
     Texture &texture;
-    LRTB patch;
+    RectangleOffset patch;
 
-    SpriteComponent(Texture &_Texture, LRTB _Patch = LRTB{0, 0, 0, 0});
+    SpriteComponent(Texture &texture, RectangleOffset patch = RectangleOffset{0, 0, 0, 0});
 };
 } // namespace feyerverx::ecs

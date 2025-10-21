@@ -2,54 +2,46 @@
 
 #pragma once
 
-#include "feyerverx/uiBuilder.hpp"
-
 #include <vector>
 
-#include <SDL3/SDL.h>
+#include "feyerverx/camera.hpp"
+#include "feyerverx/uiBuilder.hpp"
 
 #include "feyerverx/ecs/entity.hpp"
 #include "feyerverx/ecs/registry.hpp"
 #include "feyerverx/ecs/system.hpp"
-#include "feyerverx/renderer.hpp"
 
 namespace feyerverx::ecs {
-struct ISystem;
-
-class Scene {
+class Scene : IIdentifiable {
 public:
-    explicit Scene(const std::string &id) noexcept;
+    explicit Scene(const std::string &id, RectangleOffset viewport,
+                   Color backgroundColor = {255, 255, 255, 255}) noexcept;
     ~Scene() = default;
 
     Scene(Scene &&) noexcept = default;
-    Scene &operator=(Scene &&) noexcept = default;
+    Scene &operator=(Scene &&) noexcept = delete;
 
     Scene(const Scene &) = delete;
     Scene &operator=(const Scene &) = delete;
 
+    [[nodiscard]] std::shared_ptr<Registry> registry() const noexcept { return m_registry; }
+    [[nodiscard]] size_t viewUID() const noexcept { return m_camera->UID(); }
+    [[nodiscard]] Color backgroundColor() const noexcept { return m_backgroundColor; }
+
     Entity addEntity();
     void addSystem(std::unique_ptr<ISystem> &&system);
 
-    template <typename T, typename... Args> void addSystem(Args &&...args) {
-        static_assert(std::is_base_of_v<ISystem, T>, "T must derive from IComponent");
-        m_systems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
-    }
+    std::shared_ptr<Registry> registry();
+    UIBuilder &builder();
+    std::unique_ptr<ICamera> &camera();
 
-    Registry &registry();
-    uiBuilder &builder();
-
-    void update(float deltaTime);
-    void enqueueEvent(const SDL_Event &event);
-
-    std::string ID;
     bool isActive = false;
 
 private:
-    static size_t nextUID;
-    size_t uid;
-
-    Registry m_registry{};
-    uiBuilder m_builder{m_registry};
-    std::vector<std::unique_ptr<ecs::ISystem>> m_systems{};
+    Color m_backgroundColor;
+    std::unique_ptr<ICamera> m_camera;
+    std::shared_ptr<Registry> m_registry{};
+    UIBuilder m_builder{m_registry};
+    std::vector<std::unique_ptr<ISystem>> m_systems{};
 };
 } // namespace feyerverx

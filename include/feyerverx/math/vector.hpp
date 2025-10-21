@@ -156,7 +156,7 @@ template <typename T> struct Vector<T, 3> {
     };
 
     Vector() : x(T{}), y(T{}), z(T{}) {}
-    Vector(T x, T y) : x(x), y(y), z(z) {}
+    Vector(T x, T y, T z) : x(x), y(y), z(z) {}
 
     friend std::ostream &operator<<(std::ostream &os, const Vector &obj) {
         os << "Vector3<" << obj.x << ", " << obj.y << ", " << obj.z << ">";

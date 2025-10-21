@@ -1,26 +1,26 @@
 // Copyright 2025 Valentin Namleev
 
 #include "feyerverx/ecs/systems/uiSystem.hpp"
-
 #include "feyerverx/ecs/components/parentComponent.hpp"
-// #include "feyerverx/ecs/components/renderTransformComponent.hpp"
 
-// UISystem::UISystem(Registry &_Registry, events::EventQueue &_EventQueue, Vector2f _Size)
-//     : ISystem(_Registry), m_EventQueue(_EventQueue), m_LayoutEngine(m_registry), m_Size(_Size) {}
+#include "feyerverx/eventSink.hpp"
 
 namespace feyerverx::ecs {
 
-UISystem::UISystem(const Vector2f size) : m_size(size) {}
+UISystem::UISystem(const Vector2f size) : ISystem("ui_system"), m_size(size) {
+    EventSink::OnWindowResized += [this](const Vector2f newSize) { m_size = newSize; };
+}
 
-void UISystem::update(float deltaTime) {
+void UISystem::update(float deltaTime, std::shared_ptr<Registry>) {
     processLayout();
     m_roots.clear();
 }
+
 void UISystem::enqueueScene(Scene &scene) {
     // TODO: actually enqueue event, and process them in update
-    for (const auto &e : scene.registry().with<TransformComponent, LayoutComponent>()) {
-        if (!scene.registry().getComponent<ParentComponent>(e)) {
-            m_roots.emplace_back(e, &scene.registry());
+    for (const auto &e : scene.registry()->with<TransformComponent, LayoutComponent>()) {
+        if (!scene.registry()->getComponent<ParentComponent>(e)) {
+            m_roots.emplace_back(e, scene.registry().get());
         }
     }
 }

@@ -42,7 +42,7 @@ static void fillQuadFromRect(Vertex *o_out, const Rectangle &_rect) {
     o_out[3] = {xMin, yMax, 0.0f, 0.0f, 1.0f};
 }
 
-Renderer Renderer::create() {
+std::unique_ptr<Renderer> Renderer::create() {
     bgfx::VertexLayout layout;
     Vertex::InitLayout(layout);
 
@@ -62,12 +62,8 @@ Renderer Renderer::create() {
     const bgfx::UniformHandle textureSamplerUniform =
         bgfx::createUniform("s_texColor", bgfx::UniformType::Sampler);
 
-    /* TODO: This factory constructor is used in RenderSystem,
-       where it's move inside of it. The renderer object created in RenderSystem's ```create```
-       is destroyed in the end of that function, because it has moved it inside new RenderSystem
-       object. This calls Renderers destructor, event though it doesn't affect behaviour of the
-       program, I don't like the need to destroy the renderer. Fix it somehow. */
-    return Renderer{layout, vertexBuffer, trianglesBuffer, program, textureSamplerUniform};
+    return std::unique_ptr<Renderer>(
+        new Renderer{layout, vertexBuffer, trianglesBuffer, program, textureSamplerUniform});
 }
 
 Renderer::Renderer(Renderer &&other) noexcept {
@@ -100,7 +96,7 @@ Renderer::~Renderer() {
     Logger::instance().log(LogLevel::Info, "Destroyed renderer!");
 }
 
-void Renderer::renderTexture(const Texture &texture, const Rectangle &rectangle) {
+void Renderer::renderTexture(const Texture &texture, const Rectangle &rectangle, uint16_t viewID) {
     Vertex quadVerticies[4];
     fillQuadFromRect(quadVerticies, rectangle);
 
@@ -108,6 +104,7 @@ void Renderer::renderTexture(const Texture &texture, const Rectangle &rectangle)
         bgfx::destroy(m_vertexBuffer);
     }
 
+    // TODO: Do not create this each frame
     m_vertexBuffer =
         bgfx::createVertexBuffer(bgfx::copy(quadVerticies, sizeof(quadVerticies)), m_layout);
 
@@ -117,6 +114,6 @@ void Renderer::renderTexture(const Texture &texture, const Rectangle &rectangle)
     bgfx::setTexture(0, m_textureSamplerUniform, texture.handle());
     bgfx::setState(BGFX_STATE_DEFAULT);
 
-    bgfx::submit(0, m_program);
+    bgfx::submit(viewID, m_program);
 }
 }

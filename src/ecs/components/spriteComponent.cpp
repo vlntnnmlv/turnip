@@ -3,6 +3,6 @@
 #include "feyerverx/ecs/components/spriteComponent.hpp"
 
 namespace feyerverx::ecs {
-SpriteComponent::SpriteComponent(Texture &_Texture, LRTB _Patch)
-    : texture(_Texture), patch(_Patch) {}
+SpriteComponent::SpriteComponent(Texture &texture, RectangleOffset patch)
+    : texture(texture), patch(patch) {}
 } // namespace feyerverx::ecs

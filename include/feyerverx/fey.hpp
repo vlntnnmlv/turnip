@@ -2,16 +2,17 @@
 
 #pragma once
 
+#include <list>
 #include <memory>
 #include <string>
 
 #include "feyerverx/ecs/scene.hpp"
 #include "feyerverx/ecs/systems/renderSystem.hpp"
 
-#include "feyerverx/camera.hpp"
 #include "feyerverx/clock.hpp"
 #include "feyerverx/guardBGFX.hpp"
 #include "feyerverx/guardSDL.hpp"
+#include "feyerverx/specification.hpp"
 
 // new Fey
 // - new SDL
@@ -25,17 +26,14 @@
 
 namespace feyerverx {
 
-struct Specification {
-    const std::string name;
-    Vector2f windowSize;
-};
-
 using unique_ptr_guard_sdl = std::unique_ptr<GuardSDL>;
 using unique_ptr_guard_bgfx = std::unique_ptr<GuardBGFX>;
+using unique_ptr_system = std::unique_ptr<ecs::ISystem>;
 
 class Fey {
 public:
-    static std::expected<Fey, Error> create(const std::string &title, float width, float height);
+    static std::expected<Fey, Error> create(const std::string &name, float width, float height);
+    static std::expected<Fey, Error> create(const Specification &specification);
 
     Fey(const Fey &fey) = delete;
     Fey &operator=(const Fey &fey) = delete;
@@ -44,19 +42,25 @@ public:
 
     ~Fey() = default;
 
+    // getters
     Specification &specification();
     AssetManager &assetManager();
 
-    ecs::Scene &addScene(const std::string &id, bool isActive = false);
-    void initGlobalSystems();
+    // modifiers
+    ecs::Scene &addScene(const std::string &id, RectangleOffset viewport,
+                         Color backgroundColor = {255, 255, 255, 255}, bool isActive = true);
+
+    template <typename T, typename... Args> void addSystem(Args &&...args) {
+        static_assert(std::is_base_of_v<ecs::ISystem, T>, "T must derive from ISystem");
+        m_systems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+    }
 
     void run();
     void processEvents();
     void update();
 
 private:
-    Fey(Specification spec, unique_ptr_guard_sdl &&guardSDL, unique_ptr_guard_bgfx &&guardBGFX,
-        std::unique_ptr<ICamera> &&camera);
+    Fey(Specification spec, unique_ptr_guard_sdl &&guardSDL, unique_ptr_guard_bgfx &&guardBGFX);
 
     Specification m_specification;
 
@@ -65,9 +69,10 @@ private:
 
     unique_ptr_guard_sdl m_guardSDL;
     unique_ptr_guard_bgfx m_guardBGFX;
-    std::unique_ptr<ICamera> m_camera; // TODO: move to scene class
     AssetManager m_assetManager;
-    std::vector<ecs::Scene> m_scenes{};
-    std::vector<std::unique_ptr<ecs::ISystem>> m_globalSystems{};
+
+    ecs::RenderSystem m_renderSystem{};
+    std::list<unique_ptr_system> m_systems{};
+    std::list<ecs::Scene> m_scenes{};
 };
 } // namespace feyerverx

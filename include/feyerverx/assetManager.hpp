@@ -14,7 +14,13 @@ class Texture;
 class AssetManager {
 public:
     AssetManager() = default;
+    AssetManager(const AssetManager &) = delete;
+    AssetManager &operator=(const AssetManager &) = delete;
+    AssetManager(AssetManager &&) = default;
+    AssetManager &operator=(AssetManager &&) = delete;
+
     ~AssetManager();
+
     Texture getTexture(const std::string &textureName);
 
 private:
