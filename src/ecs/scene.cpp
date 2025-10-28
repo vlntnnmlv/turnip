@@ -1,21 +1,35 @@
 // Copyright 2025 Valentin Namleev
 
+#include "feyerverx/events/eventManager.hpp"
+
+#include "feyerverx/ecs/components/cameraComponent.hpp"
 #include "feyerverx/ecs/scene.hpp"
 
-#include "feyerverx/camera.hpp"
+#include <print>
 
 namespace feyerverx::ecs {
-Scene::Scene(const std::string &id, const RectangleOffset viewport,
+Scene::Scene(const std::string &id, EventManager &eventManager, const RectangleOffset viewport,
              const Color backgroundColor) noexcept
-    : IIdentifiable(id), m_registry{std::make_shared<Registry>()},
-      m_camera{
-          std::move(CameraPerspective::create(viewport, {400, 300, 200}, 120, 0.1f))},
-      m_backgroundColor{backgroundColor} {}
+    : IIdentifiable(id), m_eventManager(eventManager), m_registry{std::make_shared<Registry>()},
+      m_backgroundColor{backgroundColor} {
 
-Entity Scene::addEntity() { return m_registry->createEntity(); }
-void Scene::addSystem(std::unique_ptr<ISystem> &&system) { m_systems.push_back(std::move(system)); }
+    auto cameraEntity = m_registry->createEntity();
+    cameraEntity.addComponent<CameraComponent>(CameraType::ORTHOGRAPHIC, viewport, 0, 1000);
 
-std::shared_ptr<Registry> Scene::registry() { return m_registry; }
-UIBuilder &Scene::builder() { return m_builder; }
-std::unique_ptr<ICamera> &Scene::camera() { return m_camera; }
+    auto cameraComponent = cameraEntity.getComponent<CameraComponent>();
+
+    m_eventManager.subscribe<WindowResizedEvent>(
+        [cameraComponent](const WindowResizedEvent &event) -> void {
+            std::println("Window resized {} {}", event.windowSize.x, event.windowSize.y);
+            cameraComponent->updateViewport(cameraComponent->viewportScaled, event.windowSize);
+        });
+}
+
+Entity Scene::addEntity() const { return m_registry->createEntity(); }
+
+void Scene::update(const float deltaTime) const {
+    for (const std::unique_ptr<ISystem> &system : m_systems) {
+        system->update(deltaTime, m_registry);
+    }
+}
 } // namespace feyerverx

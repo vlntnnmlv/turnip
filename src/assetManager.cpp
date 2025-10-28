@@ -6,11 +6,12 @@
 
 #include <filesystem>
 #include <print>
+#include <ranges>
 
 namespace feyerverx {
 AssetManager::~AssetManager() {
-    for (auto it = m_assets.begin(); it != m_assets.end(); it++) {
-        bgfx::destroy(it->second.handle());
+    for (auto &texture : m_assets | std::views::values) {
+        bgfx::destroy(texture.handle());
     }
 }
 

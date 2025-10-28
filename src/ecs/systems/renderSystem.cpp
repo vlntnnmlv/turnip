@@ -7,14 +7,17 @@
 #include "feyerverx/ecs/scene.hpp"
 #include "feyerverx/ecs/systems/renderSystem.hpp"
 
+#include "bx/math.h"
+#include "feyerverx/ecs/components/cameraComponent.hpp"
+
 namespace feyerverx::ecs {
 
-RenderSystem::RenderSystem()
-    : ISystem("render_system"), m_renderer(std::move(Renderer::create())) {}
+RenderSystem::RenderSystem(EventManager &eventManager)
+    : ISystem("render_system", eventManager), m_renderer(std::move(Renderer::create())) {}
 
-void RenderSystem::update(float deltaTime, std::shared_ptr<Registry> registry) { /*TODO:*/ }
+void RenderSystem::update(float deltaTime, const std::shared_ptr<Registry> &registry) { /*TODO:*/ }
 
-void RenderSystem::render(Scene &scene, const uint16_t viewID) {
+void RenderSystem::render(const Scene &scene, const uint16_t viewID) {
     auto registry = scene.registry();
 
     const auto toRender = registry->with<TransformComponent, SpriteComponent>() |
@@ -23,9 +26,10 @@ void RenderSystem::render(Scene &scene, const uint16_t viewID) {
                           }) |
                           std::ranges::to<std::vector>();
 
-    scene.camera()->setView(viewID);
+    if (const auto camera = getSceneCameraComponent(scene))
+        camera->setView(viewID);
 
-    bgfx::setViewClear(viewID, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x45454545 + viewID);
+    bgfx::setViewClear(viewID, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, scene.backgroundColor());
 
     for (const Entity &entity : toRender) {
         m_renderer->renderTexture(entity.getComponent<SpriteComponent>()->texture,

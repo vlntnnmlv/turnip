@@ -1,14 +1,14 @@
 // Copyright 2025 Valentin Namleev
 
-#include <bgfx/platform.h>
 #include <chrono>
 #include <print>
 #include <utility>
 
-#include "feyerverx/fey.hpp"
+#include <bgfx/platform.h>
+#include <bx/math.h>
 
-#include "bx/math.h"
-#include "feyerverx/eventSink.hpp"
+#include "feyerverx/events/event.hpp"
+#include "feyerverx/fey.hpp"
 
 namespace feyerverx {
 
@@ -44,51 +44,33 @@ std::expected<Fey, Error> Fey::create(const Specification &specification) {
 Fey::Fey(Fey &&other) noexcept
     : m_specification{std::move(other.m_specification)}, m_guardSDL{std::move(other.m_guardSDL)},
       m_guardBGFX{std::move(other.m_guardBGFX)}, m_assetManager(std::move(other.m_assetManager)),
-      m_renderSystem(std::move(other.m_renderSystem)), m_systems(std::move(other.m_systems)),
-      m_scenes(std::move(other.m_scenes)) {}
+      m_renderSystem(std::move(other.m_renderSystem)), m_scenes(std::move(other.m_scenes)) {}
 
 Fey::Fey(Specification spec, unique_ptr_guard_sdl &&guardSDL, unique_ptr_guard_bgfx &&guardBGFX)
     : m_specification{std::move(spec)}, m_guardSDL{std::move(guardSDL)},
       m_guardBGFX{std::move(guardBGFX)} {}
 
 // getters
-AssetManager &Fey::assetManager() { return m_assetManager; }
 Specification &Fey::specification() { return m_specification; }
+AssetManager &Fey::assetManager() { return m_assetManager; }
+EventManager &Fey::eventManager() { return m_eventManager; }
 
 // modifiers
 ecs::Scene &Fey::addScene(const std::string &id, RectangleOffset viewport, Color backgroundColor,
                           const bool isActive) {
-    ecs::Scene &scene = m_scenes.emplace_back(id, viewport, backgroundColor);
+    ecs::Scene &scene = m_scenes.emplace_back(id, m_eventManager, viewport, backgroundColor);
     scene.isActive = isActive;
     return scene;
 }
 
 void Fey::run() {
     m_running = true;
-    EventSink::OnWindowResized.invoke(m_specification.windowSize);
+    m_eventManager.queueEvent<WindowResizedEvent>(m_specification.windowSize);
 
     while (m_running) {
         processEvents();
         update();
-
-        bgfx::touch(0);
-        for (auto it = m_scenes.begin(); it != m_scenes.end(); ++it) {
-            ecs::Scene &scene = *it;
-
-            if (!scene.isActive)
-                continue;
-
-            const uint16_t viewID = 0; // std::distance(m_scenes.begin(), it);
-            m_renderSystem.render(scene, viewID);
-        }
-
-        bgfx::setDebug(BGFX_DEBUG_TEXT);
-        bgfx::dbgTextClear();
-        bgfx::dbgTextPrintf(1, 1, 0x4f, "elapsed: %fs", m_clock.elapsedTimeSeconds());
-        bgfx::dbgTextPrintf(1, 2, 0x4f, "dt: %fs", m_clock.deltaTimeSeconds());
-        bgfx::dbgTextPrintf(1, 3, 0x4f, "fps: %f", 1 / m_clock.deltaTimeSeconds());
-
-        bgfx::frame();
+        render();
     }
 }
 
@@ -107,18 +89,20 @@ void Fey::processEvents() {
             m_specification.windowSize.x = static_cast<float>(newWidth);
             m_specification.windowSize.y = static_cast<float>(newHeight);
 
-            EventSink::OnWindowResized.invoke(m_specification.windowSize);
+            m_eventManager.queueEvent<WindowResizedEvent>(m_specification.windowSize);
 
             bgfx::reset(newWidth, newHeight, BGFX_RESET_VSYNC);
         }
 
         if (event.type == SDL_EVENT_KEY_DOWN) {
-            EventSink::OnKeyDown.invoke(event.key.key);
-
             if (event.key.key == SDLK_ESCAPE)
                 m_running = false;
+
+            m_eventManager.queueEvent<KeyboardEvent>(event.key.key, KeyboardEvent::Type::PRESSED);
         }
     }
+
+    m_eventManager.dispatch();
 }
 
 void Fey::update() {
@@ -130,10 +114,28 @@ void Fey::update() {
         if (!scene.isActive)
             continue;
 
-        // update each active scene with all systems
-        for (const unique_ptr_system &system : m_systems) {
-            system->update(deltaTime, scene.registry());
-        }
+        scene.update(deltaTime);
     }
+}
+
+void Fey::render() {
+    bgfx::touch(0);
+    for (auto it = m_scenes.begin(); it != m_scenes.end(); ++it) {
+        ecs::Scene &scene = *it;
+
+        if (!scene.isActive)
+            continue;
+
+        const uint16_t viewID = std::distance(m_scenes.begin(), it);
+        m_renderSystem.render(scene, viewID);
+    }
+
+    bgfx::setDebug(BGFX_DEBUG_TEXT);
+    bgfx::dbgTextClear();
+    bgfx::dbgTextPrintf(1, 1, 0x4f, "elapsed: %fs", m_clock.elapsedTimeSeconds());
+    bgfx::dbgTextPrintf(1, 2, 0x4f, "dt: %fs", m_clock.deltaTimeSeconds());
+    bgfx::dbgTextPrintf(1, 3, 0x4f, "fps: %f", 1 / m_clock.deltaTimeSeconds());
+
+    bgfx::frame();
 }
 } // namespace feyerverx

@@ -4,6 +4,8 @@
 
 #include <vector>
 
+#include "feyerverx/events/eventManager.hpp"
+
 #include "feyerverx/camera.hpp"
 #include "feyerverx/uiBuilder.hpp"
 
@@ -12,9 +14,9 @@
 #include "feyerverx/ecs/system.hpp"
 
 namespace feyerverx::ecs {
-class Scene : IIdentifiable {
+class Scene : public IIdentifiable {
 public:
-    explicit Scene(const std::string &id, RectangleOffset viewport,
+    explicit Scene(const std::string &id, EventManager &eventManager, RectangleOffset viewport,
                    Color backgroundColor = {255, 255, 255, 255}) noexcept;
     ~Scene() = default;
 
@@ -25,23 +27,25 @@ public:
     Scene &operator=(const Scene &) = delete;
 
     [[nodiscard]] std::shared_ptr<Registry> registry() const noexcept { return m_registry; }
-    [[nodiscard]] size_t viewUID() const noexcept { return m_camera->UID(); }
     [[nodiscard]] Color backgroundColor() const noexcept { return m_backgroundColor; }
+    [[nodiscard]] UIBuilder &builder() { return m_builder; };
 
-    Entity addEntity();
-    void addSystem(std::unique_ptr<ISystem> &&system);
+    [[nodiscard]] Entity addEntity() const;
 
-    std::shared_ptr<Registry> registry();
-    UIBuilder &builder();
-    std::unique_ptr<ICamera> &camera();
+    template <typename T, typename... Args> void addSystem(Args &&...args) {
+        static_assert(std::is_base_of_v<ISystem, T>, "T must derive from ISystem");
+        m_systems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
+    }
+
+    void update(float deltaTime) const;
 
     bool isActive = false;
 
 private:
-    Color m_backgroundColor;
-    std::unique_ptr<ICamera> m_camera;
+    EventManager &m_eventManager;
     std::shared_ptr<Registry> m_registry{};
     UIBuilder m_builder{m_registry};
     std::vector<std::unique_ptr<ISystem>> m_systems{};
+    Color m_backgroundColor;
 };
 } // namespace feyerverx

@@ -2,20 +2,22 @@
 
 #pragma once
 
-#include <SDL3/SDL_events.h>
+#include "feyerverx/identifiable.hpp"
+
+#include "feyerverx/events/eventManager.hpp"
 
 #include "feyerverx/ecs/entity.hpp"
-#include "feyerverx/identifiable.hpp"
 
 namespace feyerverx::ecs {
 class Scene;
 
 struct ISystem : IIdentifiable {
-    explicit ISystem(const std::string &id);
+    explicit ISystem(const std::string &id, EventManager &eventManager);
     virtual ~ISystem() = default;
-    virtual void update(float deltaTime, std::shared_ptr<Registry> registry) = 0;
+    virtual void update(float deltaTime, const std::shared_ptr<Registry> &registry) = 0;
 
 protected:
     std::vector<Entity> m_entityQueue{};
+    EventManager &m_eventManager;
 };
 } // namespace feyerverx::ecs

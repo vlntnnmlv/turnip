@@ -14,11 +14,15 @@ public:
 
     static std::unique_ptr<RenderPassManager> create(uint32_t width, uint32_t height);
 
-    void addPass();
-    void getPass();
-    void executePass();
-    void createFrameBuffer();
-    void destroyFrameBuffer();
+    void addPass(RenderPassType renderPassType, uint8_t priority = 0,
+                 bgfx::FrameBufferHandle frameBuffer = BGFX_INVALID_HANDLE);
+
+    RenderPass *getPass(RenderPassType renderPassType);
+    void executePass(RenderPassType renderPassType, const RenderCallback &renderCallback);
+
+    bgfx::FrameBufferHandle createFrameBuffer(uint32_t width, uint32_t height,
+                                              bool withDepth = true);
+    void destroyFrameBuffer(bgfx::FrameBufferHandle frameBuffer);
 
     ~RenderPassManager();
 
@@ -29,6 +33,6 @@ private:
     uint32_t m_height;
 
     RenderPassManager(uint32_t width, uint32_t height);
-    void setupPass();
+    void setupPass(const RenderPass &renderPass);
 };
 } // namespace feyerverx

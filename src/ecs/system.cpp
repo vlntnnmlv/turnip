@@ -3,5 +3,6 @@
 #include "feyerverx/ecs/system.hpp"
 
 namespace feyerverx::ecs {
-ISystem::ISystem(const std::string &id) : IIdentifiable(id) {}
+ISystem::ISystem(const std::string &id, EventManager &eventManager)
+    : IIdentifiable(id), m_eventManager(eventManager) {}
 } // namespace feyerverx

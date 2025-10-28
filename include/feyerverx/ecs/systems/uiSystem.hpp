@@ -25,18 +25,17 @@
 namespace feyerverx::ecs {
 class UISystem final : public ISystem {
 public:
-    explicit UISystem(Vector2f size);
+    explicit UISystem(Vector2f size, EventManager &eventManager);
     ~UISystem() override = default;
 
-    void update(float deltaTime, std::shared_ptr<Registry>) override;
-    void enqueueScene(Scene &scene);
-    void processEvent(const SDL_Event &event);
+    void update(float deltaTime, const std::shared_ptr<Registry> &registry) override;
 
 private:
     Vector2f m_size{};
     std::vector<Entity> m_roots;
     LayoutEngine m_layoutEngine{};
 
+    void findRoots(const std::shared_ptr<Registry> &registry);
     void processLayout();
 
     void measureEntityContent(Entity entity);

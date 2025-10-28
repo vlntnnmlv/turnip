@@ -6,6 +6,8 @@
 #include <memory>
 #include <string>
 
+#include "feyerverx/events/eventManager.hpp"
+
 #include "feyerverx/ecs/scene.hpp"
 #include "feyerverx/ecs/systems/renderSystem.hpp"
 
@@ -45,19 +47,16 @@ public:
     // getters
     Specification &specification();
     AssetManager &assetManager();
+    EventManager &eventManager();
 
     // modifiers
     ecs::Scene &addScene(const std::string &id, RectangleOffset viewport,
                          Color backgroundColor = {255, 255, 255, 255}, bool isActive = true);
 
-    template <typename T, typename... Args> void addSystem(Args &&...args) {
-        static_assert(std::is_base_of_v<ecs::ISystem, T>, "T must derive from ISystem");
-        m_systems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
-    }
-
     void run();
     void processEvents();
     void update();
+    void render();
 
 private:
     Fey(Specification spec, unique_ptr_guard_sdl &&guardSDL, unique_ptr_guard_bgfx &&guardBGFX);
@@ -71,8 +70,9 @@ private:
     unique_ptr_guard_bgfx m_guardBGFX;
     AssetManager m_assetManager;
 
-    ecs::RenderSystem m_renderSystem{};
-    std::list<unique_ptr_system> m_systems{};
+    EventManager m_eventManager{};
+
+    ecs::RenderSystem m_renderSystem{m_eventManager};
     std::list<ecs::Scene> m_scenes{};
 };
 } // namespace feyerverx

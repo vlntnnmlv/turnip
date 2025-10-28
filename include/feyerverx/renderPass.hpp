@@ -30,7 +30,7 @@ struct RenderPass {
     bgfx::FrameBufferHandle framebuffer;
 
     RenderPass(RenderPassType renderPassType, uint16_t viewID, uint8_t priority = 0,
-               bool clearDepth = true, bool doClearColor = true, Color clearColor = {0, 0, 0, 1},
+               bool doClearDepth = true, bool doClearColor = true, Color clearColor = {0, 0, 0, 1},
                bgfx::FrameBufferHandle frameBuffer = BGFX_INVALID_HANDLE);
 };
 } // namespace feyerverx

@@ -112,8 +112,7 @@ void Renderer::renderTexture(const Texture &texture, const Rectangle &rectangle,
     bgfx::setIndexBuffer(m_trianglesBuffer);
 
     bgfx::setTexture(0, m_textureSamplerUniform, texture.handle());
-    bgfx::setState(BGFX_STATE_DEFAULT);
-
+    bgfx::setState(BGFX_STATE_DEFAULT | BGFX_STATE_BLEND_ALPHA);
     bgfx::submit(viewID, m_program);
 }
 }
