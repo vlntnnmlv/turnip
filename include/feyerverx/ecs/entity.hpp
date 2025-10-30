@@ -9,6 +9,8 @@ class Entity {
 public:
     Entity();
     Entity(EntityID entityID, Registry *registry);
+    // Entity(const Entity &other) = default;
+    // Entity &operator=(const Entity &other) = default;
 
     [[nodiscard]] EntityID ID() const;
 
@@ -29,10 +31,12 @@ public:
     bool operator==(const EntityID &otherID) const { return ID() == otherID; }
     bool operator!=(const EntityID &otherID) const { return !(*this == otherID); }
 
+    bool operator<(const Entity &other) const { return m_ID < other.m_ID; }
+
     operator EntityID() const { return ID(); }
 
 private:
     EntityID m_ID;
-    Registry *const m_Registry{nullptr};
+    Registry *m_Registry{nullptr};
 };
 } // namespace feyerverx::ecs

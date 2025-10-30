@@ -2,17 +2,29 @@
 
 #pragma once
 
+#include <array>
 #include <string>
 
 namespace feyerverx {
-class IIdentifiable {
-public:
-    explicit IIdentifiable(const std::string &id);
-    [[nodiscard]] const std::string &ID() const;
-    [[nodiscard]] size_t UID() const;
+
+struct UUID {
+    UUID();
+
+    [[nodiscard]] std::array<uint8_t, 16> bytes() const;
+    bool operator==(const UUID &other) const noexcept;
 
 private:
-    size_t m_UID;
-    std::string m_ID;
+    std::array<uint8_t, 16> m_bytes{};
+};
+
+class IIdentifiable {
+public:
+    explicit IIdentifiable(std::string name = std::string{});
+    [[nodiscard]] const std::string &name() const;
+    [[nodiscard]] UUID ID() const;
+
+private:
+    UUID m_ID{};
+    std::string m_name;
 };
 }

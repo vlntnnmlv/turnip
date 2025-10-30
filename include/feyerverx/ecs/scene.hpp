@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "components/cameraComponent.hpp"
+
 #include <vector>
 
 #include "feyerverx/events/eventManager.hpp"
@@ -16,7 +18,7 @@
 namespace feyerverx::ecs {
 class Scene : public IIdentifiable {
 public:
-    explicit Scene(const std::string &id, EventManager &eventManager, RectangleOffset viewport,
+    explicit Scene(const std::string &id, RectangleOffset viewport,
                    Color backgroundColor = {255, 255, 255, 255}) noexcept;
     ~Scene() = default;
 
@@ -32,6 +34,15 @@ public:
 
     [[nodiscard]] Entity addEntity() const;
 
+    void setOrthogonalCamera(Vector2f windowSize, RectangleOffset viewport = {0, 1, 0, 1},
+                             float near = 0, float far = 1000, Vector3f position = {},
+                             Vector3f lookingAt = {}, Vector3f up = {},
+                             Color color = {255, 255, 255, 255}) const;
+
+    void setPerspectiveCamera(float FOV = 90, float near = 0, float far = 1000,
+                              Vector3f position = {}, Vector3f lookingAt = {}, Vector3f up = {},
+                              Color color = {255, 255, 255, 255}) const;
+
     template <typename T, typename... Args> void addSystem(Args &&...args) {
         static_assert(std::is_base_of_v<ISystem, T>, "T must derive from ISystem");
         m_systems.push_back(std::make_unique<T>(std::forward<Args>(args)...));
@@ -42,7 +53,6 @@ public:
     bool isActive = false;
 
 private:
-    EventManager &m_eventManager;
     std::shared_ptr<Registry> m_registry{};
     UIBuilder m_builder{m_registry};
     std::vector<std::unique_ptr<ISystem>> m_systems{};

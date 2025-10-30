@@ -7,10 +7,9 @@
 
 namespace feyerverx::ecs {
 
-UISystem::UISystem(const Vector2f size, EventManager &eventManager)
-    : ISystem("ui_system", eventManager), m_size(size) {
+UISystem::UISystem(EventManager &eventManager) : ISystem("ui_system", eventManager) {
     m_eventManager.subscribe<WindowResizedEvent>(
-        [this](const WindowResizedEvent &event) { m_size = event.windowSize; });
+        [this](const WindowResizedEvent &event) { return onWindowResized(event); });
 }
 
 void UISystem::update(float deltaTime, const std::shared_ptr<Registry> &registry) {
@@ -79,4 +78,10 @@ void UISystem::placeInWorld(const Entity entity) {
         placeInWorld(child);
     }
 }
+
+bool UISystem::onWindowResized(const WindowResizedEvent &event) {
+    m_size = event.windowSize;
+    return true;
+}
+
 } // namespace feyerverx

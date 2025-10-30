@@ -12,42 +12,45 @@
 
 namespace feyerverx {
 
-std::expected<Fey, Error> Fey::create(const std::string &name, const float width,
-                                      const float height) {
+Fey Fey::create(const std::string &name, const float width, const float height) {
     return create(Specification{name, {width, height}});
 }
 
-std::expected<Fey, Error> Fey::create(const Specification &specification) {
+Fey Fey::create(const Specification &specification) {
     auto guardSDLResult = GuardSDL::create(specification.name, specification.windowSize.x,
                                            specification.windowSize.y);
     if (!guardSDLResult) {
-        return std::unexpected{guardSDLResult.error()};
+        return Fey{specification, nullptr, nullptr};
     }
     unique_ptr_guard_sdl guardSDL = std::move(guardSDLResult.value());
 
-    auto nativeWindowHandleResult = guardSDL->windowHandle();
+    const auto nativeWindowHandleResult = guardSDL->windowHandle();
     if (!nativeWindowHandleResult) {
-        return std::unexpected{nativeWindowHandleResult.error()};
+        return Fey{specification, std::move(guardSDL), nullptr};
     }
     void *nativeWindowHandle = nativeWindowHandleResult.value();
 
     auto guardBGFXResult = GuardBGFX::create(nativeWindowHandle, specification.windowSize.x,
                                              specification.windowSize.y);
     if (!guardBGFXResult.value()) {
-        return std::unexpected{guardBGFXResult.error()};
+        return Fey{specification, std::move(guardSDL), nullptr};
     }
     unique_ptr_guard_bgfx guardBGFX = std::move(guardBGFXResult.value());
 
-    return Fey{specification, std::move(guardSDL), std::move(guardBGFX)};
+    auto fey = Fey{specification, std::move(guardSDL), std::move(guardBGFX), true};
+    return fey;
 }
 
 Fey::Fey(Fey &&other) noexcept
-    : m_specification{std::move(other.m_specification)}, m_guardSDL{std::move(other.m_guardSDL)},
-      m_guardBGFX{std::move(other.m_guardBGFX)}, m_assetManager(std::move(other.m_assetManager)),
-      m_renderSystem(std::move(other.m_renderSystem)), m_scenes(std::move(other.m_scenes)) {}
+    : m_inited{other.m_inited}, m_specification{std::move(other.m_specification)},
+      m_guardSDL{std::move(other.m_guardSDL)}, m_guardBGFX{std::move(other.m_guardBGFX)},
+      m_assetManager(std::move(other.m_assetManager)),
+      m_eventManager{std::move(other.m_eventManager)},
+      m_renderSystem{std::move(other.m_renderSystem)}, m_scenes{std::move(other.m_scenes)} {}
 
-Fey::Fey(Specification spec, unique_ptr_guard_sdl &&guardSDL, unique_ptr_guard_bgfx &&guardBGFX)
-    : m_specification{std::move(spec)}, m_guardSDL{std::move(guardSDL)},
+Fey::Fey(Specification spec, unique_ptr_guard_sdl &&guardSDL, unique_ptr_guard_bgfx &&guardBGFX,
+         const bool inited)
+    : m_inited{inited}, m_specification{std::move(spec)}, m_guardSDL{std::move(guardSDL)},
       m_guardBGFX{std::move(guardBGFX)} {}
 
 // getters
@@ -58,14 +61,16 @@ EventManager &Fey::eventManager() { return m_eventManager; }
 // modifiers
 ecs::Scene &Fey::addScene(const std::string &id, RectangleOffset viewport, Color backgroundColor,
                           const bool isActive) {
-    ecs::Scene &scene = m_scenes.emplace_back(id, m_eventManager, viewport, backgroundColor);
+    ecs::Scene &scene = m_scenes.emplace_back(id, viewport, backgroundColor);
     scene.isActive = isActive;
     return scene;
 }
 
 void Fey::run() {
+    if (!m_inited)
+        return;
+
     m_running = true;
-    m_eventManager.queueEvent<WindowResizedEvent>(m_specification.windowSize);
 
     while (m_running) {
         processEvents();
@@ -80,6 +85,9 @@ void Fey::processEvents() {
 
         if (event.type == SDL_EVENT_QUIT) {
             m_running = false;
+        }
+
+        if (event.type == SDL_EVENT_WINDOW_SHOWN) {
         }
 
         if (event.type == SDL_EVENT_WINDOW_RESIZED) {
@@ -99,6 +107,10 @@ void Fey::processEvents() {
                 m_running = false;
 
             m_eventManager.queueEvent<KeyboardEvent>(event.key.key, KeyboardEvent::Type::PRESSED);
+        }
+
+        if (event.type == SDL_EVENT_KEY_UP) {
+            m_eventManager.queueEvent<KeyboardEvent>(event.key.key, KeyboardEvent::Type::RELEASED);
         }
     }
 

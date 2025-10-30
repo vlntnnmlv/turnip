@@ -13,11 +13,11 @@ class Scene;
 
 struct ISystem : IIdentifiable {
     explicit ISystem(const std::string &id, EventManager &eventManager);
+    ISystem(ISystem &&other) : m_eventManager(other.m_eventManager) {};
     virtual ~ISystem() = default;
     virtual void update(float deltaTime, const std::shared_ptr<Registry> &registry) = 0;
 
 protected:
-    std::vector<Entity> m_entityQueue{};
     EventManager &m_eventManager;
 };
 } // namespace feyerverx::ecs

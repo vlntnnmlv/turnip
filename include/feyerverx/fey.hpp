@@ -34,8 +34,8 @@ using unique_ptr_system = std::unique_ptr<ecs::ISystem>;
 
 class Fey {
 public:
-    static std::expected<Fey, Error> create(const std::string &name, float width, float height);
-    static std::expected<Fey, Error> create(const Specification &specification);
+    static Fey create(const std::string &name, float width, float height);
+    static Fey create(const Specification &specification);
 
     Fey(const Fey &fey) = delete;
     Fey &operator=(const Fey &fey) = delete;
@@ -59,7 +59,9 @@ public:
     void render();
 
 private:
-    Fey(Specification spec, unique_ptr_guard_sdl &&guardSDL, unique_ptr_guard_bgfx &&guardBGFX);
+    Fey(Specification spec, unique_ptr_guard_sdl &&guardSDL, unique_ptr_guard_bgfx &&guardBGFX,
+        bool inited = false);
+    bool m_inited;
 
     Specification m_specification;
 

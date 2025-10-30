@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "feyerverx/identifiable.hpp"
+
 #include <any>
 #include <ranges>
 #include <set>
@@ -144,8 +146,6 @@ private:
     }
 
     bool hasComponentByType(EntityID entityID, std::type_index t);
-
-    EntityID m_nextEntityID = 1;
 
     std::vector<EntityID> m_alive;
 

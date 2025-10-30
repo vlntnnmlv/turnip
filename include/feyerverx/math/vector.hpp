@@ -97,6 +97,13 @@ public:
     }
 
     T magnitude() const { return std::sqrt(dot(*this)); }
+
+    void normalize() {
+        float m = magnitude();
+
+        for (size_t i = 0; i < N; ++i)
+            coordinates[i] = coordinates[i] / m;
+    }
 };
 
 template <typename T> struct Vector<T, 2> {
@@ -144,7 +151,17 @@ template <typename T> struct Vector<T, 2> {
     }
 
     T dot(const Vector &rhs) const { return x * rhs.x + y * rhs.y; }
-    T magnitude() const { return std::sqrt(Dot(*this)); }
+    T magnitude() const { return std::sqrt(dot(*this)); }
+
+    void normalize() {
+        float m = magnitude();
+
+        if (m == 0)
+            return;
+
+        x = x / m;
+        y = y / m;
+    }
 };
 
 template <typename T> struct Vector<T, 3> {
@@ -196,7 +213,7 @@ template <typename T> struct Vector<T, 3> {
     }
 
     T dot(const Vector &rhs) const { return x * rhs.x + y * rhs.y; }
-    T magnitude() const { return std::sqrt(Dot(*this)); }
+    T magnitude() const { return std::sqrt(dot(*this)); }
 };
 
 using Vector2f = Vector<float, 2>;

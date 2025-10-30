@@ -10,34 +10,34 @@
 #include "feyerverx/ecs/scene.hpp"
 #include "feyerverx/ecs/system.hpp"
 
+#include "feyerverx/events/event.hpp"
+
 namespace feyerverx::ecs {
 struct CameraComponent;
 class RenderSystem final : public ISystem {
 public:
     explicit RenderSystem(EventManager &eventManager);
-    ~RenderSystem() override = default;
+    ~RenderSystem() override { std::println("~RenderSystem"); }
 
     RenderSystem(const RenderSystem &) = delete;
     void operator=(const RenderSystem &) = delete;
-    RenderSystem(RenderSystem &&) = default;
+    RenderSystem(RenderSystem &&other) noexcept
+        : ISystem(std::move(other)), m_renderer(std::move(other.m_renderer)),
+          m_cameraEntities(std::move(other.m_cameraEntities)) {}
+
     void operator=(const RenderSystem &&) = delete;
 
-    void render(const Scene &scene, uint16_t viewID);
     void update(float deltaTime, const std::shared_ptr<Registry> &registry) override;
+    void render(const Scene &scene, uint16_t viewID);
+
+    bool onWindowResized(const WindowResizedEvent &event);
 
 private:
     std::unique_ptr<Renderer> m_renderer;
-    std::list<std::pair<Scene &, std::vector<Entity>>> m_scenesEntities{};
-    std::unordered_map<size_t, CameraComponent *> m_scenesCameras{};
+    std::set<Entity> m_cameraEntities{};
 
-    CameraComponent *getSceneCameraComponent(const Scene &scene) {
-        if (!m_scenesCameras.contains(scene.UID())) {
-            const EntityID cameraEntity = scene.registry()->with<CameraComponent>().front();
-            m_scenesCameras[scene.UID()] =
-                scene.registry()->getComponent<CameraComponent>(cameraEntity);
-        }
+    void setView(CameraComponent *cameraComponent, uint16_t viewID);
 
-        return m_scenesCameras[scene.UID()];
-    }
+    void updateVectors(CameraComponent *cameraComponent);
 };
 } // namespace feyerverx

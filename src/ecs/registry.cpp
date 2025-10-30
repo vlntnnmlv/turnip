@@ -5,6 +5,8 @@
 
 namespace feyerverx::ecs {
 
+static EntityID m_nextEntityID = 1;
+
 Entity Registry::createEntity() {
     EntityID entityID = m_nextEntityID++;
     m_alive.push_back(entityID);

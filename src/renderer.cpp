@@ -1,5 +1,7 @@
 // Copyright 2025 Valentin Namleev
 
+#include "feyerverx/color.hpp"
+
 #include <print>
 
 #include <bgfx/embedded_shader.h>
@@ -28,8 +30,9 @@
 namespace feyerverx {
 
 static const uint16_t quadTriangles[] = {0, 2, 1, 0, 3, 2};
+static const uint16_t quadLine[] = {0, 1};
 
-static void fillQuadFromRect(Vertex *o_out, const Rectangle &_rect) {
+static void fillQuadFromRect(UVVertex *o_out, const Rectangle &_rect) {
     float xMin = _rect.x;
     float xMax = _rect.x + _rect.width;
 
@@ -42,9 +45,14 @@ static void fillQuadFromRect(Vertex *o_out, const Rectangle &_rect) {
     o_out[3] = {xMin, yMax, 0.0f, 0.0f, 1.0f};
 }
 
+static void fillLineFromPoints(Vertex *o_out, Vector3f a, Vector3f b, Color color) {
+    o_out[0] = {a.x, a.y, a.z, color.r, color.g, color.b, color.a};
+    o_out[1] = {b.x, b.y, b.z, color.r, color.g, color.b, color.a};
+}
+
 std::unique_ptr<Renderer> Renderer::create() {
     bgfx::VertexLayout layout;
-    Vertex::InitLayout(layout);
+    UVVertex::initLayout(layout);
 
     constexpr bgfx::VertexBufferHandle vertexBuffer = BGFX_INVALID_HANDLE;
     const bgfx::IndexBufferHandle trianglesBuffer =
@@ -97,7 +105,7 @@ Renderer::~Renderer() {
 }
 
 void Renderer::renderTexture(const Texture &texture, const Rectangle &rectangle, uint16_t viewID) {
-    Vertex quadVerticies[4];
+    UVVertex quadVerticies[4];
     fillQuadFromRect(quadVerticies, rectangle);
 
     if (bgfx::isValid(m_vertexBuffer)) {
@@ -114,5 +122,27 @@ void Renderer::renderTexture(const Texture &texture, const Rectangle &rectangle,
     bgfx::setTexture(0, m_textureSamplerUniform, texture.handle());
     bgfx::setState(BGFX_STATE_DEFAULT | BGFX_STATE_BLEND_ALPHA);
     bgfx::submit(viewID, m_program);
+}
+
+void Renderer::renderLine(const Vector3f a, const Vector3f b, const Color color, uint16_t viewID) {
+    // bgfx::VertexLayout layout;
+    // Vertex::initLayout(layout);
+    //
+    // Vertex lineVerticies[2];
+    // fillLineFromPoints(lineVerticies, a, b, color);
+    //
+    // if (bgfx::isValid(m_vertexBuffer)) {
+    //     bgfx::destroy(m_vertexBuffer);
+    // }
+    //
+    // m_vertexBuffer =
+    //     bgfx::createVertexBuffer(bgfx::copy(lineVerticies, sizeof(lineVerticies)), layout);
+    //
+    // m_lineBuffer = bgfx::createIndexBuffer(bgfx::makeRef(quadLine, sizeof(quadLine)));
+    // bgfx::setVertexBuffer(0, m_vertexBuffer);
+    // bgfx::setIndexBuffer(m_lineBuffer);
+    //
+    // bgfx::setState(BGFX_STATE_PT_LINES);
+    // bgfx::submit(viewID, m_program);
 }
 }

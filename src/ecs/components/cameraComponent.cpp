@@ -3,19 +3,27 @@
 #include "feyerverx/ecs/components/cameraComponent.hpp"
 
 namespace feyerverx::ecs {
-CameraComponent::CameraComponent(const CameraType type, const RectangleOffset viewport,
-                                 const float near, const float far)
-    : type(type), viewport(viewport), viewportScaled(viewport), near(near), far(far) {}
 
-void CameraComponent::updateViewport(const RectangleOffset _viewportScaled,
-                                     const Vector2f windowSize) {
+CameraComponent::CameraComponent(const RectangleOffset viewport, const float near, const float far,
+                                 const Vector3f position, const Vector3f lookingAt,
+                                 const Vector3f up, const Color color)
+    : viewport(viewport), viewportScaled(viewport), type(CameraType::ORTHOGRAPHIC), near(near),
+      far(far), position(position), lookingAt(lookingAt), up(up), color(color) {}
+
+CameraComponent::CameraComponent(const float FOV, const float near, const float far,
+                                 const Vector3f position, const Vector3f lookingAt,
+                                 const Vector3f up, const Color color)
+    : FOV(FOV), type(CameraType::PERSPECTIVE), near(near), far(far), position(position),
+      lookingAt(lookingAt), up(up), color(color) {}
+
+void CameraComponent::updateViewport(const Vector2f windowSize) {
     viewport.left =
-        _viewportScaled.left <= 1.0f ? windowSize.x * _viewportScaled.left : _viewportScaled.left;
-    viewport.right = _viewportScaled.right <= 1.0f ? windowSize.x * _viewportScaled.right
-                                                   : _viewportScaled.right;
+        viewportScaled.left <= 1.0f ? windowSize.x * viewportScaled.left : viewportScaled.left;
+    viewport.right =
+        viewportScaled.right <= 1.0f ? windowSize.x * viewportScaled.right : viewportScaled.right;
     viewport.top =
-        _viewportScaled.top <= 1.0f ? windowSize.y * _viewportScaled.top : _viewportScaled.top;
-    viewport.bottom = _viewportScaled.bottom <= 1.0f ? windowSize.y * _viewportScaled.bottom
-                                                     : _viewportScaled.bottom;
+        viewportScaled.top <= 1.0f ? windowSize.y * viewportScaled.top : viewportScaled.top;
+    viewport.bottom = viewportScaled.bottom <= 1.0f ? windowSize.y * viewportScaled.bottom
+                                                    : viewportScaled.bottom;
 }
 } // namespace feyerverx

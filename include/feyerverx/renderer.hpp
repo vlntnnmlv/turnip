@@ -12,17 +12,31 @@ namespace feyerverx {
 template <typename T>
 concept IsHandle = requires(T handle) { handle.idx; };
 
-struct Vertex {
+struct UVVertex {
     float x;
     float y;
     float z;
     float u;
     float v;
 
-    static void InitLayout(bgfx::VertexLayout &layout) {
+    static void initLayout(bgfx::VertexLayout &layout) {
         layout.begin()
             .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
             .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+            .end();
+    }
+};
+
+struct Vertex {
+    float x;
+    float y;
+    float z;
+    Color color;
+
+    static void initLayout(bgfx::VertexLayout &layout) {
+        layout.begin()
+            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8)
             .end();
     }
 };
@@ -39,6 +53,7 @@ public:
     ~Renderer();
 
     void renderTexture(const Texture &texture, const Rectangle &rectangle, uint16_t viewID);
+    void renderLine(Vector3f a, Vector3f b, Color color, uint16_t viewID);
 
 private:
     Renderer(const bgfx::VertexLayout &layout, const bgfx::VertexBufferHandle &vertexBuffer,
@@ -53,9 +68,12 @@ private:
         }
     }
 
+    bgfx::IndexBufferHandle m_lineBuffer{bgfx::kInvalidHandle};
+
     bgfx::VertexLayout m_layout;
     bgfx::VertexBufferHandle m_vertexBuffer{bgfx::kInvalidHandle};
     bgfx::IndexBufferHandle m_trianglesBuffer{bgfx::kInvalidHandle};
+
     bgfx::ProgramHandle m_program{bgfx::kInvalidHandle};
     bgfx::UniformHandle m_textureSamplerUniform{bgfx::kInvalidHandle};
 };

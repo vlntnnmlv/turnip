@@ -8,17 +8,21 @@
 
 #include "feyerverx/events/event.hpp"
 
+#include <list>
+
 namespace feyerverx {
 class EventManager {
 public:
-    template <typename TEvent> using Handler = std::function<void(const TEvent &)>;
-    using Handlers =
-        std::unordered_map<std::type_index, std::vector<std::function<void(const Event &)>>>;
-    using EventQueue = std::vector<std::unique_ptr<Event>>;
+    template <typename TEvent> using Handler = std::function<bool(const TEvent &)>;
 
-    template <typename TEvent> void subscribe(Handler<TEvent> handler) {
+    using Handlers = std::unordered_map<std::type_index, std::vector<Handler<Event>>>;
+    using EventQueue = std::list<std::unique_ptr<Event>>;
+
+
+   template <typename TEvent> void subscribe(Handler<TEvent> handler) {
         auto &handlers = m_handlers[typeid(TEvent)];
-        handlers.push_back([handler](const Event &e) { handler(static_cast<const TEvent &>(e)); });
+        handlers.push_back(
+            [handler](const Event &e) -> bool { return handler(static_cast<const TEvent &>(e)); });
     }
 
     template <typename TEvent, typename... Args> void queueEvent(Args &&...args) {

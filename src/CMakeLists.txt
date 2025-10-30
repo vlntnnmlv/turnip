@@ -20,6 +20,24 @@ bgfx_compile_shaders(
         AS_HEADERS
 )
 
+bgfx_compile_shaders(
+        TYPE VERTEX
+        SHADERS ${SHADERS_DIR}/color_vs.sc
+        VARYING_DEF ${SHADERS_DIR}/varying.def.sc
+        OUTPUT_DIR ${CMAKE_BINARY_DIR}/include/generated/shaders
+        INCLUDE_DIRS ${SHADERS_DIR}
+        AS_HEADERS
+)
+
+bgfx_compile_shaders(
+        TYPE FRAGMENT
+        SHADERS ${SHADERS_DIR}/color_fs.sc
+        VARYING_DEF ${SHADERS_DIR}/varying.def.sc
+        OUTPUT_DIR ${CMAKE_BINARY_DIR}/include/generated/shaders
+        INCLUDE_DIRS ${SHADERS_DIR}
+        AS_HEADERS
+)
+
 file(GLOB_RECURSE SOURCE_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 
 # Engine library
