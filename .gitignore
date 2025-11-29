@@ -15,3 +15,7 @@ feyerverx.a
 /feyerverx
 /feyerverx.dSYM
 __pycache__
+
+.zig-cache
+zig-out
+main
