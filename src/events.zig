@@ -264,7 +264,7 @@ const keys = [_]SDLKey{
     .{ .name = "RMETA", .value = sdl.SDLK_RMETA },
     .{ .name = "LHYPER", .value = sdl.SDLK_LHYPER },
     .{ .name = "RHYPER", .value = sdl.SDLK_RHYPER },
-    // SDL_KMOD_ ???
+    // SDL_KMOD_
     // .{ .name = "KMOD_NONE", .value = sdl.SDL_KMOD_NONE },
     // .{ .name = "KMOD_LSHIFT", .value = sdl.SDL_KMOD_LSHIFT },
     // .{ .name = "KMOD_RSHIFT", .value = sdl.SDL_KMOD_RSHIFT },
@@ -283,12 +283,6 @@ const keys = [_]SDLKey{
     // .{ .name = "KMOD_SHIFT", .value = sdl.SDL_KMOD_SHIFT },
     // .{ .name = "KMOD_ALT", .value = sdl.SDL_KMOD_ALT },
     // .{ .name = "KMOD_GUI", .value = sdl.SDL_KMOD_GUI },
-    // SDL_PROP_ ???
-    // .{ .name = "PROP_TEXTINPUT_TYPE_NUMBER", .value = sdl.SDL_PROP_TEXTINPUT_TYPE_NUMBER },
-    // .{ .name = "PROP_TEXTINPUT_CAPITALIZATION_NUMBER", .value = sdl.SDL_PROP_TEXTINPUT_CAPITALIZATION_NUMBER },
-    // .{ .name = "PROP_TEXTINPUT_AUTOCORRECT_BOOLEAN", .value = sdl.SDL_PROP_TEXTINPUT_AUTOCORRECT_BOOLEAN },
-    // .{ .name = "PROP_TEXTINPUT_MULTILINE_BOOLEAN", .value = sdl.SDL_PROP_TEXTINPUT_MULTILINE_BOOLEAN },
-    // .{ .name = "PROP_TEXTINPUT_ANDROID_INPUTTYPE_NUMBER", .value = sdl.SDL_PROP_TEXTINPUT_ANDROID_INPUTTYPE_NUMBER },
     // mouse
     .{ .name = "BUTTON_LEFT", .value = sdl.SDL_BUTTON_LEFT },
     .{ .name = "BUTTON_MIDDLE", .value = sdl.SDL_BUTTON_MIDDLE },
