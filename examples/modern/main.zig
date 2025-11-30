@@ -3,30 +3,16 @@ const fey = @import("fey");
 
 const print = std.debug.print;
 
-// Three possible stacks:
-//    |Window|  |Graphics|
-// 1.  Raylib     Raylib    <-- For now, let's focus in the easiest one and desgin a common API
-// 2.   SDL        bgfx
-// 3   custom     custom
-
 // API
-// 1. Create a window
+// 1. Create an app
 // 2. Specify additional components types if needed
 // 3. Specify additional systems if needed
 // 4. Start the application loop
 
-fn ftest(i: i32) !void {
-    if (i < 0) return error.Boom;
-
-    std.debug.print("Hi!\n", .{});
-}
 pub fn main() !void {
-    var window = try fey.window.create("feyerverx", 800, 600, .{ .backendType = fey.backend.BackendType.SDL_BGFX });
-    window.run();
-
-    // const FType = fn (i32) void;
-    // const f: FType = ftest;
-    // f();
+    var app = try fey.app.create("feyerverx", 800, 600, .{ .background_color = 0x696969ff });
+    defer app.dispose();
+    app.run();
 
     // var registry = fey.ecs.Registry.create();
     // defer registry.deinit();

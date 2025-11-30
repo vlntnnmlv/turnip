@@ -6,7 +6,7 @@ const SDLKey = struct {
     value: u32,
 };
 
-const keys = [_]SDLKey{
+const sdl_keys = [_]SDLKey{
     // keyboard
     .{ .name = "UNKNOWN", .value = sdl.SDLK_UNKNOWN },
     .{ .name = "RETURN", .value = sdl.SDLK_RETURN },
@@ -29,16 +29,16 @@ const keys = [_]SDLKey{
     .{ .name = "MINUS", .value = sdl.SDLK_MINUS },
     .{ .name = "PERIOD", .value = sdl.SDLK_PERIOD },
     .{ .name = "SLASH", .value = sdl.SDLK_SLASH },
-    .{ .name = "0", .value = sdl.SDLK_0 },
-    .{ .name = "1", .value = sdl.SDLK_1 },
-    .{ .name = "2", .value = sdl.SDLK_2 },
-    .{ .name = "3", .value = sdl.SDLK_3 },
-    .{ .name = "4", .value = sdl.SDLK_4 },
-    .{ .name = "5", .value = sdl.SDLK_5 },
-    .{ .name = "6", .value = sdl.SDLK_6 },
-    .{ .name = "7", .value = sdl.SDLK_7 },
-    .{ .name = "8", .value = sdl.SDLK_8 },
-    .{ .name = "9", .value = sdl.SDLK_9 },
+    .{ .name = "N0", .value = sdl.SDLK_0 },
+    .{ .name = "N1", .value = sdl.SDLK_1 },
+    .{ .name = "N2", .value = sdl.SDLK_2 },
+    .{ .name = "N3", .value = sdl.SDLK_3 },
+    .{ .name = "N4", .value = sdl.SDLK_4 },
+    .{ .name = "N5", .value = sdl.SDLK_5 },
+    .{ .name = "N6", .value = sdl.SDLK_6 },
+    .{ .name = "N7", .value = sdl.SDLK_7 },
+    .{ .name = "N8", .value = sdl.SDLK_8 },
+    .{ .name = "N9", .value = sdl.SDLK_9 },
     .{ .name = "COLON", .value = sdl.SDLK_COLON },
     .{ .name = "SEMICOLON", .value = sdl.SDLK_SEMICOLON },
     .{ .name = "LESS", .value = sdl.SDLK_LESS },
@@ -318,9 +318,9 @@ pub const EventType = enum {
 };
 
 fn buildKey() type {
-    var fields: [keys.len]std.builtin.Type.EnumField = undefined;
-    for (0..keys.len) |i| {
-        fields[i] = .{ .name = keys[i].name, .value = keys[i].value };
+    var fields: [sdl_keys.len]std.builtin.Type.EnumField = undefined;
+    for (0..sdl_keys.len) |i| {
+        fields[i] = .{ .name = sdl_keys[i].name, .value = sdl_keys[i].value };
     }
 
     return @Type(.{ .@"enum" = .{

@@ -2,8 +2,10 @@ const sdl = @import("sdl.zig").sdl;
 const bgfx = @import("bgfx.zig").bgfx;
 
 const events = @import("events.zig");
+const renderer = @import("renderer.zig");
 
 const Event = events.Event;
+const Renderer = renderer.Renderer;
 
 pub const FeyInitializationError = error{
     FailedToInitializeSDL,
@@ -12,62 +14,44 @@ pub const FeyInitializationError = error{
     FailedToInitializeBGFX,
 };
 
-pub const BackendType = enum {
-    RAYLIB,
-    SDL_BGFX,
-};
-
 pub const Backend = struct {
-    init_f: *const fn ([:0]const u8, u32, u32) anyerror!void,
-    poll_event_f: *const fn (*Event) bool,
-
-    backendType: BackendType,
     title: [:0]const u8,
     width: u32,
     height: u32,
+    renderer: Renderer,
 
-    pub fn create(backendType: BackendType, title: [:0]const u8, width: u32, height: u32) !Backend {
+    pub fn create(title: [:0]const u8, width: u32, height: u32) !Backend {
         var backend = Backend{
-            .init_f = switch (backendType) {
-                BackendType.RAYLIB => &Backend.init_raylib,
-                BackendType.SDL_BGFX => &Backend.init_sdl_bgfx,
-            },
-            .poll_event_f = switch (backendType) {
-                BackendType.RAYLIB => &Backend.poll_event_raylib,
-                BackendType.SDL_BGFX => &Backend.poll_event_sdl,
-            },
-            .backendType = backendType,
             .title = title,
             .width = width,
             .height = height,
+            .renderer = Renderer.create(),
         };
         try backend.init();
         return backend;
     }
 
-    fn init(self: *Backend) !void {
-        try self.init_f(self.title, self.width, self.height);
+    pub fn dispose(self: *Backend) void {
+        _ = self;
     }
 
     pub fn pollEvent(self: *Backend, event: *Event) bool {
-        return self.poll_event_f(event);
+        _ = self;
+
+        var sdlEvent: sdl.SDL_Event = undefined;
+        const result = sdl.SDL_PollEvent(&sdlEvent);
+        event.* = Event.fromSDL(sdlEvent);
+        return result;
     }
 
-    fn init_raylib(title: [:0]const u8, width: u32, height: u32) !void {
-        _ = title;
-        _ = width;
-        _ = height;
-        unreachable;
-    }
-
-    fn init_sdl_bgfx(title: [:0]const u8, width: u32, height: u32) !void {
+    fn init(self: *Backend) !void {
         if (!sdl.SDL_Init(0))
             return FeyInitializationError.FailedToInitializeSDL;
 
         const window = sdl.SDL_CreateWindow(
-            title,
-            @as(c_int, @intCast(width)),
-            @as(c_int, @intCast(height)),
+            self.title,
+            @as(c_int, @intCast(self.width)),
+            @as(c_int, @intCast(self.height)),
             sdl.SDL_WINDOW_RESIZABLE | sdl.SDL_WINDOW_HIGH_PIXEL_DENSITY,
         ) orelse {
             return FeyInitializationError.FailedToCreateSDLWindow;
@@ -88,8 +72,8 @@ pub const Backend = struct {
             };
 
         bgfx_init.platformData.nwh = nativeWindowHandle;
-        bgfx_init.resolution.width = width;
-        bgfx_init.resolution.height = height;
+        bgfx_init.resolution.width = self.width;
+        bgfx_init.resolution.height = self.height;
         bgfx_init.resolution.reset = bgfx.BGFX_RESET_VSYNC;
 
         bgfx_init.platformData.ndt = null;
@@ -103,21 +87,13 @@ pub const Backend = struct {
             return FeyInitializationError.FailedToInitializeBGFX;
         }
 
-        bgfx.bgfx_set_view_rect(0, 0, 0, @intCast(width), @intCast(height)); // ! important !
-
-        bgfx.bgfx_set_view_clear(0, bgfx.BGFX_CLEAR_COLOR | bgfx.BGFX_CLEAR_DEPTH, 0x303030ff, 0, 0);
+        self.renderer.setViewRect(.{
+            .x = 0,
+            .y = 0,
+            .width = @floatFromInt(self.width),
+            .height = @floatFromInt(self.height),
+        });
+        self.renderer.renderViewColor(0xff0000ff, .{});
         _ = bgfx.bgfx_frame(false);
-    }
-
-    fn poll_event_raylib(event: *Event) bool {
-        _ = event;
-        unreachable;
-    }
-
-    fn poll_event_sdl(event: *Event) bool {
-        var sdlEvent: sdl.SDL_Event = undefined;
-        const result = sdl.SDL_PollEvent(&sdlEvent);
-        event.* = Event.fromSDL(sdlEvent);
-        return result;
     }
 };
