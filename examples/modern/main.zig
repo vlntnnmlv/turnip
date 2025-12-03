@@ -1,17 +1,21 @@
 const std = @import("std");
+
 const fey = @import("fey");
+const App = fey.app;
 
 const print = std.debug.print;
 
 // API
-// 1. Create an app
-// 2. Specify additional components types if needed
-// 3. Specify additional systems if needed
-// 4. Start the application loop
+// 1. Create an app.
+// 2. Specify component types.
+// 3. Specify renderers.
+// 4. Specify systems.
+// 5. Set up scenes
+// 6. Start the application loop.
 
 pub fn main() !void {
-    var app = try fey.app.create("feyerverx", 800, 600, .{ .background_color = 0x696969ff });
-    defer app.dispose();
+    var app = try App.init("feyerverx", 800, 600);
+    defer app.deinit();
     app.run();
 
     // var registry = fey.ecs.Registry.create();

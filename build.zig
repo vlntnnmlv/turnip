@@ -4,6 +4,64 @@
 
 const std = @import("std");
 
+fn buildShader(b: *std.Build, shader_path: []const u8, shader_type: u8) !*std.Build.Step.Run {
+    const shaderc = "./vendor/bgfx.cmake/build/cmake/bgfx/shaderc";
+
+    const bin_path_len = shader_path.len + 1;
+    const bin_path = try b.allocator.alloc(u8, bin_path_len);
+    @memmove(bin_path[0 .. bin_path_len - 1], shader_path);
+
+    bin_path[bin_path_len - 3] = 'b';
+    bin_path[bin_path_len - 2] = 'i';
+    bin_path[bin_path_len - 1] = 'n';
+
+    return b.addSystemCommand(&.{
+        shaderc,
+        "-f",
+        shader_path,
+        "-o",
+        bin_path,
+        "--type",
+        &[_]u8{shader_type},
+        "--platform",
+        "osx",
+        "--profile",
+        "metal",
+    });
+}
+
+fn buildShaders(b: *std.Build) !void {
+    var shaders_directory = try std.fs.cwd().openDir("./resources/shaders/", .{ .access_sub_paths = false, .iterate = true });
+    defer shaders_directory.close();
+
+    var files = shaders_directory.iterate();
+    while (try files.next()) |entry| {
+        if (entry.kind != .file)
+            continue;
+
+        const extension = std.fs.path.extension(entry.name);
+        const filename = std.fs.path.basename(entry.name);
+
+        if (std.mem.eql(u8, extension, ".sc")) {
+            const separtor_index = std.mem.lastIndexOfScalar(u8, filename, '_') orelse continue;
+            const shader_type: u8 = filename[separtor_index + 1];
+
+            if (shader_type != 'f' and shader_type != 'v') {
+                continue;
+            }
+
+            var full_path_builder: std.ArrayList(u8) = .empty;
+            defer full_path_builder.deinit(b.allocator);
+
+            try full_path_builder.appendSlice(b.allocator, "./resources/shaders/");
+            try full_path_builder.appendSlice(b.allocator, entry.name);
+
+            const build_shader_step = try buildShader(b, full_path_builder.items, shader_type);
+            b.default_step.dependOn(&build_shader_step.step);
+        }
+    }
+}
+
 fn buildLibraryCMake(b: *std.Build, comptime name: [:0]const u8) void {
     const source_directory = "vendor/" ++ name;
     const build_directory = source_directory ++ "/build";
@@ -27,15 +85,42 @@ fn buildLibraryCMake(b: *std.Build, comptime name: [:0]const u8) void {
     b.default_step.dependOn(&cmake_build_step.step);
 }
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
+    const target = b.standardTargetOptions(.{});
+    const optimize = b.standardOptimizeOption(.{});
+
     buildLibraryCMake(b, "SDL");
     buildLibraryCMake(b, "bgfx.cmake");
+
+    try buildShaders(b);
+
+    // fetch dependencies
+    // zigimg
+    const zigimg_dep = b.dependency("zigimg", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    const zigimg_module = zigimg_dep.module("zigimg");
+
+    const zlm_dep = b.dependency("zlm", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    const zlm_module = zlm_dep.module("zlm");
 
     // build fey
     const fey_module = b.addModule("fey", .{
         .root_source_file = b.path("src/main.zig"),
-        .target = b.standardTargetOptions(.{}),
+        .target = target,
+        .optimize = optimize,
+        .imports = &.{
+            .{ .name = "zigimg", .module = zigimg_module },
+            .{ .name = "zlm", .module = zlm_module },
+        },
     });
+
+    fey_module.addCMacro("BX_CONFIG_DEBUG", if (optimize == .Debug) "1" else "0");
+    fey_module.addCMacro("BGFX_CONFIG_DEBUG", if (optimize == .Debug) "1" else "0");
 
     // add includes paths
     // SDL
@@ -55,6 +140,7 @@ pub fn build(b: *std.Build) void {
     fey_module.linkFramework("CoreVideo", .{});
     fey_module.linkFramework("Metal", .{});
     fey_module.linkFramework("QuartzCore", .{});
+
     fey_module.linkSystemLibrary("stdc++", .{});
 
     fey_module.addLibraryPath(b.path("vendor/SDL/build/"));

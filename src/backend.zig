@@ -1,3 +1,5 @@
+const std = @import("std");
+
 const sdl = @import("sdl.zig").sdl;
 const bgfx = @import("bgfx.zig").bgfx;
 
@@ -15,24 +17,28 @@ pub const FeyInitializationError = error{
 };
 
 pub const Backend = struct {
+    allocator: std.mem.Allocator,
     title: [:0]const u8,
     width: u32,
     height: u32,
     renderer: Renderer,
 
-    pub fn create(title: [:0]const u8, width: u32, height: u32) !Backend {
+    pub fn init(allocator: std.mem.Allocator, title: [:0]const u8, width: u32, height: u32) !Backend {
         var backend = Backend{
+            .allocator = allocator,
             .title = title,
             .width = width,
             .height = height,
-            .renderer = Renderer.create(),
+            .renderer = undefined,
         };
-        try backend.init();
+        try backend.initInternal();
+        // have to be created after BGFX initialization
+        backend.renderer = try Renderer.init(allocator, width, height);
         return backend;
     }
 
-    pub fn dispose(self: *Backend) void {
-        _ = self;
+    pub fn deinit(self: *Backend) void {
+        self.renderer.deinit();
     }
 
     pub fn pollEvent(self: *Backend, event: *Event) bool {
@@ -44,7 +50,7 @@ pub const Backend = struct {
         return result;
     }
 
-    fn init(self: *Backend) !void {
+    fn initInternal(self: *Backend) !void {
         if (!sdl.SDL_Init(0))
             return FeyInitializationError.FailedToInitializeSDL;
 
@@ -60,6 +66,8 @@ pub const Backend = struct {
         _ = bgfx.bgfx_render_frame(0);
 
         var bgfx_init: bgfx.bgfx_init_t = .{};
+        bgfx.bgfx_init_ctor(&bgfx_init);
+
         bgfx_init.type = bgfx.BGFX_RENDERER_TYPE_COUNT;
 
         const windowProperties = sdl.SDL_GetWindowProperties(window);
@@ -84,8 +92,10 @@ pub const Backend = struct {
         // On Apple's macOS, you must set the NSHighResolutionCapable Info.plist property to YES,
         // otherwise you will not receive a High-DPI OpenGL canvas.
         if (!bgfx.bgfx_init(&bgfx_init)) {
+            std.debug.print("BGFX Failed to init!\n", .{});
             return FeyInitializationError.FailedToInitializeBGFX;
         }
+        std.debug.print("BGFX initialized\n", .{});
 
         self.renderer.setViewRect(.{
             .x = 0,
