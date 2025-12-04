@@ -1,7 +1,10 @@
 const std = @import("std");
 
 const fey = @import("fey");
-const App = fey.app;
+
+const App = fey.app.App;
+const bgfx = fey.bgfx;
+const sdl = fey.sdl;
 
 const print = std.debug.print;
 
@@ -14,9 +17,25 @@ const print = std.debug.print;
 // 6. Start the application loop.
 
 pub fn main() !void {
-    var app = try App.init("feyerverx", 800, 600);
+    const allocator = std.heap.c_allocator;
+
+    const width = 800;
+    const height = 600;
+    var app = try App.init(allocator, "feyerverx", width, height);
     defer app.deinit();
-    app.run();
+
+    // var scene = try app.addScene("Main");
+    // const e = try scene.registry.createEntity();
+    // try scene.registry.addComponent(e, fey.ecs.Transform2D, fey.ecs.Transform2D{
+    //     .position = .{ .x = 0, .y = 0 },
+    //     .scale = .{ .x = 1, .y = 1 },
+    // });
+    // try scene.registry.addComponent(e, fey.ecs.Camera, fey.ecs.Camera{
+    //     .view_type = fey.ecs.Camera.ViewType.ORTHOGONAL,
+    //     .options = .{ .width = width, .height = height },
+    // });
+
+    try app.run();
 
     // var registry = fey.ecs.Registry.create();
     // defer registry.deinit();

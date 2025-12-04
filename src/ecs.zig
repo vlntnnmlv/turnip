@@ -1,4 +1,5 @@
 const std = @import("std");
+const zlm = @import("zlm").as(f32);
 
 pub const EntityID = u16;
 pub const ComponentDescription = struct {
@@ -41,7 +42,7 @@ const ComponentBucket = struct {
     components: Map(EntityID, []u8),
     len: u32 = 0,
 
-    pub fn create(allocator: std.mem.Allocator, comptime T: type) ComponentBucket {
+    pub fn init(allocator: std.mem.Allocator, comptime T: type) ComponentBucket {
         return ComponentBucket{
             .allocator = allocator,
             .size = @sizeOf(T),
@@ -88,24 +89,32 @@ const ComponentsMap = std.ArrayHashMap(
     ComponentDescriptionContext,
     true,
 );
+
+// TODO: Add convinient methods for getting views on component sets
 pub const Registry = struct {
+    allocator: std.mem.Allocator,
     alive: std.ArrayList(EntityID),
     components: ComponentsMap,
 
-    var allocator = std.heap.c_allocator;
     var nextEntityID: EntityID = 0;
 
-    pub fn create() Registry {
+    pub fn init(allocator: std.mem.Allocator) Registry {
         const registry = Registry{
+            .allocator = allocator,
             .alive = .empty,
             .components = ComponentsMap.init(allocator),
         };
         return registry;
     }
 
+    pub fn deinit(self: *Registry) void {
+        self.alive.deinit(self.allocator);
+        self.components.deinit();
+    }
+
     pub fn createEntity(self: *Registry) !EntityID {
         nextEntityID += 1;
-        try self.alive.append(allocator, nextEntityID);
+        try self.alive.append(self.allocator, nextEntityID);
 
         return nextEntityID;
     }
@@ -125,14 +134,14 @@ pub const Registry = struct {
     pub fn addComponent(self: *Registry, entityID: EntityID, comptime T: type, value: T) !void {
         const componentDescription: ComponentDescription = ComponentDescription.create(T);
         if (!self.components.contains(componentDescription)) {
-            try self.components.put(componentDescription, ComponentBucket.create(allocator, T));
+            try self.components.put(componentDescription, ComponentBucket.init(self.allocator, T));
         }
 
         var componentBucket = self.components.getPtr(componentDescription).?;
         try componentBucket.set(entityID, T, value);
     }
 
-    pub fn getComponent(self: *Registry, entityID: EntityID, comptime T: type) ?*T {
+    pub fn getComponent(self: *const Registry, entityID: EntityID, comptime T: type) ?*T {
         const componentDescription: ComponentDescription = ComponentDescription.create(T);
         if (!self.components.contains(componentDescription)) return null;
 
@@ -140,7 +149,7 @@ pub const Registry = struct {
         return componentBucket.get(entityID, T);
     }
 
-    pub fn with(self: *Registry, comptime T: type) !List(EntityID) {
+    pub fn with(self: *const Registry, comptime T: type) !List(EntityID) {
         const componentDescription: ComponentDescription = ComponentDescription.create(T);
         var entityIDs: List(EntityID) = .empty;
         if (!self.components.contains(componentDescription)) return entityIDs;
@@ -148,17 +157,27 @@ pub const Registry = struct {
         const componentBucket = self.components.getPtr(componentDescription).?;
         var it = componentBucket.components.keyIterator();
         while (it.next()) |entityID| {
-            try entityIDs.append(allocator, entityID.*);
+            try entityIDs.append(self.allocator, entityID.*);
         }
         return entityIDs;
     }
-
-    pub fn deinit(self: *Registry) void {
-        self.alive.deinit(allocator);
-        self.components.deinit();
-    }
 };
 
-pub const Position = struct { x: f32 = 0, y: f32 = 0 };
-pub const Character = struct { id: u32 };
-pub const Boid = struct { k: f32 };
+pub const Transform2D = struct { position: zlm.Vec2, scale: zlm.Vec2 };
+pub const Camera = struct {
+    pub const ViewType = enum(u1) {
+        ORTHOGONAL,
+        PERSPECTIVE,
+    };
+
+    pub const Options = struct {
+        width: u32,
+        height: u32,
+        fov: f32 = 90.0,
+        near: f32 = -1.0,
+        far: f32 = 1.0,
+    };
+
+    view_type: ViewType,
+    options: Options,
+};

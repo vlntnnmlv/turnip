@@ -78,7 +78,7 @@ pub const AssetLoader = struct {
             false, // No mipmaps in this example
             1, // Number of layers
             bgfx.BGFX_TEXTURE_FORMAT_RGBA8,
-            bgfx.BGFX_TEXTURE_NONE | bgfx.BGFX_SAMPLER_U_CLAMP | bgfx.BGFX_SAMPLER_V_CLAMP,
+            bgfx.BGFX_TEXTURE_NONE | bgfx.BGFX_SAMPLER_U_CLAMP | bgfx.BGFX_SAMPLER_V_CLAMP | bgfx.BGFX_SAMPLER_POINT,
             bgfx.bgfx_copy(rgba_image.ptr, @as(u32, @intCast(width * height * 4))),
         );
 

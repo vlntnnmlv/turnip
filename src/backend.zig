@@ -39,6 +39,8 @@ pub const Backend = struct {
 
     pub fn deinit(self: *Backend) void {
         self.renderer.deinit();
+        bgfx.bgfx_shutdown();
+        sdl.SDL_Quit();
     }
 
     pub fn pollEvent(self: *Backend, event: *Event) bool {
@@ -92,18 +94,10 @@ pub const Backend = struct {
         // On Apple's macOS, you must set the NSHighResolutionCapable Info.plist property to YES,
         // otherwise you will not receive a High-DPI OpenGL canvas.
         if (!bgfx.bgfx_init(&bgfx_init)) {
-            std.debug.print("BGFX Failed to init!\n", .{});
             return FeyInitializationError.FailedToInitializeBGFX;
         }
-        std.debug.print("BGFX initialized\n", .{});
 
-        self.renderer.setViewRect(.{
-            .x = 0,
-            .y = 0,
-            .width = @floatFromInt(self.width),
-            .height = @floatFromInt(self.height),
-        });
-        self.renderer.renderViewColor(0xff0000ff, .{});
+        self.renderer.fill(0xff0000ff, .{});
         _ = bgfx.bgfx_frame(false);
     }
 };
