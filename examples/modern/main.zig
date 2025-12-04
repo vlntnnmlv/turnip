@@ -24,6 +24,35 @@ pub fn main() !void {
     var app = try App.init(allocator, "feyerverx", width, height);
     defer app.deinit();
 
+    const main_scene = try app.addScene("Main", .{});
+
+    const camera_entity = try main_scene.registry.createEntity();
+    try main_scene.registry.addComponent(camera_entity, fey.ecs.Camera, fey.ecs.Camera{
+        .view_type = fey.ecs.Camera.ViewType.ORTHOGONAL,
+        .options = .{
+            .width = width,
+            .height = height,
+        },
+    });
+
+    for (0..10) |i| {
+        const sprite_entity = try main_scene.registry.createEntity();
+        try main_scene.registry.addComponent(sprite_entity, fey.ecs.Transform2D, fey.ecs.Transform2D{
+            .rectangle = .{
+                .x = @as(f32, @floatFromInt(i)) * 100,
+                .y = 0,
+                .width = 100,
+                .height = 100,
+            },
+        });
+        const textureHandle = try fey.assetLoader.AssetLoader.loadTexture("bean");
+        try main_scene.registry.addComponent(sprite_entity, fey.ecs.Sprite, fey.ecs.Sprite{
+            .texture_reference = .{
+                .idx = textureHandle.idx,
+            },
+        });
+    }
+
     // var scene = try app.addScene("Main");
     // const e = try scene.registry.createEntity();
     // try scene.registry.addComponent(e, fey.ecs.Transform2D, fey.ecs.Transform2D{

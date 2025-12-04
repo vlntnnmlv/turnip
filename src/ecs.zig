@@ -1,6 +1,8 @@
 const std = @import("std");
 const zlm = @import("zlm").as(f32);
 
+const Rectangle = @import("geometry.zig").Rectangle;
+
 pub const EntityID = u16;
 pub const ComponentDescription = struct {
     name: [:0]const u8,
@@ -163,7 +165,9 @@ pub const Registry = struct {
     }
 };
 
-pub const Transform2D = struct { position: zlm.Vec2, scale: zlm.Vec2 };
+pub const Transform = struct { position: zlm.Vec3, scale: zlm.Vec3, rotation: zlm.Vec3 };
+pub const Transform2D = struct { rectangle: Rectangle };
+
 pub const Camera = struct {
     pub const ViewType = enum(u1) {
         ORTHOGONAL,
@@ -181,3 +185,8 @@ pub const Camera = struct {
     view_type: ViewType,
     options: Options,
 };
+
+pub const TextureReference = struct {
+    idx: u16,
+};
+pub const Sprite = struct { texture_reference: TextureReference };

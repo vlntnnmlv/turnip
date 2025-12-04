@@ -37,15 +37,16 @@ pub const App = struct {
         self.backend.deinit();
     }
 
-    pub fn addScene(self: *App, name: [:0]const u8) !*Scene {
-        try self.scenes.append(self.allocator, Scene.init(self.allocator, name));
+    pub fn addScene(
+        self: *App,
+        name: [:0]const u8,
+        options: Scene.Options,
+    ) !*Scene {
+        try self.scenes.append(self.allocator, Scene.init(self.allocator, name, options));
         return &self.scenes.items[self.scenes.items.len - 1];
     }
 
-    var img: bgfx.bgfx_texture_handle_t = undefined;
-
     pub fn run(self: *App) !void {
-        img = AssetLoader.loadTexture("devil") catch unreachable;
         self.running = true;
 
         while (self.running) {
@@ -86,32 +87,36 @@ pub const App = struct {
 
         self.backend.renderer.beginRender();
 
-        self.backend.renderer.fill(0x444444ff, .{});
-
-        const cells = 16.0;
-        const cell_size: f32 = @as(f32, @floatFromInt(self.backend.width)) / cells;
-        for (0..@as(u8, @intFromFloat(cells))) |i| {
-            for (0..@as(u8, @intFromFloat(cells))) |j| {
-                try self.backend.renderer.renderTexture(.{ .idx = img.idx }, .{
-                    .x = @as(f32, @floatFromInt(i)) * cell_size,
-                    .y = @as(f32, @floatFromInt(j)) * cell_size,
-                    .width = cell_size,
-                    .height = cell_size,
-                });
-            }
+        for (self.scenes.items) |scene| {
+            try self.renderScene(scene);
         }
+
+        // self.backend.renderer.fill(0x444444ff, .{});
 
         // bgfx.bgfx_set_debug(bgfx.BGFX_DEBUG_TEXT);
         // bgfx.bgfx_dbg_text_clear(0, false);
         // bgfx.bgfx_dbg_text_printf(1, 1, 0x4f, "Entities count");
         self.backend.renderer.endRender();
+    }
 
-        // var it = registry.components.iterator();
-        // var i: u16 = 2;
-        // while (it.next()) |entry| {
-        //     bgfx.bgfx_dbg_text_printf(1, i, 0x4f, "Component %s : %d", entry.key_ptr.name.ptr, entry.value_ptr.len);
-        //     i += 1;
-        // }
+    fn renderScene(self: *App, scene: Scene) !void {
+        const cameras = scene.registry.with(ecs.Camera) catch return;
+        if (cameras.items.len == 0) return;
+        const camera_entity = cameras.items[0];
+        const camera = scene.registry.getComponent(camera_entity, ecs.Camera) orelse return;
 
+        self.backend.renderer.setCamera(camera.*);
+        self.backend.renderer.fill(scene.options.background_color, .{});
+
+        const sprites = scene.registry.with(ecs.Sprite) catch return;
+        if (sprites.items.len == 0) return;
+        for (sprites.items) |sprite_entity| {
+            const transform = scene.registry.getComponent(sprite_entity, ecs.Transform2D) orelse continue;
+            const sprite = scene.registry.getComponent(sprite_entity, ecs.Sprite) orelse continue;
+            try self.backend.renderer.renderTexture(
+                bgfx.bgfx_texture_handle_t{ .idx = sprite.texture_reference.idx },
+                transform.rectangle,
+            );
+        }
     }
 };

@@ -76,6 +76,7 @@ pub fn setupPerspectiveViewProjection(width: u32, height: u32, fov_degrees: f32,
     };
 }
 
+// TODO: Fix leaks
 pub const Renderer = struct {
     allocator: std.mem.Allocator,
     width: u32,
