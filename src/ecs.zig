@@ -175,8 +175,7 @@ pub const Camera = struct {
     };
 
     pub const Options = struct {
-        width: u32,
-        height: u32,
+        view_rectangle: Rectangle,
         fov: f32 = 90.0,
         near: f32 = -1.0,
         far: f32 = 1.0,

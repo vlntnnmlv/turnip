@@ -34,13 +34,13 @@ pub const Vertex2D = struct {
 };
 
 const ViewProjection = struct { view: [16]f32, proj: [16]f32 };
-fn setupViewProjection(width: u32, height: u32) ViewProjection {
+fn setupViewProjection(width: f32, height: f32) ViewProjection {
     // Create orthographic projection for 2D
 
     const proj = zlm.Mat4.createOrthogonal(
         0.0, // left
-        @as(f32, @floatFromInt(width)), // right
-        @as(f32, @floatFromInt(height)), // bottom (flipped for BGFX)
+        width, // right
+        height, // bottom (flipped for BGFX)
         0.0, // top
         -1.0, // near
         1.0, // far
@@ -55,8 +55,8 @@ fn setupViewProjection(width: u32, height: u32) ViewProjection {
     };
 }
 
-pub fn setupPerspectiveViewProjection(width: u32, height: u32, fov_degrees: f32, near: f32, far: f32) ViewProjection {
-    const aspect_ratio = @as(f32, @floatFromInt(width)) / @as(f32, @floatFromInt(height));
+pub fn setupPerspectiveViewProjection(width: f32, height: f32, fov_degrees: f32, near: f32, far: f32) ViewProjection {
+    const aspect_ratio = width / height;
     const fov_radians = zlm.toRadians(fov_degrees);
 
     // Perspective projection matrix
@@ -126,10 +126,13 @@ pub const Renderer = struct {
 
     pub fn setCamera(self: *Renderer, camera: ecs.Camera) void {
         const mxs = switch (camera.view_type) {
-            ecs.Camera.ViewType.ORTHOGONAL => setupViewProjection(camera.options.width, camera.options.height),
+            ecs.Camera.ViewType.ORTHOGONAL => setupViewProjection(
+                camera.options.view_rectangle.width,
+                camera.options.view_rectangle.height,
+            ),
             ecs.Camera.ViewType.PERSPECTIVE => setupPerspectiveViewProjection(
-                camera.options.width,
-                camera.options.height,
+                camera.options.view_rectangle.width,
+                camera.options.view_rectangle.height,
                 camera.options.fov,
                 camera.options.near,
                 camera.options.far,
@@ -137,47 +140,24 @@ pub const Renderer = struct {
         };
 
         view_matrix = mxs.view;
-        // projecion_matrix = mxs.proj;
-        projecion_matrix = [16]f32{
-            2.0 / @as(f32, @floatFromInt(self.width)), 0.0, 0.0, 0.0,
-            0.0, -2.0 / @as(f32, @floatFromInt(self.height)), 0.0, 0.0, // Negative flips Y
-            0.0, 0.0, -1.0, 0.0, // z: -1 to 1
-            -1.0, 1.0, 0.0, 1.0, // Translation
-        };
+        projecion_matrix = mxs.proj;
 
-        self.setViewRect(geometry.Rectangle{
-            .x = 0,
-            .y = 0,
-            .width = @floatFromInt(camera.options.width),
-            .height = @floatFromInt(camera.options.height),
-        });
+        self.setViewRect(camera.options.view_rectangle);
         bgfx.bgfx_set_view_transform(0, &view_matrix, &projecion_matrix);
 
-        std.debug.print("Projection matrix:\n", .{});
-        for (0..4) |i| {
-            std.debug.print(
-                "{d:12.6} {d:12.6} {d:12.6} {d:12.6}\n",
-                .{
-                    projecion_matrix[i * 4],
-                    projecion_matrix[i * 4 + 1],
-                    projecion_matrix[i * 4 + 2],
-                    projecion_matrix[i * 4 + 3],
-                },
-            );
-        }
-
-        std.debug.print("View matrix:\n", .{});
-        for (0..4) |i| {
-            std.debug.print(
-                "{d:12.6} {d:12.6} {d:12.6} {d:12.6}\n",
-                .{
-                    view_matrix[i * 4],
-                    view_matrix[i * 4 + 1],
-                    view_matrix[i * 4 + 2],
-                    view_matrix[i * 4 + 3],
-                },
-            );
-        }
+        std.debug.print(
+            "Set active camera: type: {}, x: {}, y: {}, w: {}, h: {}, fov: {}, near: {}, far: {}\n",
+            .{
+                camera.view_type,
+                camera.options.view_rectangle.x,
+                camera.options.view_rectangle.y,
+                camera.options.view_rectangle.width,
+                camera.options.view_rectangle.height,
+                camera.options.fov,
+                camera.options.near,
+                camera.options.far,
+            },
+        );
     }
 
     pub fn beginRender(self: *Renderer) void {
@@ -238,7 +218,7 @@ pub const Renderer = struct {
         const state: u64 = bgfx.BGFX_STATE_WRITE_RGB |
             bgfx.BGFX_STATE_WRITE_A |
             bgfx.BGFX_STATE_WRITE_Z |
-            // bgfx.BGFX_STATE_DEPTH_TEST_LESS |
+            // bgfx.BGFX_STATE_DEPTH_TEST_LESS | // TODO: This ruins 2d rendering for some reason...
             bgfx.BGFX_STATE_BLEND_ALPHA |
             bgfx.BGFX_STATE_CULL_CW |
             bgfx.BGFX_STATE_MSAA;
@@ -246,66 +226,4 @@ pub const Renderer = struct {
         bgfx.bgfx_set_state(state, 0);
         bgfx.bgfx_submit(0, uv_texture_shader_program, 0, bgfx.BGFX_DISCARD_ALL);
     }
-
-    // pub fn renderTexture(self: *Renderer, textureHandle: bgfx.bgfx_texture_handle_t, rectangle: geometry.Rectangle) !void {
-    //     std.debug.print("=== RENDER TEXTURE START ===\n", .{});
-
-    //     // 1. Check texture
-    //     std.debug.print("Texture handle idx: {}\n", .{textureHandle.idx});
-    //     if (textureHandle.idx == 0xFFFF) {
-    //         std.debug.print("ERROR: Invalid texture!\n", .{});
-    //         return;
-    //     }
-
-    //     // 2. Check shader
-    //     std.debug.print("Shader program idx: {}\n", .{uv_texture_shader_program.idx});
-    //     if (uv_texture_shader_program.idx == 0xFFFF) {
-    //         std.debug.print("ERROR: Invalid shader!\n", .{});
-    //         return;
-    //     }
-
-    //     // 3. Create vertices
-    //     const quad_mesh = try Vertex2D.fromRectangle(self.allocator, rectangle);
-    //     defer self.allocator.free(quad_mesh);
-
-    //     std.debug.print("Vertices created (first): x={}, y={}, u={}, v={}\n", .{ quad_mesh[0].x, quad_mesh[0].y, quad_mesh[0].u, quad_mesh[0].v });
-
-    //     // 4. Create vertex buffer
-    //     vertex_buffer = bgfx.bgfx_create_vertex_buffer(
-    //         bgfx.bgfx_copy(quad_mesh.ptr, 4 * @sizeOf(Vertex2D)),
-    //         &vertex_2d_layout,
-    //         bgfx.BGFX_BUFFER_NONE,
-    //     );
-
-    //     std.debug.print("Vertex buffer idx: {}\n", .{vertex_buffer.idx});
-    //     if (vertex_buffer.idx == 0xFFFF) {
-    //         std.debug.print("ERROR: Failed to create vertex buffer!\n", .{});
-    //         return;
-    //     }
-
-    //     // 5. Set and submit
-    //     bgfx.bgfx_set_vertex_buffer(0, vertex_buffer, 0, 4);
-    //     bgfx.bgfx_set_index_buffer(triangles_buffer, 0, 6);
-    //     bgfx.bgfx_set_texture(0, texture_sampler_uniform, textureHandle, 0xFFFFFFFF);
-
-    //     // https://bkaradzic.github.io/bgfx/bgfx.html - bgfx states
-    //     const state: u64 = bgfx.BGFX_STATE_WRITE_RGB |
-    //         bgfx.BGFX_STATE_WRITE_A |
-    //         bgfx.BGFX_STATE_WRITE_Z |
-    //         // bgfx.BGFX_STATE_DEPTH_TEST_LESS |
-    //         bgfx.BGFX_STATE_BLEND_ALPHA |
-    //         bgfx.BGFX_STATE_CULL_CW |
-    //         bgfx.BGFX_STATE_MSAA;
-
-    //     // bgfx.bgfx_set_state(bgfx.BGFX_STATE_WRITE_RGB | bgfx.BGFX_STATE_WRITE_A | bgfx.BGFX_STATE_DEPTH_TEST_ALWAYS, 0);
-    //     bgfx.bgfx_set_state(state, 0);
-
-    //     const submit_result = bgfx.bgfx_submit(0, uv_texture_shader_program, 0, bgfx.BGFX_DISCARD_ALL);
-    //     std.debug.print("Submit result: {}\n", .{submit_result});
-
-    //     // 6. DON'T destroy immediately - BGFX needs it for frame()
-    //     // bgfx.bgfx_destroy_vertex_buffer(vertex_buffer);
-
-    //     std.debug.print("=== RENDER TEXTURE END ===\n\n", .{});
-    // }
 };

@@ -24,14 +24,18 @@ pub fn main() !void {
     var app = try App.init(allocator, "feyerverx", width, height);
     defer app.deinit();
 
-    const main_scene = try app.addScene("Main", .{});
+    const main_scene = try app.addScene("Main", .{ .background_color = 0x2222FFFF });
 
     const camera_entity = try main_scene.registry.createEntity();
     try main_scene.registry.addComponent(camera_entity, fey.ecs.Camera, fey.ecs.Camera{
         .view_type = fey.ecs.Camera.ViewType.ORTHOGONAL,
         .options = .{
-            .width = width,
-            .height = height,
+            .view_rectangle = fey.geometry.Rectangle{
+                .x = 0,
+                .y = 0,
+                .width = width / 2,
+                .height = height / 2,
+            },
         },
     });
 
