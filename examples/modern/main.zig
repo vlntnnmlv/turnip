@@ -27,7 +27,7 @@ pub fn main() !void {
     var app = try App.init(allocator, "feyerverx", width, height);
     defer app.deinit();
 
-    const main_scene = try app.add("Main", .{ .background_color = 0x2222FFFF });
+    const main_scene = try app.add("Main", .{ .background_color = 0x363636ff });
 
     const camera_entity = try main_scene.registry.create();
     try main_scene.registry.add(camera_entity, Camera, Camera{

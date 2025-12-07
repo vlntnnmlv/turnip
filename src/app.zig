@@ -27,27 +27,31 @@ const Scene = scenes.Scene;
 pub const App = struct {
     allocator: std.mem.Allocator,
     backend: Backend,
-    scenes: std.ArrayList(Scene) = .empty,
+    scenes: std.StringHashMap(Scene),
     running: bool = false,
 
     pub fn init(allocator: std.mem.Allocator, title: [:0]const u8, width: u32, height: u32) !App {
         return App{
             .allocator = allocator,
+            .scenes = std.StringHashMap(Scene).init(allocator),
             .backend = try Backend.init(allocator, title, width, height),
         };
     }
 
     pub fn deinit(self: *App) void {
+        self.scenes.deinit();
         self.backend.deinit();
     }
 
     pub fn add(
         self: *App,
-        name: [:0]const u8,
+        name: []const u8,
         options: Scene.Options,
     ) !*Scene {
-        try self.scenes.append(self.allocator, Scene.init(self.allocator, name, options));
-        return &self.scenes.items[self.scenes.items.len - 1];
+        try self.scenes.put(name, Scene.init(self.allocator, name, options));
+        if (self.scenes.getPtr(name)) |scene| {
+            return scene;
+        } else unreachable;
     }
 
     pub fn run(self: *App) !void {
@@ -80,7 +84,8 @@ pub const App = struct {
     fn render(self: *App) !void {
         self.backend.renderer.beginRender();
 
-        for (self.scenes.items) |scene| {
+        var scenes_iterator = self.scenes.valueIterator();
+        while (scenes_iterator.next()) |scene| {
             try self.renderScene(scene);
         }
 
@@ -88,7 +93,7 @@ pub const App = struct {
     }
 
     // TODO: Add mutiple cameras rendering, this will just render the first one.
-    fn renderScene(self: *App, scene: Scene) !void {
+    fn renderScene(self: *App, scene: *Scene) !void {
         const cameras = scene.registry.with(Camera) catch return;
         for (cameras.items) |camera_entity| {
             const camera = scene.registry.get(camera_entity, Camera) orelse continue;
