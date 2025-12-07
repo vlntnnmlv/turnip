@@ -4,10 +4,13 @@ const bgfx = @import("bgfx.zig").bgfx;
 const ecs = @import("ecs.zig");
 const events = @import("events.zig");
 const backend = @import("backend.zig");
-const assetLoader = @import("assetLoader.zig");
+const assetLoader = @import("asset_loader.zig");
 const scenes = @import("scenes.zig");
 
-const List = std.ArrayList;
+const components = @import("components.zig");
+const Camera = components.Camera;
+const Transform2D = components.Transform2D;
+const Sprite = components.Sprite;
 
 const AssetLoader = assetLoader.AssetLoader;
 
@@ -24,7 +27,7 @@ const Scene = scenes.Scene;
 pub const App = struct {
     allocator: std.mem.Allocator,
     backend: Backend,
-    scenes: List(Scene) = .empty,
+    scenes: std.ArrayList(Scene) = .empty,
     running: bool = false,
 
     pub fn init(allocator: std.mem.Allocator, title: [:0]const u8, width: u32, height: u32) !App {
@@ -38,7 +41,7 @@ pub const App = struct {
         self.backend.deinit();
     }
 
-    pub fn addScene(
+    pub fn add(
         self: *App,
         name: [:0]const u8,
         options: Scene.Options,
@@ -51,13 +54,13 @@ pub const App = struct {
         self.running = true;
 
         while (self.running) {
-            self.processEvents();
+            self.process();
             self.update();
             try self.render();
         }
     }
 
-    fn processEvents(self: *App) void {
+    fn process(self: *App) void {
         var event: Event = undefined;
         while (self.backend.pollEvent(&event)) {
             if (event.eventType == EventType.Quit)
@@ -86,18 +89,18 @@ pub const App = struct {
 
     // TODO: Add mutiple cameras rendering, this will just render the first one.
     fn renderScene(self: *App, scene: Scene) !void {
-        const cameras = scene.registry.with(ecs.Camera) catch return;
+        const cameras = scene.registry.with(Camera) catch return;
         for (cameras.items) |camera_entity| {
-            const camera = scene.registry.getComponent(camera_entity, ecs.Camera) orelse continue;
+            const camera = scene.registry.get(camera_entity, Camera) orelse continue;
 
             self.backend.renderer.setCamera(camera.*);
             self.backend.renderer.fill(scene.options.background_color, .{});
 
-            const sprites = scene.registry.with(ecs.Sprite) catch return;
+            const sprites = scene.registry.with(Sprite) catch return;
             if (sprites.items.len == 0) return;
             for (sprites.items) |sprite_entity| {
-                const transform = scene.registry.getComponent(sprite_entity, ecs.Transform2D) orelse continue;
-                const sprite = scene.registry.getComponent(sprite_entity, ecs.Sprite) orelse continue;
+                const transform = scene.registry.get(sprite_entity, Transform2D) orelse continue;
+                const sprite = scene.registry.get(sprite_entity, Sprite) orelse continue;
                 try self.backend.renderer.renderTexture(
                     bgfx.bgfx_texture_handle_t{ .idx = sprite.texture_reference.idx },
                     transform.rectangle,

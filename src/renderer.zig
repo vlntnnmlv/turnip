@@ -6,7 +6,9 @@ const zlm = @import("zlm").as(f32);
 const ecs = @import("ecs.zig");
 const geometry = @import("geometry.zig");
 const backend = @import("backend.zig");
-const assetLoader = @import("assetLoader.zig");
+const assetLoader = @import("asset_loader.zig");
+
+const Camera = @import("components.zig").Camera;
 
 const AssetLoader = assetLoader.AssetLoader;
 
@@ -35,18 +37,7 @@ pub const Vertex2D = struct {
 
 const ViewProjection = struct { view: [16]f32, proj: [16]f32 };
 fn setupViewProjection(width: f32, height: f32) ViewProjection {
-    // Create orthographic projection for 2D
-
-    const proj = zlm.Mat4.createOrthogonal(
-        0.0, // left
-        width, // right
-        height, // bottom (flipped for BGFX)
-        0.0, // top
-        -1.0, // near
-        1.0, // far
-    );
-
-    // Identity view matrix
+    const proj = zlm.Mat4.createOrthogonal(0.0, width, height, 0.0, -1.0, 1.0);
     const view = zlm.Mat4.identity;
 
     return ViewProjection{
@@ -59,15 +50,7 @@ pub fn setupPerspectiveViewProjection(width: f32, height: f32, fov_degrees: f32,
     const aspect_ratio = width / height;
     const fov_radians = zlm.toRadians(fov_degrees);
 
-    // Perspective projection matrix
-    const proj = zlm.Mat4.createPerspective(
-        fov_radians, // Field of view in radians
-        aspect_ratio, // Aspect ratio (width/height)
-        near, // Near clipping plane
-        far, // Far clipping plane
-    ).transpose();
-
-    // Camera looking forward (identity view matrix)
+    const proj = zlm.Mat4.createPerspective(fov_radians, aspect_ratio, near, far);
     const view = zlm.Mat4.identity;
 
     return ViewProjection{
@@ -114,23 +97,38 @@ pub const Renderer = struct {
         return Renderer{ .allocator = allocator, .width = width, .height = height };
     }
 
+    fn destroyHandle(handle: anytype) void {
+        const handle_type = @TypeOf(handle);
+        std.debug.print("[DEBUG] handle type: {}\n", .{handle_type});
+        if (!bgfx.BGFX_HANDLE_IS_VALID(handle)) {
+            std.debug.print("[DEBUG] handle is invalid\n", .{});
+        }
+        switch (handle_type) {
+            bgfx.bgfx_uniform_handle_s => bgfx.bgfx_destroy_uniform(handle),
+            bgfx.bgfx_index_buffer_handle_s => bgfx.bgfx_destroy_index_buffer(handle),
+            bgfx.bgfx_vertex_buffer_handle_s => bgfx.bgfx_destroy_vertex_buffer(handle),
+            bgfx.bgfx_program_handle_s => bgfx.bgfx_destroy_program(handle),
+            else => {},
+        }
+        std.debug.print("[DEBUG] handle destroyed\n", .{});
+    }
+
     pub fn deinit(self: *Renderer) void {
         _ = self;
 
-        // TODO:
-        // bgfx.bgfx_destroy_uniform(texture_sampler_uniform);
-        // bgfx.bgfx_destroy_index_buffer(triangles_buffer);
-        // bgfx.bgfx_destroy_vertex_buffer(vertex_buffer);
-        // bgfx.bgfx_destroy_program(uv_texture_shader_program);
+        destroyHandle(texture_sampler_uniform);
+        destroyHandle(triangles_buffer);
+        // destroyHandle(vertex_buffer);
+        destroyHandle(uv_texture_shader_program);
     }
 
-    pub fn setCamera(self: *Renderer, camera: ecs.Camera) void {
+    pub fn setCamera(self: *Renderer, camera: Camera) void {
         const mxs = switch (camera.view_type) {
-            ecs.Camera.ViewType.ORTHOGONAL => setupViewProjection(
+            Camera.ViewType.ORTHOGONAL => setupViewProjection(
                 camera.options.view_rectangle.width,
                 camera.options.view_rectangle.height,
             ),
-            ecs.Camera.ViewType.PERSPECTIVE => setupPerspectiveViewProjection(
+            Camera.ViewType.PERSPECTIVE => setupPerspectiveViewProjection(
                 camera.options.view_rectangle.width,
                 camera.options.view_rectangle.height,
                 camera.options.fov,
@@ -144,29 +142,17 @@ pub const Renderer = struct {
 
         self.setViewRect(camera.options.view_rectangle);
         bgfx.bgfx_set_view_transform(0, &view_matrix, &projecion_matrix);
-
-        std.debug.print(
-            "Set active camera: type: {}, x: {}, y: {}, w: {}, h: {}, fov: {}, near: {}, far: {}\n",
-            .{
-                camera.view_type,
-                camera.options.view_rectangle.x,
-                camera.options.view_rectangle.y,
-                camera.options.view_rectangle.width,
-                camera.options.view_rectangle.height,
-                camera.options.fov,
-                camera.options.near,
-                camera.options.far,
-            },
-        );
     }
 
     pub fn beginRender(self: *Renderer) void {
         _ = self;
+
         bgfx.bgfx_touch(0);
     }
 
     pub fn endRender(self: *Renderer) void {
         _ = self;
+
         _ = bgfx.bgfx_frame(false);
     }
 
@@ -198,6 +184,7 @@ pub const Renderer = struct {
 
     pub fn renderTexture(self: *Renderer, textureHandle: bgfx.bgfx_texture_handle_t, rectangle: geometry.Rectangle) !void {
         const quad_mesh = try Vertex2D.fromRectangle(self.allocator, rectangle);
+        defer self.allocator.free(quad_mesh);
 
         if (bgfx.BGFX_HANDLE_IS_VALID(vertex_buffer)) {
             bgfx.bgfx_destroy_vertex_buffer(vertex_buffer);
@@ -214,6 +201,7 @@ pub const Renderer = struct {
         bgfx.bgfx_set_index_buffer(triangles_buffer, 0, 6);
 
         bgfx.bgfx_set_texture(0, texture_sampler_uniform, textureHandle, 4294967295);
+
         // https://bkaradzic.github.io/bgfx/bgfx.html - bgfx states
         const state: u64 = bgfx.BGFX_STATE_WRITE_RGB |
             bgfx.BGFX_STATE_WRITE_A |

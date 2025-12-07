@@ -70,13 +70,14 @@ pub const AssetLoader = struct {
         const width = image.width;
         const height = image.height;
 
-        std.debug.print("Image loaded: {}x{}\n", .{ width, height });
+        std.debug.print("[DEBUG] Image loaded: {}x{}\n", .{ width, height });
 
+        // TODO: Use this function from AssetManager, and free all the memory from there.
         const textureHandle = bgfx.bgfx_create_texture_2d(
             @intCast(width),
             @intCast(height),
-            false, // No mipmaps in this example
-            1, // Number of layers
+            false,
+            1,
             bgfx.BGFX_TEXTURE_FORMAT_RGBA8,
             bgfx.BGFX_TEXTURE_NONE | bgfx.BGFX_SAMPLER_U_CLAMP | bgfx.BGFX_SAMPLER_V_CLAMP | bgfx.BGFX_SAMPLER_POINT,
             bgfx.bgfx_copy(rgba_image.ptr, @as(u32, @intCast(width * height * 4))),
