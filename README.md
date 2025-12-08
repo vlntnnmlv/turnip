@@ -1,8 +1,8 @@
 # Fey
 
-C++ ECS Game engine
+ECS game engine in Zig.
 
-At first this project's goal was just to undestand how big ECS system's work under the hood. But after about 50 hours of development time, I became interested in somewhat low-level graphics API's for complete control of the visuals.
+At first this project's goal was just to undestand how big ECS system's work under the hood. But after about 20 hours of development time, I became interested in somewhat low-level graphics API's for complete control of the visuals.
 
 **WORK IN PROGRESS**
 
@@ -26,5 +26,4 @@ The project was only built for OSX, but usage of cross-platform libraries like S
 
 ## Build
 
-* ```cmake -S . -B build``` in root directory to generate cmake build directory
-* Then ```cmake --build build```. You will find everything in build directory.
+* ```zig build``` in root directory.
