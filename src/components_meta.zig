@@ -115,7 +115,7 @@ pub fn NamedComponentsTuple(comptime ComponentTypes: anytype) type {
         fields[i] =
             .{
                 .name = type2FieldName(ComponentTypes[i]),
-                .type = *const ComponentTypes[i],
+                .type = *ComponentTypes[i],
                 .default_value_ptr = null,
                 .is_comptime = false,
                 .alignment = @alignOf(ComponentTypes[i]),
@@ -134,10 +134,9 @@ pub fn NamedComponentsTuple(comptime ComponentTypes: anytype) type {
 
 pub fn ComponentsViewIterator(comptime ComponentTypes: anytype) type {
     comptime {
-        const ComponentsViewType = NamedComponentsTuple(ComponentTypes);
-
         return struct {
             const Self = @This();
+            pub const ComponentsViewType = NamedComponentsTuple(ComponentTypes);
 
             registry: *const Registry,
             current_entity_index: usize = 0,
@@ -177,6 +176,10 @@ pub fn ComponentsViewIterator(comptime ComponentTypes: anytype) type {
 
             pub fn deinit(self: *Self) void {
                 self.matching_entities.deinit(self.allocator);
+            }
+
+            pub fn reset(self: *Self) void {
+                self.current_entity_index = 0;
             }
 
             pub fn next(self: *Self) ?ComponentsViewType {

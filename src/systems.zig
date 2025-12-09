@@ -1,20 +1,26 @@
 const std = @import("std");
 
-pub const System = struct {
-    component_types: std.ArrayList(type),
-    allocator: std.mem.Allocator,
+const Registry = @import("ecs.zig").Registry;
+const ComponentsViewIterator = @import("components_meta.zig").ComponentsViewIterator;
 
-    pub fn init(comptime allocator: std.mem.Allocator, comptime ComponentTypes: anytype) System {
-        return System{
-            .allocator = allocator,
-            .component_types = comptime blk: {
-                var result: std.ArrayList(type) = .empty;
-                var i = 0;
-                while (i > ComponentTypes.len) : (i += 1) {
-                    result.append(allocator, ComponentTypes[i]);
-                }
-                break :blk result;
-            },
-        };
-    }
-};
+pub fn System(comptime ComponentTypes: anytype) type {
+    return struct {
+        const Self = @This();
+        pub const SystemComponentsViewIterator = ComponentsViewIterator(ComponentTypes);
+
+        registry: *const Registry,
+
+        pub fn init(registry: *const Registry) Self {
+            return Self{ .registry = registry };
+        }
+
+        pub fn run(self: *Self, comptime process: anytype) void {
+            var components = self.registry.view(ComponentTypes);
+            defer components.deinit();
+
+            while (components.next()) |view| {
+                process(view);
+            }
+        }
+    };
+}
