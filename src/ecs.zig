@@ -3,11 +3,12 @@ const zlm = @import("zlm").as(f32);
 
 pub const EntityID = u16;
 
-pub const component_meta = @import("component_meta.zig");
+pub const components_meta = @import("components_meta.zig");
 
-pub const ComponentDescription = component_meta.ComponentDescription;
-pub const ComponentDescriptionContext = component_meta.ComponentDescriptionContext;
-pub const ComponentBucket = component_meta.ComponentBucket;
+pub const ComponentDescription = components_meta.ComponentDescription;
+pub const ComponentDescriptionContext = components_meta.ComponentDescriptionContext;
+pub const ComponentBucket = components_meta.ComponentBucket;
+pub const ComponentsViewIterator = components_meta.ComponentsViewIterator;
 
 const Rectangle = @import("geometry.zig").Rectangle;
 
@@ -91,5 +92,15 @@ pub const Registry = struct {
             try entityIDs.append(self.allocator, entityID.*);
         }
         return entityIDs;
+    }
+
+    pub fn view(self: *const Registry, comptime ComponentTypes: anytype) ComponentsViewIterator(ComponentTypes) {
+        return ComponentsViewIterator(ComponentTypes).init(self) catch {
+            return ComponentsViewIterator(ComponentTypes){
+                .registry = self,
+                .matching_entities = .empty,
+                .allocator = self.allocator,
+            };
+        };
     }
 };

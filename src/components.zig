@@ -1,10 +1,17 @@
 const zlm = @import("zlm").as(f32);
 const Rectangle = @import("geometry.zig").Rectangle;
 
+const AssetReference = @import("asset_manager.zig").AssetReference;
+
 pub const Transform = struct { position: zlm.Vec3, scale: zlm.Vec3, rotation: zlm.Vec3 };
 pub const Transform2D = struct { rectangle: Rectangle };
 
 pub const Camera = struct {
+    pub fn tmp(self: Camera) void {
+        const std = @import("std");
+        _ = self;
+        std.debug.print("TEST !\n", .{});
+    }
     pub const ViewType = enum(u1) {
         ORTHOGONAL,
         PERSPECTIVE,
@@ -21,7 +28,4 @@ pub const Camera = struct {
     options: Options,
 };
 
-pub const TextureReference = struct {
-    idx: u16,
-};
-pub const Sprite = struct { texture_reference: TextureReference };
+pub const Sprite = struct { texture_reference: AssetReference };

@@ -9,4 +9,5 @@ pub const components = @import("components.zig");
 pub const systems = @import("systems.zig");
 
 pub const backend = @import("backend.zig");
-pub const assetLoader = @import("asset_loader.zig");
+pub const asset_loader = @import("asset_loader.zig");
+pub const asset_manager = @import("asset_manager.zig");

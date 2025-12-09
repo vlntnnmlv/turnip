@@ -4,6 +4,10 @@ const fey = @import("fey");
 
 const App = fey.app.App;
 
+const AssetType = fey.asset_manager.AssetType;
+const AssetReference = fey.asset_manager.AssetReference;
+const TextureReference = fey.asset_manager.TextureReference;
+
 const components = fey.components;
 const Camera = components.Camera;
 const Transform2D = components.Transform2D;
@@ -42,7 +46,7 @@ pub fn main() !void {
         },
     });
 
-    const textureHandle = try fey.assetLoader.AssetLoader.loadTexture("bean");
+    const asset_reference = try app.asset_manager.loadAsset(fey.asset_manager.AssetType.TEXTURE, "bean");
     for (0..10) |i| {
         const sprite_entity = try main_scene.registry.create();
         try main_scene.registry.add(sprite_entity, Transform2D, Transform2D{
@@ -54,9 +58,7 @@ pub fn main() !void {
             },
         });
         try main_scene.registry.add(sprite_entity, Sprite, Sprite{
-            .texture_reference = .{
-                .idx = textureHandle.idx,
-            },
+            .texture_reference = asset_reference,
         });
     }
 
