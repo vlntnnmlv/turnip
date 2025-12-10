@@ -25,7 +25,6 @@ const Backend = backend.Backend;
 
 const Scene = scenes.Scene;
 
-// TODO: Add systems
 pub const App = struct {
     allocator: std.mem.Allocator,
     backend: Backend,
@@ -83,7 +82,10 @@ pub const App = struct {
     }
 
     fn update(self: *App) void {
-        _ = self;
+        var scenes_iterator = self.scenes.valueIterator();
+        while (scenes_iterator.next()) |scene| {
+            scene.update();
+        }
     }
 
     fn render(self: *App) !void {

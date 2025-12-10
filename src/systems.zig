@@ -1,26 +1,50 @@
 const std = @import("std");
 
+// TODO:!!!
 const Registry = @import("ecs.zig").Registry;
 const ComponentsViewIterator = @import("components_meta.zig").ComponentsViewIterator;
 
-pub fn System(comptime ComponentTypes: anytype) type {
-    return struct {
-        const Self = @This();
-        pub const SystemComponentsViewIterator = ComponentsViewIterator(ComponentTypes);
-
-        registry: *const Registry,
-
-        pub fn init(registry: *const Registry) Self {
-            return Self{ .registry = registry };
-        }
-
-        pub fn run(self: *Self, comptime process: anytype) void {
-            var components = self.registry.view(ComponentTypes);
-            defer components.deinit();
-
-            while (components.next()) |view| {
-                process(view);
-            }
-        }
+pub const System = struct {
+    const VTable = struct {
+        run: *const fn (*anyopaque) void,
+        deinit: *const fn (*anyopaque) void = skip,
     };
-}
+
+    ptr: *anyopaque,
+    vtable: *const VTable,
+
+    pub fn create(
+        ptr: anytype,
+        comptime run_function: fn (@TypeOf(ptr)) void,
+    ) System {
+        const PtrType = @TypeOf(ptr);
+        const Erased = struct {
+            fn run(erased: *anyopaque) void {
+                const self: PtrType = @ptrCast(@alignCast(erased));
+                run_function(self);
+            }
+
+            fn deinit(erased: *anyopaque) void {
+                _ = erased;
+            }
+        };
+
+        return System{
+            .ptr = ptr,
+            .vtable = &VTable{
+                .run = Erased.run,
+                .deinit = Erased.deinit,
+            },
+        };
+    }
+
+    fn skip(_: *anyopaque) void {}
+
+    pub fn run(self: System) void {
+        self.vtable.run(self.ptr);
+    }
+
+    pub fn deinit(self: System) void {
+        self.vtable.deinit(self.ptr);
+    }
+};
