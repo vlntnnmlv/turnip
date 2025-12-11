@@ -3,13 +3,12 @@ const std = @import("std");
 const bgfx = @import("bgfx.zig").bgfx;
 const zlm = @import("zlm").as(f32);
 
-const ecs = @import("ecs.zig");
 const geometry = @import("geometry.zig");
+const ecs = @import("ecs.zig");
 const backend = @import("backend.zig");
 const assetLoader = @import("asset_loader.zig");
 
-const Camera = @import("components.zig").Camera;
-
+const Camera = ecs.components.Camera;
 const AssetLoader = assetLoader.AssetLoader;
 
 pub const Vertex2D = struct {

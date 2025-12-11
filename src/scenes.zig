@@ -1,9 +1,9 @@
 const std = @import("std");
 const ecs = @import("ecs.zig");
 
-const Registry = ecs.Registry;
-const System = @import("systems.zig").System;
-const NamedComponentsTuple = @import("components_meta.zig").NamedComponentsTuple;
+const Registry = ecs.registry.Registry;
+const System = ecs.systems.System;
+const NamedComponentsTuple = ecs.meta.NamedComponentsTuple;
 
 pub const Scene = struct {
     pub const Options = struct { background_color: u32 = 0xFFFFFFFF };

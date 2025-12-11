@@ -1,10 +1,8 @@
 const std = @import("std");
-
 const builtin = @import("std").builtin;
 
-const ecs = @import("ecs.zig");
-const EntityID = ecs.EntityID;
-const Registry = ecs.Registry;
+const EntityID = @import("entity.zig").EntityID;
+const Registry = @import("registry.zig").Registry;
 
 pub const ComponentDescription = struct {
     name: [:0]const u8,
@@ -95,7 +93,7 @@ pub const ComponentBucket = struct {
 
 fn type2FieldName(comptime ComponentType: type) [:0]const u8 {
     const full_name = @typeName(ComponentType);
-    const dot_index = std.mem.indexOfScalar(u8, full_name, '.').? + 1;
+    const dot_index = std.mem.lastIndexOfScalar(u8, full_name, '.').? + 1;
     const name = full_name[dot_index..];
 
     var lower_name: [name.len:0]u8 = undefined;

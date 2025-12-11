@@ -8,7 +8,7 @@ const asset_loader = @import("asset_loader.zig");
 const asset_manager = @import("asset_manager.zig");
 const scenes = @import("scenes.zig");
 
-const components = @import("components.zig");
+const components = ecs.components;
 const Camera = components.Camera;
 const Transform2D = components.Transform2D;
 const Sprite = components.Sprite;

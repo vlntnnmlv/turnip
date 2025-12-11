@@ -1,8 +1,6 @@
 const std = @import("std");
 
-// TODO:!!!
-const Registry = @import("ecs.zig").Registry;
-const ComponentsViewIterator = @import("components_meta.zig").ComponentsViewIterator;
+const Registry = @import("registry.zig").Registry;
 
 pub const System = struct {
     const VTable = struct {

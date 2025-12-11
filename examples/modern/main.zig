@@ -8,7 +8,7 @@ const AssetType = fey.asset_manager.AssetType;
 const AssetReference = fey.asset_manager.AssetReference;
 const TextureReference = fey.asset_manager.TextureReference;
 
-const components = fey.components;
+const components = fey.ecs.components;
 const Camera = components.Camera;
 const Transform2D = components.Transform2D;
 const Sprite = components.Sprite;
@@ -26,7 +26,7 @@ const print = std.debug.print;
 const Position = struct { x: f32, y: f32 };
 const Velocity = struct { dx: f32, dy: f32 };
 
-const NamedComponentsTuple = fey.components_meta.NamedComponentsTuple;
+const NamedComponentsTuple = fey.ecs.meta.NamedComponentsTuple;
 
 fn movementSystem(view: NamedComponentsTuple(.{Transform2D})) void {
     view.transform2d.rectangle.y += 0.1;
