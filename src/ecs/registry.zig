@@ -4,6 +4,7 @@ const entity = @import("entity.zig");
 const meta = @import("meta.zig");
 
 const EntityID = entity.EntityID;
+const Entity = entity.Entity;
 
 const ComponentDescription = meta.ComponentDescription;
 const ComponentBucket = meta.ComponentBucket;
@@ -22,7 +23,7 @@ pub const Registry = struct {
     alive: std.ArrayList(EntityID),
     components: ComponentsMap,
 
-    var nextEntityID: EntityID = 0;
+    var next_entity_id: EntityID = 0;
 
     pub fn init(allocator: std.mem.Allocator) Registry {
         const registry = Registry{
@@ -35,14 +36,20 @@ pub const Registry = struct {
 
     pub fn deinit(self: *Registry) void {
         self.alive.deinit(self.allocator);
+
+        var component_buckets = self.components.values();
+        for (0..component_buckets.len) |i| {
+            component_buckets[i].deinit();
+        }
+
         self.components.deinit();
     }
 
-    pub fn create(self: *Registry) !EntityID {
-        nextEntityID += 1;
-        try self.alive.append(self.allocator, nextEntityID);
+    pub fn create(self: *Registry) !Entity {
+        next_entity_id += 1;
+        try self.alive.append(self.allocator, next_entity_id);
 
-        return nextEntityID;
+        return Entity.create(next_entity_id, self);
     }
 
     pub fn destroy(self: *Registry, entityID: EntityID) void {

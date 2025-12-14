@@ -42,6 +42,11 @@ pub const App = struct {
     }
 
     pub fn deinit(self: *App) void {
+        var scenes_iterator = self.scenes.valueIterator();
+        while (scenes_iterator.next()) |scene| {
+            scene.deinit();
+        }
+
         self.scenes.deinit();
         self.asset_manager.deinit();
         self.backend.deinit();

@@ -21,6 +21,7 @@ pub const Backend = struct {
     title: [:0]const u8,
     width: u32,
     height: u32,
+    window: ?*sdl.struct_SDL_Window = null,
     renderer: Renderer,
 
     pub fn init(allocator: std.mem.Allocator, title: [:0]const u8, width: u32, height: u32) !Backend {
@@ -40,6 +41,7 @@ pub const Backend = struct {
     pub fn deinit(self: *Backend) void {
         self.renderer.deinit();
         bgfx.bgfx_shutdown();
+        sdl.SDL_DestroyWindow(self.window);
         sdl.SDL_Quit();
     }
 
@@ -56,7 +58,7 @@ pub const Backend = struct {
         if (!sdl.SDL_Init(0))
             return FeyInitializationError.FailedToInitializeSDL;
 
-        const window = sdl.SDL_CreateWindow(
+        self.window = sdl.SDL_CreateWindow(
             self.title,
             @as(c_int, @intCast(self.width)),
             @as(c_int, @intCast(self.height)),
@@ -72,7 +74,7 @@ pub const Backend = struct {
 
         bgfx_init.type = bgfx.BGFX_RENDERER_TYPE_COUNT;
 
-        const windowProperties = sdl.SDL_GetWindowProperties(window);
+        const windowProperties = sdl.SDL_GetWindowProperties(self.window);
 
         // TODO: Add cross-platform logic of getting window handle:
         // https://wiki.libsdl.org/SDL3/SDL_GetWindowProperties

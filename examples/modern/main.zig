@@ -23,9 +23,6 @@ const print = std.debug.print;
 // 5. Specify systems.
 // 6. Start the application loop.
 
-const Position = struct { x: f32, y: f32 };
-const Velocity = struct { dx: f32, dy: f32 };
-
 const NamedComponentsTuple = fey.ecs.meta.NamedComponentsTuple;
 
 fn movementSystem(view: NamedComponentsTuple(.{Transform2D})) void {
@@ -41,11 +38,11 @@ pub fn main() !void {
     var app = try App.init(allocator, "feyerverx", width, height);
     defer app.deinit();
 
+    // 3. Set up scenes
     const main_scene = try app.add("Main", .{ .background_color = 0x363636ff });
     const camera_entity = try main_scene.registry.create();
 
-    // 3. Set up scenes
-    try main_scene.registry.add(camera_entity, Camera, Camera{
+    try camera_entity.add(Camera, Camera{
         .view_type = Camera.ViewType.ORTHOGONAL,
         .options = .{
             .view_rectangle = fey.geometry.Rectangle{
@@ -58,19 +55,20 @@ pub fn main() !void {
     });
 
     const asset_reference = try app.asset_manager.loadAsset(fey.asset_manager.AssetType.TEXTURE, "bean");
-    for (0..10) |i| {
+    var i: f32 = 0.0;
+    while (i < 10) {
         const sprite_entity = try main_scene.registry.create();
-        try main_scene.registry.add(sprite_entity, Transform2D, Transform2D{
+        try sprite_entity.add(Transform2D, Transform2D{
             .rectangle = .{
-                .x = @as(f32, @floatFromInt(i)) * 100,
+                .x = i * 100,
                 .y = 0,
                 .width = 100,
                 .height = 100,
             },
         });
-        try main_scene.registry.add(sprite_entity, Sprite, Sprite{
-            .texture_reference = asset_reference,
-        });
+        try sprite_entity.add(Sprite, Sprite{ .texture_reference = asset_reference });
+
+        i += 1.0;
     }
 
     // 5. Specify systems

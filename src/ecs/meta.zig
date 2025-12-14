@@ -54,24 +54,34 @@ pub const ComponentBucket = struct {
     }
 
     pub fn deinit(self: *ComponentBucket) void {
+        var components_iterator = self.components.valueIterator();
+        while (components_iterator.next()) |component| {
+            self.allocator.free(component.*);
+        }
         self.components.deinit();
     }
 
-    pub fn set(self: *ComponentBucket, entityID: EntityID, comptime T: type, value: T) !void {
+    pub fn set(self: *ComponentBucket, entity_id: EntityID, comptime T: type, value: T) !void {
         if (@sizeOf(T) != self.size or @alignOf(T) != self.alignment) {
             return error.MismatchedLayout;
         }
 
-        const mem = try self.allocator.alignedAlloc(
+        // TODO: Do not reallocate, just put new value in allocated memory
+        if (self.components.contains(entity_id)) {
+            const mem = self.components.getPtr(entity_id).?;
+            self.allocator.free(mem.*);
+        }
+
+        const mem_raw = try self.allocator.alignedAlloc(
             u8,
             std.mem.Alignment.fromByteUnits(@alignOf(T)),
             @sizeOf(T),
         );
 
-        const mem2: []u8 = @as([]u8, @ptrCast(mem));
-        @memmove(mem2, std.mem.asBytes(&value));
+        const mem: []u8 = @as([]u8, @ptrCast(mem_raw));
+        @memmove(mem, std.mem.asBytes(&value));
 
-        try self.components.put(entityID, mem2);
+        try self.components.put(entity_id, mem_raw);
         self.len += 1;
     }
 

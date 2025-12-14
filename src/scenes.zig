@@ -29,6 +29,8 @@ pub const Scene = struct {
 
     pub fn deinit(self: *Scene) void {
         self.registry.deinit();
+
+        self.systems.deinit(self.allocator);
     }
 
     pub fn addSystem(
@@ -49,6 +51,7 @@ pub const Scene = struct {
             }
         };
 
+        // TODO: Free the closurea allocation somewhere
         const closure = try self.allocator.create(Closure);
         closure.* = .{
             .registry = self.registry,
