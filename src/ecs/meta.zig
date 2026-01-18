@@ -117,7 +117,7 @@ fn type2FieldName(comptime ComponentType: type) [:0]const u8 {
     return lower_name[0..lower_name_len :0];
 }
 
-pub fn NamedComponentsTuple(comptime ComponentTypes: anytype) type {
+pub fn ComponentsView(comptime ComponentTypes: anytype) type {
     var fields: [ComponentTypes.len]builtin.Type.StructField = undefined;
     for (0..ComponentTypes.len) |i| {
         fields[i] =
@@ -144,7 +144,7 @@ pub fn ComponentsViewIterator(comptime ComponentTypes: anytype) type {
     comptime {
         return struct {
             const Self = @This();
-            pub const ComponentsViewType = NamedComponentsTuple(ComponentTypes);
+            pub const ComponentsViewType = ComponentsView(ComponentTypes);
 
             registry: *const Registry,
             current_entity_index: usize = 0,

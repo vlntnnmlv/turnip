@@ -9,3 +9,6 @@ pub const app = @import("app.zig");
 
 pub const asset_loader = @import("asset_loader.zig");
 pub const asset_manager = @import("asset_manager.zig");
+
+pub const events = @import("events.zig");
+pub const scenes = @import("scenes.zig");

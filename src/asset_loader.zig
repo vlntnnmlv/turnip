@@ -1,8 +1,9 @@
 const std = @import("std");
-
 const bgfx = @import("bgfx.zig").bgfx;
-
 const zigimg = @import("zigimg");
+const fey_asset = @import("fey_asset");
+
+pub const fbx = fey_asset.fbx;
 
 pub const AssetLoader = struct {
     pub fn loadShader(name: []const u8) !bgfx.bgfx_shader_handle_t {
@@ -55,7 +56,6 @@ pub const AssetLoader = struct {
         try full_path_builder.appendSlice(allocator, "resources/textures/");
         try full_path_builder.appendSlice(allocator, name);
         try full_path_builder.appendSlice(allocator, ".png");
-        // try full_path_builder.append(allocator, 0);
 
         var read_buffer: [16 * 1024]u8 = undefined;
         var image = try zigimg.Image.fromFilePath(allocator, full_path_builder.items, &read_buffer);
@@ -63,16 +63,13 @@ pub const AssetLoader = struct {
 
         const rgba_image = switch (image.pixels) {
             .rgba32 => |pixels| pixels,
-            else => unreachable, //try image.toRGBA32(allocator),
+            else => unreachable,
         };
         defer if (image.pixels != .rgba32) allocator.free(rgba_image);
 
         const width = image.width;
         const height = image.height;
 
-        std.debug.print("[DEBUG] Image loaded: {}x{}\n", .{ width, height });
-
-        // TODO: Use this function from AssetManager, and free all the memory from there.
         const textureHandle = bgfx.bgfx_create_texture_2d(
             @intCast(width),
             @intCast(height),
@@ -84,5 +81,11 @@ pub const AssetLoader = struct {
         );
 
         return textureHandle;
+    }
+
+    pub fn loadFBX(comptime name: []const u8) !fbx.FBXFile {
+        const path = "resources/models/" ++ name ++ ".fbx";
+        var arena = std.heap.ArenaAllocator.init(std.heap.c_allocator);
+        return try fbx.FBXFile.init(arena.allocator(), path);
     }
 };

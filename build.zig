@@ -85,6 +85,20 @@ fn buildLibraryCMake(b: *std.Build, comptime name: [:0]const u8) void {
     b.default_step.dependOn(&cmake_build_step.step);
 }
 
+pub fn addDependencyModule(
+    b: *std.Build,
+    comptime name: []const u8,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+) *std.Build.Module {
+    const dep = b.dependency(name, .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    return dep.module(name);
+}
+
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -95,28 +109,18 @@ pub fn build(b: *std.Build) !void {
     try buildShaders(b);
 
     // fetch dependencies
-    // zigimg
-    const zigimg_dep = b.dependency("zigimg", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    const zigimg_module = zigimg_dep.module("zigimg");
-
-    const zlm_dep = b.dependency("zlm", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    const zlm_module = zlm_dep.module("zlm");
+    const imports: []const std.Build.Module.Import = &.{
+        .{ .name = "zigimg", .module = addDependencyModule(b, "zigimg", target, optimize) },
+        .{ .name = "zlm", .module = addDependencyModule(b, "zlm", target, optimize) },
+        .{ .name = "fey_asset", .module = addDependencyModule(b, "fey_asset", target, optimize) },
+    };
 
     // build fey
     const fey_module = b.addModule("fey", .{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
-        .imports = &.{
-            .{ .name = "zigimg", .module = zigimg_module },
-            .{ .name = "zlm", .module = zlm_module },
-        },
+        .imports = imports,
     });
 
     fey_module.addCMacro("BX_CONFIG_DEBUG", if (optimize == .Debug) "1" else "0");

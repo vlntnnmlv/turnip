@@ -1,6 +1,8 @@
 const std = @import("std");
 
 const bgfx = @import("bgfx.zig").bgfx;
+
+// TODO: Why f32 not f64?
 const zlm = @import("zlm").as(f32);
 
 const geometry = @import("geometry.zig");
@@ -35,9 +37,9 @@ pub const Vertex2D = struct {
 };
 
 const ViewProjection = struct { view: [16]f32, proj: [16]f32 };
-fn setupViewProjection(width: f32, height: f32) ViewProjection {
-    const proj = zlm.Mat4.createOrthogonal(0.0, width, height, 0.0, -1.0, 1.0);
-    const view = zlm.Mat4.identity;
+fn setupOrthogonalViewProjection(width: f32, height: f32, near: f32, far: f32, position: zlm.Vec3) ViewProjection {
+    const proj = zlm.Mat4.createOrthogonal(0.0, width, height, 0.0, near, far);
+    const view = zlm.Mat4.createTranslation(position.scale(-1.0));
 
     return ViewProjection{
         .view = @bitCast(view),
@@ -45,12 +47,27 @@ fn setupViewProjection(width: f32, height: f32) ViewProjection {
     };
 }
 
-pub fn setupPerspectiveViewProjection(width: f32, height: f32, fov_degrees: f32, near: f32, far: f32) ViewProjection {
+pub fn setupPerspectiveViewProjection(
+    width: f32,
+    height: f32,
+    fov_degrees: f32,
+    near: f32,
+    far: f32,
+    position: zlm.Vec3,
+    // rotation: zlm.Vec3,
+    target: zlm.Vec3,
+    up: zlm.Vec3,
+) ViewProjection {
     const aspect_ratio = width / height;
     const fov_radians = zlm.toRadians(fov_degrees);
 
     const proj = zlm.Mat4.createPerspective(fov_radians, aspect_ratio, near, far);
-    const view = zlm.Mat4.identity;
+
+    // const translation = zlm.Mat4.createTranslation(position.scale(-1.0));
+    // const rot = zlm.Mat4.fromQuat(rotation.conjugate());
+    // const view = zlm.Mat4.createLookAt(position, target, up);
+    // const view = rot.mul(translation);
+    const view = zlm.Mat4.createLookAt(position, target, up);
 
     return ViewProjection{
         .view = @bitCast(view),
@@ -123,16 +140,24 @@ pub const Renderer = struct {
 
     pub fn setCamera(self: *Renderer, camera: Camera) void {
         const mxs = switch (camera.view_type) {
-            Camera.ViewType.ORTHOGONAL => setupViewProjection(
+            Camera.ViewType.ORTHOGONAL => setupOrthogonalViewProjection(
                 camera.options.view_rectangle.width,
                 camera.options.view_rectangle.height,
+                camera.near,
+                camera.far,
+                camera.position,
             ),
             Camera.ViewType.PERSPECTIVE => setupPerspectiveViewProjection(
                 camera.options.view_rectangle.width,
                 camera.options.view_rectangle.height,
                 camera.options.fov,
-                camera.options.near,
-                camera.options.far,
+                camera.near,
+                camera.far,
+                camera.position,
+                // camera.rotation,
+                // camera.options.target,
+                camera.getTarget(),
+                camera.options.up,
             ),
         };
 
@@ -145,7 +170,6 @@ pub const Renderer = struct {
 
     pub fn beginRender(self: *Renderer) void {
         _ = self;
-
         bgfx.bgfx_touch(0);
     }
 

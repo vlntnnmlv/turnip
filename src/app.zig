@@ -83,6 +83,13 @@ pub const App = struct {
                 if (event.key == Key.ESCAPE)
                     self.running = false;
             }
+
+            var scenes_iterator = self.scenes.valueIterator();
+            while (scenes_iterator.next()) |scene| {
+                for (scene.event_callbacks.items) |callback| {
+                    callback(scene, event);
+                }
+            }
         }
     }
 

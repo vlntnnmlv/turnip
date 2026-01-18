@@ -1,11 +1,15 @@
 const std = @import("std");
 const ecs = @import("ecs.zig");
+const events = @import("events.zig");
 
 const Registry = ecs.registry.Registry;
 const System = ecs.systems.System;
-const NamedComponentsTuple = ecs.meta.NamedComponentsTuple;
+const ComponentsView = ecs.meta.ComponentsView;
+
+const Event = events.Event;
 
 pub const Scene = struct {
+    const EventCallback = *const fn (*Scene, Event) void;
     pub const Options = struct { background_color: u32 = 0xFFFFFFFF };
 
     allocator: std.mem.Allocator,
@@ -13,6 +17,7 @@ pub const Scene = struct {
     options: Options,
     registry: Registry,
     systems: std.ArrayList(System) = .empty,
+    event_callbacks: std.ArrayList(EventCallback) = .empty,
 
     pub fn init(
         allocator: std.mem.Allocator,
@@ -31,12 +36,13 @@ pub const Scene = struct {
         self.registry.deinit();
 
         self.systems.deinit(self.allocator);
+        self.event_callbacks.deinit(self.allocator);
     }
 
     pub fn addSystem(
         self: *Scene,
         comptime ComponentTypes: anytype,
-        comptime run_function: fn (NamedComponentsTuple(ComponentTypes)) void,
+        comptime run_function: fn (ComponentsView(ComponentTypes)) void,
     ) !void {
         const Closure = struct {
             registry: Registry,
@@ -59,6 +65,10 @@ pub const Scene = struct {
 
         const system = System.create(closure, Closure.run);
         try self.systems.append(self.allocator, system);
+    }
+
+    pub fn addEventCallback(self: *Scene, callback: EventCallback) !void {
+        try self.event_callbacks.append(self.allocator, callback);
     }
 
     pub fn update(self: *Scene) void {
