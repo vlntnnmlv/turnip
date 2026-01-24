@@ -1,7 +1,6 @@
 const std = @import("std");
 const sdl = @import("sdl.zig").sdl;
 const bgfx = @import("bgfx.zig").bgfx;
-const ecs = @import("ecs.zig");
 const events = @import("events.zig");
 const backend = @import("backend.zig");
 const asset_loader = @import("asset_loader.zig");
@@ -31,6 +30,7 @@ pub const App = struct {
     asset_manager: AssetManager,
     worlds: std.StringHashMap(World),
     running: bool = false,
+    events_q: std.ArrayList(Event) = .empty,
 
     const Self = @This();
 
@@ -44,9 +44,9 @@ pub const App = struct {
     }
 
     pub fn deinit(self: *Self) void {
-        var scenes_iterator = self.worlds.valueIterator();
-        while (scenes_iterator.next()) |scene| {
-            scene.deinit();
+        var worlds_iterator = self.worlds.valueIterator();
+        while (worlds_iterator.next()) |world| {
+            world.deinit();
         }
 
         self.worlds.deinit();
@@ -59,8 +59,8 @@ pub const App = struct {
         name: []const u8,
     ) !*World {
         try self.worlds.put(name, try World.init(self.allocator));
-        if (self.worlds.getPtr(name)) |scene| {
-            return scene;
+        if (self.worlds.getPtr(name)) |world| {
+            return world;
         } else unreachable;
     }
 
@@ -77,13 +77,18 @@ pub const App = struct {
     fn process(self: *Self) void {
         var event: Event = undefined;
         while (self.backend.pollEvent(&event)) {
-            if (event.eventType == EventType.Quit)
-                self.running = false;
-
-            if (event.eventType == EventType.KeyPressed) {
-                if (event.key == Key.ESCAPE)
-                    self.running = false;
+            switch (event.eventType) {
+                EventType.Quit => self.running = false,
+                EventType.KeyPressed => {
+                    if (event.key == Key.ESCAPE)
+                        self.running = false;
+                },
+                else => {},
             }
+
+            self.events_q.append(self.allocator, event) catch {
+                unreachable;
+            };
 
             // TODO: Move this to an input system.
             // var scenes_iterator = self.worlds.valueIterator();

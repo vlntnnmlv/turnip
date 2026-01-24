@@ -219,6 +219,14 @@ pub const Renderer = struct {
     pub fn renderMesh(self: *Renderer, textureHandle: bgfx.bgfx_texture_handle_t, mesh: Mesh) !void {
         const vertexes = try self.allocator.alloc(Vertex2D, mesh.vertices.len);
         for (0..mesh.vertices.len) |i| {
+            // std.debug.print("[{}] p: ({}, {}, {}), uv: ({}, {})\n", .{
+            //     i,
+            //     mesh.vertices[i].x,
+            //     mesh.vertices[i].y,
+            //     mesh.vertices[i].z,
+            //     mesh.uvs[i].x,
+            //     mesh.uvs[i].y,
+            // });
             vertexes[i] = Vertex2D{
                 .x = mesh.vertices[i].x,
                 .y = mesh.vertices[i].y,
@@ -246,12 +254,12 @@ pub const Renderer = struct {
 
         triangles_buffer =
             bgfx.bgfx_create_index_buffer(
-                bgfx.bgfx_copy(mesh.indices.ptr, 4 * @sizeOf(u32)),
+                bgfx.bgfx_copy(mesh.indices.ptr, @intCast(mesh.indices.len * @sizeOf(u32))),
                 0,
             );
 
-        bgfx.bgfx_set_vertex_buffer(0, vertex_buffer, 0, 4);
-        bgfx.bgfx_set_index_buffer(triangles_buffer, 0, 6);
+        bgfx.bgfx_set_vertex_buffer(0, vertex_buffer, 0, @intCast(mesh.vertices.len));
+        bgfx.bgfx_set_index_buffer(triangles_buffer, 0, @intCast(mesh.indices.len));
 
         bgfx.bgfx_set_texture(0, texture_sampler_uniform, textureHandle, 4294967295);
 
@@ -259,7 +267,7 @@ pub const Renderer = struct {
         const state: u64 = bgfx.BGFX_STATE_WRITE_RGB |
             bgfx.BGFX_STATE_WRITE_A |
             bgfx.BGFX_STATE_WRITE_Z |
-            // bgfx.BGFX_STATE_DEPTH_TEST_LESS | // TODO: This ruins 2d rendering for some reason...
+            bgfx.BGFX_STATE_DEPTH_TEST_LESS | // TODO: This ruins 2d rendering for some reason...
             bgfx.BGFX_STATE_BLEND_ALPHA |
             bgfx.BGFX_STATE_CULL_CW |
             bgfx.BGFX_STATE_MSAA;

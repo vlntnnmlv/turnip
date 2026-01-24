@@ -48,9 +48,9 @@ pub const Backend = struct {
     pub fn pollEvent(self: *Backend, event: *Event) bool {
         _ = self;
 
-        var sdlEvent: sdl.SDL_Event = undefined;
-        const result = sdl.SDL_PollEvent(&sdlEvent);
-        event.* = Event.fromSDL(sdlEvent);
+        var sdl_event: sdl.SDL_Event = undefined;
+        const result = sdl.SDL_PollEvent(&sdl_event);
+        event.* = Event.fromSDL(sdl_event);
         return result;
     }
 
