@@ -1,8 +1,8 @@
 const std = @import("std");
 
 const zlm = @import("zlm").as(f32);
-const geometry = @import("../geometry.zig");
-const asset_manager = @import("../asset_manager.zig");
+const geometry = @import("geometry.zig");
+const asset_manager = @import("asset_manager.zig");
 
 const Rectangle = geometry.Rectangle;
 const AssetReference = asset_manager.AssetReference;

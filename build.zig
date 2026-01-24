@@ -113,11 +113,12 @@ pub fn build(b: *std.Build) !void {
         .{ .name = "zigimg", .module = addDependencyModule(b, "zigimg", target, optimize) },
         .{ .name = "zlm", .module = addDependencyModule(b, "zlm", target, optimize) },
         .{ .name = "fey_asset", .module = addDependencyModule(b, "fey_asset", target, optimize) },
+        .{ .name = "fey_ecs", .module = addDependencyModule(b, "fey_ecs", target, optimize) },
     };
 
     // build fey
     const fey_module = b.addModule("fey", .{
-        .root_source_file = b.path("src/main.zig"),
+        .root_source_file = b.path("src/lib.zig"),
         .target = target,
         .optimize = optimize,
         .imports = imports,
@@ -164,7 +165,7 @@ pub fn build(b: *std.Build) !void {
     const fey_library = b.addLibrary(.{
         .name = "fey",
         .root_module = b.createModule(.{
-            .root_source_file = b.path("src/main.zig"),
+            .root_source_file = b.path("src/lib.zig"),
             .target = b.graph.host,
         }),
     });

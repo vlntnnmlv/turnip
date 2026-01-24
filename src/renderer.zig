@@ -6,11 +6,12 @@ const bgfx = @import("bgfx.zig").bgfx;
 const zlm = @import("zlm").as(f32);
 
 const geometry = @import("geometry.zig");
-const ecs = @import("ecs.zig");
+const components = @import("components.zig");
 const backend = @import("backend.zig");
 const assetLoader = @import("asset_loader.zig");
 
-const Camera = ecs.components.Camera;
+const Camera = components.Camera;
+const Mesh = components.Mesh;
 const AssetLoader = assetLoader.AssetLoader;
 
 pub const Vertex2D = struct {
@@ -80,6 +81,8 @@ pub const Renderer = struct {
     allocator: std.mem.Allocator,
     width: u32,
     height: u32,
+    vertexes_call: std.ArrayList(Vertex2D) = .empty,
+    indices_call: std.ArrayList(u16) = .empty,
 
     var vertex_2d_layout: bgfx.bgfx_vertex_layout_t = undefined;
     var uv_texture_shader_program: bgfx.bgfx_program_handle_t = undefined;
@@ -90,6 +93,13 @@ pub const Renderer = struct {
 
     var view_matrix: [16]f32 = undefined;
     var projecion_matrix: [16]f32 = undefined;
+
+    const Self = @This();
+
+    pub fn clear_call(self: *Self) void {
+        self.vertexes_call.clearAndFree(self.allocator);
+        self.indices_call.clearAndFree(self.allocator);
+    }
 
     pub fn init(allocator: std.mem.Allocator, width: u32, height: u32) !Renderer {
         _ = bgfx.bgfx_vertex_layout_begin(&vertex_2d_layout, bgfx.BGFX_RENDERER_TYPE_COUNT);
@@ -169,13 +179,14 @@ pub const Renderer = struct {
     }
 
     pub fn beginRender(self: *Renderer) void {
-        _ = self;
         bgfx.bgfx_touch(0);
+
+        self.clear_call();
     }
 
     pub fn endRender(self: *Renderer) void {
+        // self.renderAll();
         _ = self;
-
         _ = bgfx.bgfx_frame(false);
     }
 
@@ -205,9 +216,102 @@ pub const Renderer = struct {
         );
     }
 
+    pub fn renderMesh(self: *Renderer, textureHandle: bgfx.bgfx_texture_handle_t, mesh: Mesh) !void {
+        const vertexes = try self.allocator.alloc(Vertex2D, mesh.vertices.len);
+        for (0..mesh.vertices.len) |i| {
+            vertexes[i] = Vertex2D{
+                .x = mesh.vertices[i].x,
+                .y = mesh.vertices[i].y,
+                .z = mesh.vertices[i].z,
+                .u = mesh.uvs[i].x,
+                .v = mesh.uvs[i].y,
+            };
+        }
+        defer self.allocator.free(vertexes);
+
+        if (bgfx.BGFX_HANDLE_IS_VALID(vertex_buffer)) {
+            bgfx.bgfx_destroy_vertex_buffer(vertex_buffer);
+        }
+
+        vertex_buffer =
+            bgfx.bgfx_create_vertex_buffer(
+                bgfx.bgfx_copy(vertexes.ptr, @intCast(mesh.vertices.len * @sizeOf(Vertex2D))),
+                &vertex_2d_layout,
+                0,
+            );
+
+        if (bgfx.BGFX_HANDLE_IS_VALID(triangles_buffer)) {
+            bgfx.bgfx_destroy_index_buffer(triangles_buffer);
+        }
+
+        triangles_buffer =
+            bgfx.bgfx_create_index_buffer(
+                bgfx.bgfx_copy(mesh.indices.ptr, 4 * @sizeOf(u32)),
+                0,
+            );
+
+        bgfx.bgfx_set_vertex_buffer(0, vertex_buffer, 0, 4);
+        bgfx.bgfx_set_index_buffer(triangles_buffer, 0, 6);
+
+        bgfx.bgfx_set_texture(0, texture_sampler_uniform, textureHandle, 4294967295);
+
+        // https://bkaradzic.github.io/bgfx/bgfx.html - bgfx states
+        const state: u64 = bgfx.BGFX_STATE_WRITE_RGB |
+            bgfx.BGFX_STATE_WRITE_A |
+            bgfx.BGFX_STATE_WRITE_Z |
+            // bgfx.BGFX_STATE_DEPTH_TEST_LESS | // TODO: This ruins 2d rendering for some reason...
+            bgfx.BGFX_STATE_BLEND_ALPHA |
+            bgfx.BGFX_STATE_CULL_CW |
+            bgfx.BGFX_STATE_MSAA;
+
+        bgfx.bgfx_set_state(state, 0);
+        bgfx.bgfx_submit(0, uv_texture_shader_program, 0, bgfx.BGFX_DISCARD_ALL);
+    }
+
+    pub fn renderAll(self: *Renderer) void {
+        if (bgfx.BGFX_HANDLE_IS_VALID(vertex_buffer)) {
+            bgfx.bgfx_destroy_vertex_buffer(vertex_buffer);
+        }
+
+        vertex_buffer =
+            bgfx.bgfx_create_vertex_buffer(
+                bgfx.bgfx_copy(self.vertexes_call.items.ptr, @intCast(self.vertexes_call.items.len * @sizeOf(Vertex2D))),
+                &vertex_2d_layout,
+                0,
+            );
+
+        bgfx.bgfx_set_vertex_buffer(0, vertex_buffer, 0, @intCast(self.vertexes_call.items.len));
+
+        if (bgfx.BGFX_HANDLE_IS_VALID(triangles_buffer)) {
+            bgfx.bgfx_destroy_index_buffer(triangles_buffer);
+        }
+
+        triangles_buffer =
+            bgfx.bgfx_create_index_buffer(
+                bgfx.bgfx_copy(self.indices_call.items.ptr, @intCast(self.indices_call.items.len * @sizeOf(u16))),
+                0,
+            );
+
+        bgfx.bgfx_set_index_buffer(triangles_buffer, 0, @intCast(self.indices_call.items.len));
+
+        // https://bkaradzic.github.io/bgfx/bgfx.html - bgfx states
+        const state: u64 = bgfx.BGFX_STATE_WRITE_RGB |
+            bgfx.BGFX_STATE_WRITE_A |
+            bgfx.BGFX_STATE_WRITE_Z |
+            // bgfx.BGFX_STATE_DEPTH_TEST_LESS | // TODO: This ruins 2d rendering for some reason...
+            bgfx.BGFX_STATE_BLEND_ALPHA |
+            bgfx.BGFX_STATE_CULL_CW |
+            bgfx.BGFX_STATE_MSAA;
+
+        bgfx.bgfx_set_state(state, 0);
+        bgfx.bgfx_submit(0, uv_texture_shader_program, 0, bgfx.BGFX_DISCARD_ALL);
+    }
+
     pub fn renderTexture(self: *Renderer, textureHandle: bgfx.bgfx_texture_handle_t, rectangle: geometry.Rectangle) !void {
         const quad_mesh = try Vertex2D.fromRectangle(self.allocator, rectangle);
         defer self.allocator.free(quad_mesh);
+
+        try self.vertexes_call.appendSlice(self.allocator, quad_mesh);
 
         if (bgfx.BGFX_HANDLE_IS_VALID(vertex_buffer)) {
             bgfx.bgfx_destroy_vertex_buffer(vertex_buffer);
@@ -221,6 +325,19 @@ pub const Renderer = struct {
             );
 
         bgfx.bgfx_set_vertex_buffer(0, vertex_buffer, 0, 4);
+
+        try self.indices_call.appendSlice(self.allocator, &[6]u16{ 0, 2, 1, 0, 3, 2 });
+
+        if (bgfx.BGFX_HANDLE_IS_VALID(triangles_buffer)) {
+            bgfx.bgfx_destroy_index_buffer(triangles_buffer);
+        }
+
+        triangles_buffer =
+            bgfx.bgfx_create_index_buffer(
+                bgfx.bgfx_copy(&[6]u16{ 0, 2, 1, 0, 3, 2 }, 6 * @sizeOf(u16)),
+                0,
+            );
+
         bgfx.bgfx_set_index_buffer(triangles_buffer, 0, 6);
 
         bgfx.bgfx_set_texture(0, texture_sampler_uniform, textureHandle, 4294967295);

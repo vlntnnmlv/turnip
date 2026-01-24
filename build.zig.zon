@@ -13,8 +13,12 @@
             .hash = "zlm-0.1.0-LoZ6yDawAADMopilIe9MDzer0UqmruCy_PuhNv4OMc7c",
         },
         .fey_asset = .{
-            .url = "git+https://github.com/vlntnnmlv/fey-asset.git#a116d03d04a2b45bd91504f75a8267d5fa8cab26",
-            .hash = "fey_asset-0.1.0-Fn8CQbtHAAChpSZAyzu0iYnfTjTszLHFSD5K6eBqzNQa",
+            .url = "git+https://github.com/vlntnnmlv/fey-asset.git#6de342be70fc5b9f2ca3997663d6b94768c37052",
+            .hash = "fey_asset-0.1.0-Fn8CQSlIAADaQzKBE49VuZpHdkNsFBqVjXOwkuMPKk4B",
+        },
+        .fey_ecs = .{
+            .url = "git+https://github.com/vlntnnmlv/fey-ecs.git#28aa49353b4bb9b198cdf1b91d3a46d213dfe858",
+            .hash = "fey_ecs-0.1.0-jYKktMhGAABprBAcpuH4wutND3NCTUgsFpdEO5giMfys",
         },
     },
 }
