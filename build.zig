@@ -110,7 +110,7 @@ pub fn build(b: *std.Build) !void {
 
     // fetch dependencies
     const imports: []const std.Build.Module.Import = &.{
-        .{ .name = "zigimg", .module = addDependencyModule(b, "zigimg", target, optimize) },
+        .{ .name = "zigimg", .module = addDependencyModule(b, "zigimg", target, optimize) }, // TODO: Use fey-asset instead
         .{ .name = "zlm", .module = addDependencyModule(b, "zlm", target, optimize) },
         .{ .name = "fey_asset", .module = addDependencyModule(b, "fey_asset", target, optimize) },
         .{ .name = "fey_ecs", .module = addDependencyModule(b, "fey_ecs", target, optimize) },
