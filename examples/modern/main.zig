@@ -68,11 +68,12 @@ pub fn main() !void {
                 .height = height,
             },
         },
-        .position = Vec3{ .x = 0.0, .y = 0.0, .z = -50.0 },
-        .rotation = Vec3{ .x = 0, .y = 0.7, .z = 0 },
+        .far = 5000,
+        .position = Vec3{ .x = 10.0, .y = 0.0, .z = -1500.0 },
+        .rotation = Vec3{ .x = 0, .y = -0.5, .z = 0 },
     });
 
-    const asset_reference = try app.asset_manager.loadAsset(fey.asset_manager.AssetType.TEXTURE, "hand");
+    const asset_reference = try app.asset_manager.loadAsset(fey.asset_manager.AssetType.TEXTURE, "turnip");
     var i: f32 = 0.0;
     while (i < 10) {
         const sprite_entity = try main_world.registry.create();
@@ -89,10 +90,15 @@ pub fn main() !void {
         i += 1.0;
     }
 
-    var cube_model = try AssetLoader.loadFBX("cube_tr");
+    var cube_model = try AssetLoader.loadFBX("tree_tr");
     // TODO: deinit freezes the application...probably because triangles data is now owned by bgfx and FBX struct
     // defer cube_model.deinit();
     const cube_entity = try main_world.registry.create();
+    cube_model.dump();
+
+    for (try cube_model.vertices(allocator), 0..) |v, j| {
+        std.debug.print("[{}] V: {any}\n", .{ j, v });
+    }
     try cube_entity.add(Mesh, Mesh{
         .vertices = try cube_model.vertices(allocator),
         .indices = cube_model.triangles(),
@@ -130,11 +136,16 @@ pub fn main() !void {
     const CameraControlSystem = struct {
         pub fn run(view: ComponentsView(.{Camera}), dt: f32, d: *anyopaque) void {
             const context: *CameraControlSystemContext = @ptrCast(@alignCast(d));
-            const move_speed = 0.5 * dt;
-            const rotation_speed = 0.001 * dt;
+            const move_speed = 20 * dt;
+            // const rotation_speed = 5 * dt;
+            const rotation_speed = 5 * dt;
 
             while (context.events_q.pop()) |event| {
-                std.debug.print("event: {}\n", .{event});
+                if (event.eventType == EventType.MouseMoved) {
+                    // std.debug.print("X: {}, Y: {}\n", .{ event.mouse_x, event.mouse_y });
+                    view.camera.rotate(-event.mouse_y_rel * rotation_speed, -event.mouse_x_rel * rotation_speed);
+                }
+
                 const pressed = event.eventType == EventType.KeyPressed;
                 if (pressed) {
                     switch (event.key) {

@@ -17,8 +17,8 @@
             .hash = "fey_asset-0.1.0-Fn8CQSlIAADaQzKBE49VuZpHdkNsFBqVjXOwkuMPKk4B",
         },
         .fey_ecs = .{
-            .url = "git+https://github.com/vlntnnmlv/fey-ecs.git#e9078d3ea19bb3b974991d87ae9bdf2948d4784f",
-            .hash = "fey_ecs-0.1.0-jYKktJZHAAAunVakFevXd1pjWB50nW7vAyb64mGii-Xo",
+            .url = "git+https://github.com/vlntnnmlv/fey-ecs.git#471d18790cbdf1034f8874fb9df3f9e2a5842824",
+            .hash = "fey_ecs-0.1.0-jYKktOZPAABzQlfBunLyT-vrlJP22YwFviPLTld2BiiO",
         },
     },
 }

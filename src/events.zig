@@ -315,6 +315,10 @@ pub const EventType = enum {
     fn isKeyboardEvent(self: EventType) bool {
         return self == EventType.KeyPressed or self == EventType.KeyReleased;
     }
+
+    fn isMouseEvent(self: EventType) bool {
+        return self == EventType.MouseMoved or self == EventType.MouseButtonPressed or self == EventType.MouseButtonReleased;
+    }
 };
 
 fn buildKey() type {
@@ -336,6 +340,10 @@ pub const Key = buildKey();
 pub const Event = struct {
     eventType: EventType,
     key: Key,
+    mouse_x: f32,
+    mouse_y: f32,
+    mouse_x_rel: f32,
+    mouse_y_rel: f32,
 
     pub fn fromSDL(sdlEvent: sdl.SDL_Event) Event {
         const eventType: EventType = EventType.fromSDL(sdlEvent.type);
@@ -344,9 +352,24 @@ pub const Event = struct {
         if (eventType.isKeyboardEvent())
             key = @enumFromInt(sdlEvent.key.key);
 
+        var mouse_x: f32 = 0;
+        var mouse_y: f32 = 0;
+        var mouse_x_rel: f32 = 0;
+        var mouse_y_rel: f32 = 0;
+        if (eventType.isMouseEvent()) {
+            mouse_x = sdlEvent.motion.x;
+            mouse_y = sdlEvent.motion.y;
+            mouse_x_rel = sdlEvent.motion.xrel;
+            mouse_y_rel = sdlEvent.motion.yrel;
+        }
+
         return Event{
             .eventType = eventType,
             .key = key,
+            .mouse_x = mouse_x,
+            .mouse_y = mouse_y,
+            .mouse_x_rel = mouse_x_rel,
+            .mouse_y_rel = mouse_y_rel,
         };
     }
 };

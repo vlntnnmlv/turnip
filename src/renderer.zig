@@ -235,6 +235,12 @@ pub const Renderer = struct {
                 .v = mesh.uvs[i].y,
             };
         }
+
+        // for (0..mesh.indices.len) |i| {
+        //     std.debug.print("[{}] {}\n", .{ i, mesh.indices[i] });
+        //     std.debug.print("-> {}\n", .{vertexes[@intCast(mesh.indices[i])]});
+        // }
+
         defer self.allocator.free(vertexes);
 
         if (bgfx.BGFX_HANDLE_IS_VALID(vertex_buffer)) {
@@ -255,7 +261,7 @@ pub const Renderer = struct {
         triangles_buffer =
             bgfx.bgfx_create_index_buffer(
                 bgfx.bgfx_copy(mesh.indices.ptr, @intCast(mesh.indices.len * @sizeOf(u32))),
-                0,
+                bgfx.BGFX_BUFFER_INDEX32,
             );
 
         bgfx.bgfx_set_vertex_buffer(0, vertex_buffer, 0, @intCast(mesh.vertices.len));
@@ -267,7 +273,7 @@ pub const Renderer = struct {
         const state: u64 = bgfx.BGFX_STATE_WRITE_RGB |
             bgfx.BGFX_STATE_WRITE_A |
             bgfx.BGFX_STATE_WRITE_Z |
-            bgfx.BGFX_STATE_DEPTH_TEST_LESS | // TODO: This ruins 2d rendering for some reason...
+            // bgfx.BGFX_STATE_DEPTH_TEST_LESS |
             bgfx.BGFX_STATE_BLEND_ALPHA |
             bgfx.BGFX_STATE_CULL_CW |
             bgfx.BGFX_STATE_MSAA;
