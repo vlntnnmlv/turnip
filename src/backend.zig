@@ -32,9 +32,14 @@ pub const Backend = struct {
             .height = height,
             .renderer = undefined,
         };
-        try backend.initInternal();
+        try backend.initSDLAndBGFX();
         // have to be created after BGFX initialization
         backend.renderer = try Renderer.init(allocator, width, height);
+
+        // Initial clear frame (must happen after renderer is initialized)
+        backend.renderer.fill(0xff0000ff, .{});
+        _ = bgfx.bgfx_frame(false);
+
         return backend;
     }
 
@@ -54,7 +59,7 @@ pub const Backend = struct {
         return result;
     }
 
-    fn initInternal(self: *Backend) !void {
+    fn initSDLAndBGFX(self: *Backend) !void {
         if (!sdl.SDL_Init(0))
             return FeyInitializationError.FailedToInitializeSDL;
 
@@ -99,7 +104,5 @@ pub const Backend = struct {
             return FeyInitializationError.FailedToInitializeBGFX;
         }
 
-        self.renderer.fill(0xff0000ff, .{});
-        _ = bgfx.bgfx_frame(false);
     }
 };

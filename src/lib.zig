@@ -8,4 +8,7 @@ pub const backend = @import("backend.zig");
 pub const events = @import("events.zig");
 pub const components = @import("components.zig");
 
+pub const input = @import("input.zig");
+pub const systems = @import("systems.zig");
+
 pub const geometry = @import("geometry.zig");

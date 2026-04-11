@@ -4,45 +4,19 @@ const fey = @import("fey");
 const App = fey.app.App;
 
 const AssetType = fey.asset_manager.AssetType;
-const AssetReference = fey.asset_manager.AssetReference;
+const Camera = fey.components.Camera;
+const Transform2D = fey.components.Transform2D;
+const Sprite = fey.components.Sprite;
+const Mesh = fey.components.Mesh;
+
+const OrthoCameraController = fey.systems.OrthoCameraController;
+
 const AssetLoader = fey.asset_loader.AssetLoader;
-
-const fbx = fey.asset_loader.fbx;
-
-const components = fey.components;
-const Camera = components.Camera;
-const Transform2D = components.Transform2D;
-const Sprite = components.Sprite;
-const Mesh = components.Mesh;
-
-const Event = fey.events.Event;
-const EventType = fey.events.EventType;
-const Key = fey.events.Key;
-
 const Vec3 = fey.geometry.zlm.Vec3;
 
-const print = std.debug.print;
-
-// API
-// 1. Create an app.
-// 2. Specify component types.
-// 3. Set up scenes
-// 4. Specify renderers.
-// 5. Specify systems.
-// 6. Start the application loop.
-
-const ComponentsView = fey.ecs.meta.ComponentsView;
-
-const MovementSystemData = struct { time: f32, dt: f32 };
-fn movementSystem(view: ComponentsView(.{Transform2D}), dt: f32, data: *anyopaque) void {
-    _ = view;
-    _ = dt;
-    _ = data;
-
-    // const v = @sin(dt);
-    // view.transform2d.rectangle.y += 2 * v;
-}
-
+// TODO: Discuss general workflow
+// ecs may be too much boilerplate sometimes...
+// how to mix ecs with global state/smth else?
 pub fn main() !void {
     const allocator = std.heap.c_allocator;
 
@@ -59,7 +33,7 @@ pub fn main() !void {
 
     const camera_entity = try main_world.registry.create();
     try camera_entity.add(Camera, Camera{
-        .view_type = Camera.ViewType.PERSPECTIVE,
+        .view_type = Camera.ViewType.ORTHOGONAL,
         .options = .{
             .view_rectangle = fey.geometry.Rectangle{
                 .x = 0,
@@ -68,12 +42,12 @@ pub fn main() !void {
                 .height = height,
             },
         },
-        .far = 5000,
-        .position = Vec3{ .x = 10.0, .y = 0.0, .z = -1500.0 },
-        .rotation = Vec3{ .x = 0, .y = -0.5, .z = 0 },
+        .position = Vec3{ .x = 0.0, .y = 2.0, .z = -5.0 },
+        .rotation = Vec3{ .x = 0, .y = 0, .z = 0 },
     });
 
-    const asset_reference = try app.asset_manager.loadAsset(fey.asset_manager.AssetType.TEXTURE, "turnip");
+    const asset_reference = try app.asset_manager.loadAsset(fey.asset_manager.AssetType.TEXTURE, "hive");
+    const grass_reference = try app.asset_manager.loadAsset(fey.asset_manager.AssetType.TEXTURE, "grass");
     var i: f32 = 0.0;
     while (i < 10) {
         const sprite_entity = try main_world.registry.create();
@@ -89,162 +63,36 @@ pub fn main() !void {
 
         i += 1.0;
     }
+    i = 0;
+    var j: f32 = 0.0;
 
-    var cube_model = try AssetLoader.loadFBX("tree_tr");
-    // TODO: deinit freezes the application...probably because triangles data is now owned by bgfx and FBX struct
-    // defer cube_model.deinit();
-    const cube_entity = try main_world.registry.create();
-    cube_model.dump();
-
-    for (try cube_model.vertices(allocator), 0..) |v, j| {
-        std.debug.print("[{}] V: {any}\n", .{ j, v });
+    while (i < 100) {
+        j = 0;
+        while (j < 100) {
+            const sprite_entity = try main_world.registry.create();
+            try sprite_entity.add(Transform2D, Transform2D{
+                .rectangle = .{
+                    .x = i * 10,
+                    .y = j * 10,
+                    .width = 25,
+                    .height = 25,
+                },
+            });
+            try sprite_entity.add(Sprite, Sprite{ .texture_reference = grass_reference });
+            j += 1.0;
+        }
+        i += 1.0;
     }
-    try cube_entity.add(Mesh, Mesh{
-        .vertices = try cube_model.vertices(allocator),
-        .indices = cube_model.triangles(),
-        .uvs = try cube_model.uvs(allocator),
-    });
+    // 5. Load a 3D model
+    const fbx_file = try AssetLoader.loadFBX(allocator, "cube_tr");
+    const cube_mesh = try Mesh.fromFBX(allocator, fbx_file);
+    const cube_entity = try main_world.registry.create();
+    try cube_entity.add(Mesh, cube_mesh);
     try cube_entity.add(Sprite, Sprite{ .texture_reference = asset_reference });
 
-    // 5. Specify systems
-
-    // Camera movement system
-    // var data = {};
-    // const CameraMovementSystem = struct {
-    //     pub fn run(view: ComponentsView(.{Camera}), dt: f32, d: *anyopaque) void {
-    //         _ = d;
-    //         view.camera.rotation.y += 0.001 * dt;
-    //     }
-    // };
-    // try main_world.addSystem(.{Camera}, &CameraMovementSystem.run, &data);
-
-    // Camera control system
-    const ControlInfo = struct {
-        w: bool = false,
-        a: bool = false,
-        s: bool = false,
-        d: bool = false,
-        k: bool = false,
-        l: bool = false,
-    };
-
-    const CameraControlSystemContext = struct {
-        events_q: *std.ArrayList(Event),
-        control_info: *ControlInfo,
-    };
-
-    const CameraControlSystem = struct {
-        pub fn run(view: ComponentsView(.{Camera}), dt: f32, d: *anyopaque) void {
-            const context: *CameraControlSystemContext = @ptrCast(@alignCast(d));
-            const move_speed = 20 * dt;
-            // const rotation_speed = 5 * dt;
-            const rotation_speed = 5 * dt;
-
-            while (context.events_q.pop()) |event| {
-                if (event.eventType == EventType.MouseMoved) {
-                    // std.debug.print("X: {}, Y: {}\n", .{ event.mouse_x, event.mouse_y });
-                    view.camera.rotate(-event.mouse_y_rel * rotation_speed, -event.mouse_x_rel * rotation_speed);
-                }
-
-                const pressed = event.eventType == EventType.KeyPressed;
-                if (pressed) {
-                    switch (event.key) {
-                        Key.W => context.control_info.w = true,
-                        Key.A => context.control_info.a = true,
-                        Key.S => context.control_info.s = true,
-                        Key.D => context.control_info.d = true,
-                        Key.K => context.control_info.k = true,
-                        Key.L => context.control_info.l = true,
-                        else => {},
-                    }
-                }
-                const released = event.eventType == EventType.KeyReleased;
-                if (released) {
-                    switch (event.key) {
-                        Key.W => context.control_info.w = false,
-                        Key.A => context.control_info.a = false,
-                        Key.S => context.control_info.s = false,
-                        Key.D => context.control_info.d = false,
-                        Key.K => context.control_info.k = false,
-                        Key.L => context.control_info.l = false,
-                        else => {},
-                    }
-                }
-
-                // switch (event.key) {
-                //     Key.W => context.control_info.w = event.eventType == EventType.KeyPressed, //view.camera.moveRelative(.{ .x = 0.0, .y = -move_speed, .z = 0.0 }),
-                //     Key.A => context.control_info.a = event.eventType == EventType.KeyPressed, //view.camera.moveRelative(.{ .x = -move_speed, .y = 0.0, .z = 0.0 }),
-                //     Key.S => context.control_info.s = event.eventType == EventType.KeyPressed, //view.camera.moveRelative(.{ .x = 0.0, .y = move_speed, .z = 0.0 }),
-                //     Key.D => context.control_info.d = event.eventType == EventType.KeyPressed, //view.camera.moveRelative(.{ .x = move_speed, .y = 0.0, .z = 0.0 }),
-                //     // Key.K => view.camera.moveRelative(.{ .x = 0.0, .y = 0.0, .z = move_speed }),
-                //     // Key.L => view.camera.moveRelative(.{ .x = 0.0, .y = 0.0, .z = -move_speed }),
-                //     // Key.Z => view.camera.rotation.y += rotation_speed,
-                //     // Key.X => view.camera.rotation.y -= rotation_speed,
-                //     // Key.C => view.camera.rotation.z += rotation_speed,
-                //     else => {},
-                // }
-            }
-
-            if (context.control_info.w) {
-                view.camera.moveRelative(.{ .x = 0.0, .y = 0.0, .z = move_speed });
-            }
-
-            if (context.control_info.a) {
-                view.camera.moveRelative(.{ .x = -move_speed, .y = 0.0, .z = 0.0 });
-            }
-
-            if (context.control_info.s) {
-                view.camera.moveRelative(.{ .x = 0.0, .y = 0.0, .z = -move_speed });
-            }
-
-            if (context.control_info.d) {
-                view.camera.moveRelative(.{ .x = move_speed, .y = 0.0, .z = 0.0 });
-            }
-
-            if (context.control_info.k) {
-                view.camera.rotate(0, rotation_speed);
-            }
-
-            if (context.control_info.l) {
-                view.camera.rotate(0, -rotation_speed);
-            }
-        }
-    };
-
-    var control_info = ControlInfo{};
-    var context = CameraControlSystemContext{ .events_q = &app.events_q, .control_info = &control_info };
-    try main_world.addSystem(.{Camera}, &CameraControlSystem.run, &context);
+    // 6. Camera controller (WASD + mouse look)
+    var camera_controller = OrthoCameraController.init(&app.input, width, height);
+    try main_world.addSystem(.{Camera}, &OrthoCameraController.system, camera_controller.context());
 
     try app.run();
 }
-
-//////////////////////////
-
-// const std = @import("std");
-// const fey = @import("fey");
-
-// const AssetLoader = fey.asset_loader.AssetLoader;
-
-// pub fn main() !void {
-//     const allocator = std.heap.c_allocator;
-
-//     const model = try AssetLoader.loadFBX("Lowpoly_tree_sample");
-//     const vs = model.children.get("Objects").?.children.get("Geometry").?.children.get("Vertices").?.properties.items[0];
-//     var points: std.ArrayList(Vec3) = .empty;
-//     for (vs.data.ArrayDouble, 0..) |v, i| {
-//         const part = i % 3;
-//         if (part == 0) {
-//             try points.append(allocator, Vec3{ .x = v, .y = 0, .z = 0 });
-//         }
-//         if (part == 1) {
-//             points.items[i / 3].y = v;
-//         }
-//         if (part == 2) {
-//             points.items[i / 3].z = v;
-//         }
-//     }
-//     for (points.items) |p| {
-//         std.debug.print("{any}\n", .{p});
-//     }
-//     // std.debug.print("Model version: {}\n", .{model.version});
-// }

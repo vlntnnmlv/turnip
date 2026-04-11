@@ -20,3 +20,8 @@ __pycache__
 .zig-cache
 zig-out
 main
+
+CLAUDE.md
+.claude
+.mcp.json
+.serena

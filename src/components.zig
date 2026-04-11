@@ -3,6 +3,7 @@ const std = @import("std");
 const zlm = @import("zlm").as(f32);
 const geometry = @import("geometry.zig");
 const asset_manager = @import("asset_manager.zig");
+const fbx = @import("fey_asset").fbx;
 
 const Rectangle = geometry.Rectangle;
 const AssetReference = asset_manager.AssetReference;
@@ -24,11 +25,22 @@ pub const Camera = struct {
     };
 
     view_type: ViewType,
-    near: f32 = 0.1,
-    far: f32 = 1000.0,
+    near: ?f32 = null,
+    far: ?f32 = null,
     position: zlm.Vec3 = zlm.Vec3.zero,
     rotation: zlm.Vec3 = zlm.Vec3.zero,
     options: Options,
+
+    pub fn getNear(self: Camera) f32 {
+        return self.near orelse switch (self.view_type) {
+            .ORTHOGONAL => -1000.0,
+            .PERSPECTIVE => 0.1,
+        };
+    }
+
+    pub fn getFar(self: Camera) f32 {
+        return self.far orelse 1000.0;
+    }
 
     // Helper to get forward vector from rotation
     pub fn getForward(self: Camera) zlm.Vec3 {
@@ -83,6 +95,21 @@ pub const Sprite = struct { texture_reference: AssetReference };
 
 pub const Mesh = struct {
     vertices: []zlm.Vec3,
-    indices: []i32,
+    indices: []u32,
     uvs: []zlm.Vec2,
+
+    const Self = @This();
+    pub fn fromFBX(allocator: std.mem.Allocator, file: fbx.FBXFile) !Self {
+        return Self{
+            .vertices = try file.vertices(allocator),
+            .indices = try file.indices(allocator),
+            .uvs = try file.uvs(allocator),
+        };
+    }
+
+    pub fn deinit(self: Self, allocator: std.mem.Allocator) void {
+        allocator.free(self.vertices);
+        allocator.free(self.indices);
+        allocator.free(self.uvs);
+    }
 };

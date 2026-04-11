@@ -6,6 +6,7 @@ const backend = @import("backend.zig");
 const asset_loader = @import("asset_loader.zig");
 const asset_manager = @import("asset_manager.zig");
 const components = @import("components.zig");
+const input_mod = @import("input.zig");
 
 const Camera = components.Camera;
 const Transform2D = components.Transform2D;
@@ -14,6 +15,7 @@ const Mesh = components.Mesh;
 
 const AssetLoader = asset_loader.AssetLoader;
 const AssetManager = asset_manager.AssetManager;
+const Input = input_mod.Input;
 
 const Event = events.Event;
 const EventType = events.EventType;
@@ -28,6 +30,7 @@ pub const App = struct {
     allocator: std.mem.Allocator,
     backend: Backend,
     asset_manager: AssetManager,
+    input: Input,
     worlds: std.StringHashMap(World),
     running: bool = false,
     events_q: std.ArrayList(Event) = .empty,
@@ -39,6 +42,7 @@ pub const App = struct {
             .allocator = allocator,
             .backend = try Backend.init(allocator, title, width, height),
             .asset_manager = AssetManager.init(allocator),
+            .input = Input.init(allocator),
             .worlds = std.StringHashMap(World).init(allocator),
         };
     }
@@ -49,6 +53,8 @@ pub const App = struct {
             world.deinit();
         }
 
+        self.events_q.deinit(self.allocator);
+        self.input.deinit();
         self.worlds.deinit();
         self.asset_manager.deinit();
         self.backend.deinit();
@@ -75,6 +81,8 @@ pub const App = struct {
     }
 
     fn process(self: *Self) void {
+        self.events_q.clearRetainingCapacity();
+
         var event: Event = undefined;
         while (self.backend.pollEvent(&event)) {
             switch (event.eventType) {
@@ -89,15 +97,9 @@ pub const App = struct {
             self.events_q.append(self.allocator, event) catch {
                 unreachable;
             };
-
-            // TODO: Move this to an input system.
-            // var scenes_iterator = self.worlds.valueIterator();
-            // while (scenes_iterator.next()) |scene| {
-            //     for (scene.event_callbacks.items) |callback| {
-            //         callback(scene, event);
-            //     }
-            // }
         }
+
+        self.input.update(self.events_q.items);
     }
 
     fn update(self: *Self) !void {

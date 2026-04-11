@@ -42,7 +42,7 @@ pub const AssetManager = struct {
         var asset_reference = AssetReference{ .asset_type = asset_type };
         switch (asset_type) {
             AssetType.TEXTURE => {
-                const texture_handle = try AssetLoader.loadTexture(name);
+                const texture_handle = try AssetLoader.loadTexture(self.allocator, name);
                 asset_reference.id = texture_handle.idx;
             },
         }

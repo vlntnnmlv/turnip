@@ -299,6 +299,7 @@ pub const EventType = enum {
     MouseButtonPressed,
     MouseButtonReleased,
     MouseMoved,
+    MouseWheel,
 
     fn fromSDL(sdlEventType: u32) EventType {
         return switch (sdlEventType) {
@@ -308,6 +309,7 @@ pub const EventType = enum {
             sdl.SDL_EVENT_MOUSE_BUTTON_DOWN => EventType.MouseButtonPressed,
             sdl.SDL_EVENT_MOUSE_BUTTON_UP => EventType.MouseButtonReleased,
             sdl.SDL_EVENT_MOUSE_MOTION => EventType.MouseMoved,
+            sdl.SDL_EVENT_MOUSE_WHEEL => EventType.MouseWheel,
             else => EventType.Unknown,
         };
     }
@@ -318,6 +320,10 @@ pub const EventType = enum {
 
     fn isMouseEvent(self: EventType) bool {
         return self == EventType.MouseMoved or self == EventType.MouseButtonPressed or self == EventType.MouseButtonReleased;
+    }
+
+    fn isWheelEvent(self: EventType) bool {
+        return self == EventType.MouseWheel;
     }
 };
 
@@ -344,6 +350,7 @@ pub const Event = struct {
     mouse_y: f32,
     mouse_x_rel: f32,
     mouse_y_rel: f32,
+    scroll_y: f32,
 
     pub fn fromSDL(sdlEvent: sdl.SDL_Event) Event {
         const eventType: EventType = EventType.fromSDL(sdlEvent.type);
@@ -363,6 +370,11 @@ pub const Event = struct {
             mouse_y_rel = sdlEvent.motion.yrel;
         }
 
+        var scroll_y: f32 = 0;
+        if (eventType.isWheelEvent()) {
+            scroll_y = sdlEvent.wheel.y;
+        }
+
         return Event{
             .eventType = eventType,
             .key = key,
@@ -370,6 +382,7 @@ pub const Event = struct {
             .mouse_y = mouse_y,
             .mouse_x_rel = mouse_x_rel,
             .mouse_y_rel = mouse_y_rel,
+            .scroll_y = scroll_y,
         };
     }
 };

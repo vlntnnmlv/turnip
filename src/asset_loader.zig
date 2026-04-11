@@ -6,30 +6,13 @@ const fey_asset = @import("fey_asset");
 pub const fbx = fey_asset.fbx;
 
 pub const AssetLoader = struct {
-    pub fn loadShader(name: []const u8) !bgfx.bgfx_shader_handle_t {
-        // const renderType: []const u8 = switch (bgfx.bgfx_get_renderer_type()) {
-        //     bgfx.BGFX_RENDERER_TYPE_NOOP => "dx9/",
-        //     bgfx.BGFX_RENDERER_TYPE_DIRECT3D11 => "dx11/",
-        //     bgfx.BGFX_RENDERER_TYPE_DIRECT3D12 => "dx11/",
-        //     bgfx.BGFX_RENDERER_TYPE_GNM => "pssl/",
-        //     bgfx.BGFX_RENDERER_TYPE_METAL => "metal/",
-        //     bgfx.BGFX_RENDERER_TYPE_OPENGL => "glsl/",
-        //     bgfx.BGFX_RENDERER_TYPE_OPENGLES => "essl/",
-        //     bgfx.BGFX_RENDERER_TYPE_VULKAN => "spirv/",
-        //     bgfx.BGFX_RENDERER_TYPE_NVN => unreachable,
-        //     bgfx.BGFX_RENDERER_TYPE_COUNT => unreachable,
-        //     else => unreachable,
-        // };
-
-        const allocator = std.heap.c_allocator;
-
+    pub fn loadShader(allocator: std.mem.Allocator, name: []const u8) !bgfx.bgfx_shader_handle_t {
         var full_path_builder: std.ArrayList(u8) = .empty;
-        defer full_path_builder.deinit(std.heap.c_allocator);
+        defer full_path_builder.deinit(allocator);
 
-        try full_path_builder.appendSlice(std.heap.c_allocator, "resources/shaders/");
-        // try full_path_builder.appendSlice(std.heap.c_allocator, renderType);
-        try full_path_builder.appendSlice(std.heap.c_allocator, name);
-        try full_path_builder.appendSlice(std.heap.c_allocator, ".bin");
+        try full_path_builder.appendSlice(allocator, "resources/shaders/");
+        try full_path_builder.appendSlice(allocator, name);
+        try full_path_builder.appendSlice(allocator, ".bin");
 
         const shader_file = try std.fs.cwd().openFile(full_path_builder.items, .{});
         defer shader_file.close();
@@ -37,7 +20,7 @@ pub const AssetLoader = struct {
         const shader_stat = try shader_file.stat();
         const shader_size: u32 = @intCast(shader_stat.size);
         const shader_content = try shader_file.readToEndAlloc(allocator, shader_size + 1);
-        defer allocator.free(shader_content); // Free the allocated memory
+        defer allocator.free(shader_content);
 
         const mem = bgfx.bgfx_alloc(shader_size + 1);
         const mem_mut: *bgfx.bgfx_memory_t = @ptrCast(@constCast(mem));
@@ -48,8 +31,7 @@ pub const AssetLoader = struct {
         return bgfx.bgfx_shader_handle_t{ .idx = shader_handle.idx };
     }
 
-    pub fn loadTexture(name: []const u8) !bgfx.bgfx_texture_handle_t {
-        const allocator = std.heap.c_allocator;
+    pub fn loadTexture(allocator: std.mem.Allocator, name: []const u8) !bgfx.bgfx_texture_handle_t {
         var full_path_builder: std.ArrayList(u8) = .empty;
         defer full_path_builder.deinit(allocator);
 
@@ -83,9 +65,8 @@ pub const AssetLoader = struct {
         return textureHandle;
     }
 
-    pub fn loadFBX(comptime name: []const u8) !fbx.FBXFile {
+    pub fn loadFBX(allocator: std.mem.Allocator, comptime name: []const u8) !fbx.FBXFile {
         const path = "resources/models/" ++ name ++ ".fbx";
-        var arena = std.heap.ArenaAllocator.init(std.heap.c_allocator);
-        return try fbx.FBXFile.init(arena.allocator(), path);
+        return try fbx.FBXFile.init(allocator, path);
     }
 };
